@@ -7,25 +7,18 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#f0f2f5;
-  --card:#fff;
-  --border:#e4e7ed;
-  --text:#1d2129;
-  --muted:#6b7280;
-  --dim:#9ca3af;
-  --blue:#2563eb;
-  --blue-lt:#eff6ff;
-  --red:#dc2626;     /* 涨：红 */
-  --green:#16a34a;   /* 跌：绿 */
-  --prem-hi-bg:#fef2f2; --prem-hi-fg:#dc2626;
-  --prem-md-bg:#fffbeb; --prem-md-fg:#92400e;
-  --prem-lo-bg:#f0fdf4; --prem-lo-fg:#15803d;
+  --bg:#f0f2f5; --card:#fff; --border:#e4e7ed; --text:#1d2129;
+  --muted:#6b7280; --dim:#9ca3af; --blue:#2563eb; --blue-lt:#eff6ff;
+  --red:#dc2626; --green:#16a34a;
+  --phi-bg:#fef2f2; --phi-fg:#dc2626;
+  --pmd-bg:#fffbeb; --pmd-fg:#92400e;
+  --plo-bg:#f0fdf4; --plo-fg:#15803d;
   --mono:'Consolas','Menlo','Courier New',monospace;
   --sans:'Microsoft YaHei','PingFang SC',Arial,sans-serif;
 }
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;min-height:100vh}
 
-/* header */
+/* ── header ── */
 .hd{background:var(--card);border-bottom:1px solid var(--border);
     box-shadow:0 1px 4px rgba(0,0,0,.06);position:sticky;top:0;z-index:99}
 .hd-in{max-width:1600px;margin:0 auto;padding:10px 20px;
@@ -38,8 +31,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
      border:1px solid var(--border);background:var(--card);color:var(--muted);
      font-family:var(--sans);transition:all .15s}
 .tab:hover{border-color:var(--blue);color:var(--blue)}
-.tab.on-ndx{background:var(--blue-lt);border-color:#93c5fd;color:var(--blue);font-weight:600}
-.tab.on-spx{background:#ecfeff;border-color:#67e8f9;color:#0e7490;font-weight:600}
+.tab.on-n{background:var(--blue-lt);border-color:#93c5fd;color:var(--blue);font-weight:600}
+.tab.on-s{background:#ecfeff;border-color:#67e8f9;color:#0e7490;font-weight:600}
 .sa{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap}
 .dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;
      background:var(--green);animation:blink 2s infinite}
@@ -52,11 +45,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
 #btn:hover{background:#dbeafe}
 #btn:disabled{opacity:.5;cursor:not-allowed}
 
-/* progress */
+/* ── progress ── */
 #bar{position:fixed;top:0;left:0;height:3px;background:var(--blue);
      width:0;transition:width .25s;z-index:200}
 
-/* main */
+/* ── main ── */
 .mn{max-width:1600px;margin:0 auto;padding:14px 20px}
 .cards{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:8px;
@@ -66,15 +59,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
 .cl{font-size:10px;color:var(--muted)}
 .cv{font-family:var(--mono);font-size:14px;font-weight:600;margin-top:2px}
 
-/* scroll hint */
+/* ── scroll hint ── */
 .sh{display:none;font-size:10px;color:var(--dim);text-align:center;padding:3px 0}
 @media(max-width:860px){.sh{display:block}}
 
-/* table */
+/* ── table ── */
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px;
     border:1px solid var(--border);background:var(--card);
     box-shadow:0 1px 3px rgba(0,0,0,.04)}
-table{width:100%;border-collapse:collapse;min-width:1020px}
+table{width:100%;border-collapse:collapse;min-width:1120px}
 thead th{background:#f8f9fb;color:var(--muted);font-size:10.5px;font-weight:700;
          letter-spacing:.03em;padding:8px 9px;text-align:right;
          border-bottom:1px solid var(--border);white-space:nowrap;
@@ -91,23 +84,24 @@ tbody td{padding:7px 9px;text-align:right;white-space:nowrap;vertical-align:midd
 tbody td:first-child{text-align:left;padding-left:14px}
 tbody td:nth-child(2){text-align:left}
 
-/* cell types */
-.cc{font-family:var(--mono);font-size:12px;color:var(--blue);font-weight:600}
+/* ── cell types ── */
+.cc{font-family:var(--mono);font-size:12px;color:var(--blue);font-weight:600;
+    cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.cc:hover{color:#1d4ed8}
 .cn{font-size:12px;color:var(--text);max-width:125px;overflow:hidden;
     text-overflow:ellipsis;display:block}
 .nm{font-family:var(--mono);font-size:12px}
 .dm{font-family:var(--mono);font-size:12px;color:var(--dim)}
 .dt{font-size:11px;color:var(--muted)}
-.pos{color:var(--red)}
-.neg{color:var(--green)}
+.pos{color:var(--red)}   /* A股惯例：红涨 */
+.neg{color:var(--green)} /* 绿跌 */
 .neu{color:var(--muted)}
-/* premium */
-.ph{background:var(--prem-hi-bg)!important;color:var(--prem-hi-fg)!important;font-family:var(--mono);font-size:12px}
-.pm{background:var(--prem-md-bg)!important;color:var(--prem-md-fg)!important;font-family:var(--mono);font-size:12px}
-.pn{font-family:var(--mono);font-size:12px;color:var(--muted)}
-.pl{background:var(--prem-lo-bg)!important;color:var(--prem-lo-fg)!important;font-family:var(--mono);font-size:12px}
+.phi{background:var(--phi-bg)!important;color:var(--phi-fg)!important;font-family:var(--mono);font-size:12px}
+.pmd{background:var(--pmd-bg)!important;color:var(--pmd-fg)!important;font-family:var(--mono);font-size:12px}
+.pno{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.plo{background:var(--plo-bg)!important;color:var(--plo-fg)!important;font-family:var(--mono);font-size:12px}
 
-/* legend */
+/* ── legend ── */
 .lgd{display:flex;flex-wrap:wrap;align-items:center;gap:10px;
      margin-top:12px;font-size:11px;color:var(--muted)}
 .li{display:inline-flex;align-items:center;gap:4px}
@@ -115,9 +109,42 @@ tbody td:nth-child(2){text-align:left}
 .note{margin-top:9px;font-size:10px;color:var(--dim);line-height:1.9;
       border-top:1px solid var(--border);padding-top:9px}
 
+/* ═══════════════════════════════
+   MODAL (历史数据弹窗)
+═══════════════════════════════ */
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;
+         align-items:center;justify-content:center;padding:16px}
+#overlay.show{display:flex}
+#modal{background:var(--card);border-radius:12px;width:100%;max-width:900px;
+       max-height:90vh;display:flex;flex-direction:column;overflow:hidden;
+       box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.mo-hd{padding:16px 20px;border-bottom:1px solid var(--border);
+       display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.mo-title{font-size:15px;font-weight:700}
+.mo-sub{font-size:11px;color:var(--muted);margin-top:2px}
+#mo-close{background:none;border:none;font-size:20px;color:var(--dim);
+           cursor:pointer;padding:4px 8px;border-radius:4px;line-height:1}
+#mo-close:hover{background:#f3f4f6;color:var(--text)}
+.mo-body{flex:1;overflow-y:auto;padding:16px 20px}
+
+/* chart */
+.chart-wrap{position:relative;height:200px;margin-bottom:16px;
+            background:#fafafa;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+canvas#hchart{display:block;width:100%!important;height:100%!important}
+.chart-legend{display:flex;gap:16px;font-size:11px;color:var(--muted);margin-bottom:10px;flex-wrap:wrap}
+.chart-legend span{display:flex;align-items:center;gap:4px}
+.chart-legend i{display:inline-block;width:20px;height:2px;border-radius:1px}
+
+/* history table */
+.htw{overflow-x:auto;border-radius:6px;border:1px solid var(--border)}
+.htw table{min-width:500px}
+.htw thead th{font-size:10px;padding:7px 8px;background:#f8f9fb}
+.htw tbody td{padding:6px 8px;font-size:12px}
+.htw tbody tr:last-child{border-bottom:none}
+
 @media(max-width:700px){
   .hd-in,.mn{padding-left:10px;padding-right:10px}
-  table{min-width:900px}
+  table{min-width:980px}
   .cards{gap:7px}
 }
 </style>
@@ -125,52 +152,51 @@ tbody td:nth-child(2){text-align:left}
 <body>
 <div id="bar"></div>
 
+<!-- ═══ Header ═══ -->
 <div class="hd">
   <div class="hd-in">
     <div class="logo">
       <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
         <rect width="26" height="26" rx="6" fill="#eff6ff"/>
         <polyline points="3,19 8,11 13,15 18,7 23,7"
-          stroke="#2563eb" stroke-width="2.2"
-          stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
         <circle cx="23" cy="7" r="2" fill="#2563eb"/>
       </svg>
       <div>
         <div class="logo-t">美股指数ETF监控</div>
-        <div class="logo-s">纳斯达克100 · 标普500 · 场内基金</div>
+        <div class="logo-s">纳斯达克100 · 标普500 · 点击代码查看3月溢价历史</div>
       </div>
     </div>
-
     <div class="tabs">
-      <button class="tab on-ndx" id="tn" onclick="go('ndx')">
+      <button class="tab on-n" id="tn" onclick="go('ndx')">
         纳斯达克100 <span style="opacity:.55;font-size:11px">(13只)</span>
       </button>
       <button class="tab" id="ts" onclick="go('spx')">
         标普500 <span style="opacity:.55;font-size:11px">(5只)</span>
       </button>
     </div>
-
     <div class="sa">
       <span class="dot" id="dot"></span>
       <span id="st">就绪</span>
-      <button id="btn" onclick="refresh()">⟳ 刷新数据</button>
+      <button id="btn" onclick="doRefresh()">⟳ 刷新数据</button>
     </div>
   </div>
 </div>
 
+<!-- ═══ Main ═══ -->
 <div class="mn">
   <div class="cards">
     <div class="card">
       <div class="cdot" style="background:#2563eb"></div>
-      <div><div class="cl">纳指100期货 (NQ)</div><div class="cv" id="ci-ndx">--</div></div>
+      <div><div class="cl">纳指100期货 (NQ)</div><div class="cv" id="ci-n">--</div></div>
     </div>
     <div class="card">
       <div class="cdot" style="background:#0e7490"></div>
-      <div><div class="cl">标普500期货 (ES)</div><div class="cv" id="ci-spx">--</div></div>
+      <div><div class="cl">标普500期货 (ES)</div><div class="cv" id="ci-s">--</div></div>
     </div>
     <div class="card">
       <div class="cdot" style="background:#d97706"></div>
-      <div><div class="cl">USD/CNY 中间价</div><div class="cv" id="ci-usd" style="font-size:13px;color:var(--muted)">--</div></div>
+      <div><div class="cl">USD/CNY 中间价</div><div class="cv" id="ci-u" style="font-size:13px;color:var(--muted)">--</div></div>
     </div>
     <div class="card" style="margin-left:auto">
       <div><div class="cl">最后更新</div>
@@ -185,26 +211,60 @@ tbody td:nth-child(2){text-align:left}
 
   <div class="lgd">
     <b style="color:var(--muted)">溢价率</b>
-    <span class="li"><span class="ld" style="background:var(--prem-hi-bg);border-color:#fca5a5"></span><span style="color:var(--prem-hi-fg)">&gt;3% 高溢价</span></span>
-    <span class="li"><span class="ld" style="background:var(--prem-md-bg);border-color:#fcd34d"></span><span style="color:var(--prem-md-fg)">1%~3% 溢价</span></span>
+    <span class="li"><span class="ld" style="background:var(--phi-bg);border-color:#fca5a5"></span><span style="color:var(--phi-fg)">&gt;3% 高溢价</span></span>
+    <span class="li"><span class="ld" style="background:var(--pmd-bg);border-color:#fcd34d"></span><span style="color:var(--pmd-fg)">1%~3% 溢价</span></span>
     <span class="li"><span class="ld" style="background:#fff;border-color:var(--border)"></span>-1%~1% 正常</span>
-    <span class="li"><span class="ld" style="background:var(--prem-lo-bg);border-color:#86efac"></span><span style="color:var(--prem-lo-fg)">&lt;-1% 折价</span></span>
-    <span style="margin-left:auto;color:var(--dim)">数据：天天基金 · 腾讯财经</span>
+    <span class="li"><span class="ld" style="background:var(--plo-bg);border-color:#86efac"></span><span style="color:var(--plo-fg)">&lt;-1% 折价</span></span>
+    <span style="margin-left:auto;color:var(--dim)">数据：天天基金 · 腾讯财经 · 点击代码查看历史溢价走势</span>
   </div>
   <div class="note">
-    ⚠ <b>溢价率</b> = (现价 ÷ 盘中估算净值 - 1) × 100%；闭市后使用昨日净值。
-    <b>净值涨跌%</b> 为天天基金盘中估算值（gztime 时点）。涨跌颜色遵循A股惯例（红涨绿跌）。
-    费率来自各基金2024年说明书，仅供参考，请以官方为准。本工具不构成投资建议。
+    ⚠ <b>实时溢价</b> = 现价 ÷ 盘中估算净值 − 1，盘中实时计算。
+    <b>最新溢价</b> = 现价 ÷ T-1净值 − 1，反映昨日收盘净值对应溢价，是判断申购套利的核心指标。
+    涨跌颜色遵循A股惯例（红涨绿跌）。费率来自2024年基金说明书，请以官方为准。不构成投资建议。
+  </div>
+</div>
+
+<!-- ═══ Modal ═══ -->
+<div id="overlay" onclick="closeModal(event)">
+  <div id="modal">
+    <div class="mo-hd">
+      <div>
+        <div class="mo-title" id="mo-title">历史溢价率</div>
+        <div class="mo-sub" id="mo-sub">近3个月 T-1日收盘溢价率 = (收盘价 ÷ T-1净值 − 1) × 100%</div>
+      </div>
+      <button id="mo-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="mo-body">
+      <div class="chart-legend">
+        <span><i style="background:#2563eb"></i>T-1日溢价率%</span>
+        <span style="color:var(--phi-fg)">▬ 3%线（高溢价）</span>
+        <span style="color:#92400e">▬ 1%线（溢价）</span>
+        <span style="color:var(--plo-fg)">▬ -1%线（折价）</span>
+      </div>
+      <div class="chart-wrap"><canvas id="hchart"></canvas></div>
+      <div class="htw">
+        <table>
+          <thead><tr>
+            <th style="text-align:left;padding-left:10px">日期</th>
+            <th>收盘价</th>
+            <th>T-1净值</th>
+            <th>T-1溢价率%</th>
+            <th>净值涨跌%</th>
+          </tr></thead>
+          <tbody id="htbl"></tbody>
+        </table>
+      </div>
+      <div id="mo-load" style="text-align:center;padding:20px;color:var(--dim);font-size:12px">加载中...</div>
+    </div>
   </div>
 </div>
 
 <script>
-/* =====================================================================
-   基金数据库
-   格式: [代码, 简称, 管理+托管费%, 申购费%, 赎回费%]
-   ★ 新增基金：在对应数组末尾加一行
-   ===================================================================== */
-const DB = {
+/* ═══════════════════════════════════════════════════════════
+   基金数据库  [代码, 简称, 管+托%, 申购%, 赎回%]
+   ★ 新增基金：末尾加一行
+═══════════════════════════════════════════════════════════ */
+const DB={
   ndx:[
     ['159941','广发纳指100ETF',    0.20,0.00,0.00],
     ['513300','华夏纳指100ETF',    0.20,0.00,0.00],
@@ -229,30 +289,32 @@ const DB = {
   ],
 };
 
-/* 列定义 */
+/* ── 列定义 ── */
 const COLS=[
-  {k:'code',      l:'代码',       t:'code'},
-  {k:'name',      l:'基金简称',   t:'name'},
-  {k:'price',     l:'现价',       t:'price'},
-  {k:'pct',       l:'涨跌%',      t:'pct'},
-  {k:'navEst',    l:'盘中估值',   t:'n4'},
-  {k:'prem',      l:'溢价率%',    t:'prem'},
-  {k:'nav',       l:'净值(T-1)',  t:'n4'},
-  {k:'navPct',    l:'净值涨跌%',  t:'pct'},
-  {k:'navDate',   l:'净值日期',   t:'date'},
-  {k:'amount',    l:'成交额(万)', t:'amt'},
-  {k:'fees',      l:'管理+托管%', t:'fee'},
-  {k:'purchase',  l:'申购费%',    t:'fee'},
-  {k:'redeem',    l:'赎回费%',    t:'fee'},
+  {k:'code',     l:'代码',      t:'code'},
+  {k:'name',     l:'基金简称',  t:'name'},
+  {k:'price',    l:'现价',      t:'price'},
+  {k:'pct',      l:'涨跌%',     t:'pct'},
+  {k:'realPrem', l:'实时溢价%', t:'prem'},  // 现价/盘中估值-1
+  {k:'latPrem',  l:'最新溢价%', t:'prem'},  // 现价/T-1净值-1 ★核心
+  {k:'navEst',   l:'盘中估值',  t:'n4'},
+  {k:'nav',      l:'净值(T-1)', t:'n4'},
+  {k:'navPct',   l:'净值涨跌%', t:'pct'},
+  {k:'navDate',  l:'净值日期',  t:'date'},
+  {k:'amount',   l:'成交额(万)',t:'amt'},
+  {k:'fees',     l:'管理+托管%',t:'fee'},
+  {k:'purchase', l:'申购费%',   t:'fee'},
+  {k:'redeem',   l:'赎回费%',   t:'fee'},
 ];
 
-/* 状态 */
+/* ── 状态 ── */
 let tab='ndx', sk='amount', sd=-1, pk='', busy=false;
 let D={ndx:{},spx:{}};
+function exch(c){return c[0]==='5'?'sh':'sz'}
 
-/* =====================================================================
+/* ═══════════════════════════════════════════════════════════
    格式化
-   ===================================================================== */
+═══════════════════════════════════════════════════════════ */
 const n4=v=>v==null||isNaN(+v)?'--':(+v).toFixed(4);
 const n2=v=>v==null||isNaN(+v)?'--':(+v).toFixed(2);
 const fp=v=>{if(v==null||isNaN(+v))return'--';return(v>=0?'+':'')+n2(v)+'%'};
@@ -264,14 +326,14 @@ const fa=v=>{
 };
 const clr=v=>v==null||isNaN(+v)?'neu':+v>0?'pos':+v<0?'neg':'neu';
 const pcls=v=>{
-  if(v==null||isNaN(+v))return'pn';
-  if(+v>3)return'ph'; if(+v>=1)return'pm';
-  if(+v<-1)return'pl'; return'pn';
+  if(v==null||isNaN(+v))return'pno';
+  if(+v>3)return'phi'; if(+v>=1)return'pmd';
+  if(+v<-1)return'plo'; return'pno';
 };
 
-/* =====================================================================
-   渲染
-   ===================================================================== */
+/* ═══════════════════════════════════════════════════════════
+   渲染主表格
+═══════════════════════════════════════════════════════════ */
 function head(t){
   const tr=document.getElementById('h'+t[0]);
   tr.innerHTML='';
@@ -291,7 +353,8 @@ function draw(t){
     return{
       code:f[0],name:f[1],fees:f[2],purchase:f[3],redeem:f[4],
       price:d.price??null, pct:d.pct??null,
-      navEst:d.navEst??null, prem:d.prem??null,
+      realPrem:d.realPrem??null, latPrem:d.latPrem??null,
+      navEst:d.navEst??null,
       nav:d.nav??null, navPct:d.navPct??null, navDate:d.navDate??'--',
       amount:d.amount??null,
     };
@@ -300,8 +363,7 @@ function draw(t){
     let av=a[sk],bv=b[sk];
     const m=sd===1?Infinity:-Infinity;
     if(av==null)av=m; if(bv==null)bv=m;
-    if(typeof av==='string')return sd*av.localeCompare(bv,'zh');
-    return sd*(av-bv);
+    return sd*(typeof av==='string'?av.localeCompare(bv,'zh'):av-bv);
   });
   tbody.innerHTML='';
   rows.forEach(r=>{
@@ -310,20 +372,19 @@ function draw(t){
       const td=document.createElement('td');
       const v=r[c.k];
       switch(c.t){
-        case'code': td.innerHTML=`<span class="cc">${r.code}</span>`; break;
-        case'name': td.innerHTML=`<span class="cn" title="${r.name}">${r.name}</span>`; break;
+        case'code':
+          td.innerHTML=`<span class="cc" onclick="openHistory('${r.code}','${r.name}')">${r.code}</span>`;
+          break;
+        case'name':
+          td.innerHTML=`<span class="cn" title="${r.name}">${r.name}</span>`; break;
         case'price':
-          td.className=`nm ${clr(r.pct)}`;
-          td.textContent=n4(v); break;
+          td.className=`nm ${clr(r.pct)}`; td.textContent=n4(v); break;
         case'pct':
-          td.className=`nm ${clr(v)}`;
-          td.textContent=fp(v); break;
-        case'n4':
-          td.className='nm'; td.style.color='var(--text)';
-          td.textContent=n4(v); break;
+          td.className=`nm ${clr(v)}`; td.textContent=fp(v); break;
         case'prem':
-          td.className=pcls(v);
-          td.textContent=fp(v); break;
+          td.className=pcls(v); td.textContent=fp(v); break;
+        case'n4':
+          td.className='nm'; td.style.color='var(--text)'; td.textContent=n4(v); break;
         case'amt':
           td.className='nm'; td.style.color=v!=null?'var(--text)':'var(--dim)';
           td.textContent=fa(v); break;
@@ -338,21 +399,21 @@ function draw(t){
   });
 }
 function sort(k){
-  if(pk===k)sd=-sd; else sd=(k==='amount')?-1:1;
+  if(pk===k)sd=-sd; else sd=(k==='amount'||k==='scale')?-1:1;
   sk=k; pk=k; draw('ndx'); draw('spx');
 }
 function go(t){
   tab=t;
   document.getElementById('wn').style.display=t==='ndx'?'':'none';
   document.getElementById('ws').style.display=t==='spx'?'':'none';
-  document.getElementById('tn').className='tab'+(t==='ndx'?' on-ndx':'');
-  document.getElementById('ts').className='tab'+(t==='spx'?' on-spx':'');
+  document.getElementById('tn').className='tab'+(t==='ndx'?' on-n':'');
+  document.getElementById('ts').className='tab'+(t==='spx'?' on-s':'');
 }
 
-/* =====================================================================
+/* ═══════════════════════════════════════════════════════════
    状态 / 进度
-   ===================================================================== */
-function st(s,m){
+═══════════════════════════════════════════════════════════ */
+function setSt(s,m){
   document.getElementById('dot').className='dot'+(s==='busy'?' busy':s==='err'?' err':'');
   document.getElementById('st').textContent=m;
   const b=document.getElementById('btn');
@@ -361,256 +422,397 @@ function st(s,m){
 }
 function prog(p){document.getElementById('bar').style.width=p+'%'}
 
-/* =====================================================================
-   JSONP 工具（通用，支持自定义回调参数名）
-   ===================================================================== */
-function jsonp(url,cbParam,timeout=8000){
-  return new Promise((res,rej)=>{
-    const id='_cb'+Date.now()+'_'+(Math.random()*1e6|0);
-    const s=document.createElement('script');
-    let done=false;
-    const fin=(val,err)=>{
-      if(done)return; done=true;
-      clearTimeout(tid);
-      delete window[id];
-      s.parentNode&&s.parentNode.removeChild(s);
-      err?rej(err):res(val);
-    };
-    window[id]=d=>fin(d);
-    s.onerror=()=>fin(null,new Error('script error'));
-    const tid=setTimeout(()=>fin(null,new Error('timeout')),timeout);
-    s.src=url+(url.includes('?')?'&':'?')+cbParam+'='+id+'&_='+Date.now();
-    document.head.appendChild(s);
-  });
-}
-
-/* =====================================================================
-   天天基金盘中估算净值 — JSONP
-   URL: https://fundgz.1234567.com.cn/js/{code}.js
-   回调固定名 jsonpgz，每次需串行（用队列）
-   返回字段:
-     dwjz  = 上一交易日单位净值
-     gsz   = 盘中估算净值
-     gszzl = 估算涨跌幅%
-     jzrq  = 净值日期
-   ===================================================================== */
-const _q=[], _prevCb=[];
-let _running=false;
-
-function navQueue(code){
-  return new Promise(res=>{_q.push({code,res});if(!_running)_drain()});
-}
+/* ═══════════════════════════════════════════════════════════
+   JSONP 队列（天天基金估值，固定回调名 jsonpgz，须串行）
+═══════════════════════════════════════════════════════════ */
+const _q=[];let _run=false;
+function navQ(code){return new Promise(r=>{_q.push({code,r});if(!_run)_drain()})}
 function _drain(){
-  if(!_q.length){_running=false;return}
-  _running=true;
-  const{code,res}=_q.shift();
+  if(!_q.length){_run=false;return}
+  _run=true;
+  const{code,r}=_q.shift();
   const s=document.createElement('script');
-  let done=false;
+  let ok=false;
   const prev=window.jsonpgz;
-  const fin=val=>{
-    if(done)return; done=true;
+  const done=val=>{
+    if(ok)return; ok=true;
     clearTimeout(tid);
     window.jsonpgz=prev;
     s.parentNode&&s.parentNode.removeChild(s);
-    res(val);
-    _drain();
+    r(val); _drain();
   };
-  window.jsonpgz=d=>{
-    fin({
-      nav:   parseFloat(d.dwjz)||null,
-      navEst:parseFloat(d.gsz)||null,
-      navPct:parseFloat(d.gszzl)||null,
-      navDate:d.jzrq||'--',
-    });
-  };
-  s.onerror=()=>fin(null);
-  const tid=setTimeout(()=>fin(null),6000);
+  window.jsonpgz=d=>done({
+    nav:parseFloat(d.dwjz)||null,
+    navEst:parseFloat(d.gsz)||null,
+    navPct:parseFloat(d.gszzl)||null,
+    navDate:d.jzrq||'--',
+  });
+  s.onerror=()=>done(null);
+  const tid=setTimeout(()=>done(null),6000);
   s.src=`https://fundgz.1234567.com.cn/js/${code}.js?rt=${Date.now()}`;
   document.head.appendChild(s);
 }
 
-/* =====================================================================
-   腾讯财经实时行情 — script 标签注入（非标准 JSONP，读全局变量）
-   URL: https://qt.gtimg.cn/q=sz159941,sh513300,...
-   返回: var v_sz159941="51~名~代码~现价~昨收~今开~量~...~成交额(万)~...";
-   关键字段（~分割，0-based）:
-     3  = 现价
-     4  = 昨收
-     37 = 成交额（万元）  ← 腾讯直接给万元
-   ===================================================================== */
+/* ═══════════════════════════════════════════════════════════
+   腾讯行情（script 注入，读全局变量）
+   字段(~): 3=现价 4=昨收 37=成交额(万元)
+═══════════════════════════════════════════════════════════ */
 function fetchQt(funds){
-  return new Promise(res=>{
-    const syms=funds.map(f=>(f[2]||'sz')+f[0]).join(',');
+  return new Promise(r=>{
+    const syms=funds.map(f=>exch(f[0])+f[0]).join(',');
     const s=document.createElement('script');
-    let done=false;
-    const fin=()=>{
-      if(done)return; done=true;
+    let ok=false;
+    const done=()=>{
+      if(ok)return; ok=true;
       clearTimeout(tid);
       s.parentNode&&s.parentNode.removeChild(s);
       const out={};
       funds.forEach(f=>{
-        const key='v_'+(f[2]||'sz')+f[0];
-        const raw=window[key];
-        if(!raw){delete window[key];return}
+        const key='v_'+exch(f[0])+f[0];
+        const raw=window[key]; if(!raw){delete window[key];return}
         delete window[key];
         const p=raw.split('~');
         if(p.length<38)return;
-        const price=parseFloat(p[3]),prev=parseFloat(p[4]);
-        const amt=parseFloat(p[37])||0;
+        const price=parseFloat(p[3]),prev=parseFloat(p[4]),amt=parseFloat(p[37])||0;
         if(!price||!prev)return;
-        out[f[0]]={
-          price,
-          pct:prev?((price-prev)/prev*100):null,
-          amount:amt,   // 已是万元
-        };
+        out[f[0]]={price,pct:((price-prev)/prev*100),amount:amt};
       });
-      res(out);
+      r(out);
     };
-    s.onload=fin;
-    s.onerror=fin;
-    const tid=setTimeout(fin,8000);
+    s.onload=done; s.onerror=done;
+    const tid=setTimeout(done,8000);
     s.src=`https://qt.gtimg.cn/q=${syms}&r=${Date.now()}`;
     document.head.appendChild(s);
   });
 }
 
-/* =====================================================================
-   腾讯美股指数 — 同样 script 注入
-   代码: us_ndx=纳指100  us_spx=标普500
-   字段同上: 3=现价 4=昨收
-   ===================================================================== */
+/* 美股指数期货 */
 function fetchIdx(){
-  return new Promise(res=>{
+  return new Promise(r=>{
     const s=document.createElement('script');
-    let done=false;
-    const fin=()=>{
-      if(done)return; done=true;
+    let ok=false;
+    const done=()=>{
+      if(ok)return; ok=true;
       clearTimeout(tid);
       s.parentNode&&s.parentNode.removeChild(s);
-      const parse=key=>{
+      const prs=key=>{
         const raw=window[key]; if(!raw){delete window[key];return null}
         delete window[key];
         const p=raw.split('~');
-        const cur=parseFloat(p[3]),prev=parseFloat(p[4]);
-        return(cur&&prev)?((cur-prev)/prev*100):null;
+        const c=parseFloat(p[3]),v=parseFloat(p[4]);
+        return(c&&v)?((c-v)/v*100):null;
       };
-      res({ndx:parse('v_us_ndx'),spx:parse('v_us_spx')});
+      r({ndx:prs('v_us_ndx'),spx:prs('v_us_spx')});
     };
-    s.onload=fin; s.onerror=()=>res({ndx:null,spx:null});
-    const tid=setTimeout(()=>res({ndx:null,spx:null}),8000);
+    s.onload=done; s.onerror=()=>r({ndx:null,spx:null});
+    const tid=setTimeout(()=>r({ndx:null,spx:null}),8000);
     s.src=`https://qt.gtimg.cn/q=us_ndx,us_spx&r=${Date.now()}`;
     document.head.appendChild(s);
   });
 }
 
-/* =====================================================================
-   汇率：腾讯美元人民币 — usdcnyboc（中间价）
-   ===================================================================== */
+/* USD/CNY */
 function fetchUSD(){
-  return new Promise(res=>{
+  return new Promise(r=>{
     const s=document.createElement('script');
-    let done=false;
-    const fin=()=>{
-      if(done)return; done=true;
+    let ok=false;
+    const done=()=>{
+      if(ok)return; ok=true;
       clearTimeout(tid);
       s.parentNode&&s.parentNode.removeChild(s);
-      const raw=window['v_usdcnyboc']||window['v_fx_susdboc'];
-      if(raw){
-        delete window['v_usdcnyboc']; delete window['v_fx_susdboc'];
-        const p=raw.split('~');
-        res(parseFloat(p[3])||null);
-      } else res(null);
+      const raw=window['v_usdcnyboc'];
+      if(raw){delete window['v_usdcnyboc'];const p=raw.split('~');r(parseFloat(p[3])||null);}
+      else r(null);
     };
-    s.onload=fin; s.onerror=()=>res(null);
-    const tid=setTimeout(()=>res(null),6000);
+    s.onload=done; s.onerror=()=>r(null);
+    const tid=setTimeout(()=>r(null),6000);
     s.src=`https://qt.gtimg.cn/q=usdcnyboc&r=${Date.now()}`;
     document.head.appendChild(s);
   });
 }
 
-/* =====================================================================
-   主流程
-   ===================================================================== */
-// 交易所判断：5开头 = 上交所sh，其余(1/0/3开头) = 深交所sz
-function exch(code){return code[0]==='5'?'sh':'sz'}
-const allFunds=[...DB.ndx,...DB.spx].map(f=>({...f,ex:exch(f[0])}));
+/* ═══════════════════════════════════════════════════════════
+   主刷新流程
+═══════════════════════════════════════════════════════════ */
+const ALL=[...DB.ndx,...DB.spx];
 
 async function fetchAll(){
-  if(busy)return;
-  busy=true;
-  st('busy',`加载中 0/${allFunds.length}`);
-  prog(5);
+  if(busy)return; busy=true;
+  setSt('busy','加载中…'); prog(5);
 
-  // Step 1: 行情 + 指数 + 汇率（并发）
-  const fundsForQt=[...DB.ndx,...DB.spx].map(f=>([f[0],f[1],exch(f[0])]));
-  const [qtMap,idx,usd]=await Promise.all([
-    fetchQt(fundsForQt),
-    fetchIdx(),
-    fetchUSD(),
-  ]);
-  prog(30);
+  // 1. 行情 + 指数 + 汇率（并发）
+  const [qt,idx,usd]=await Promise.all([fetchQt(ALL),fetchIdx(),fetchUSD()]);
+  prog(25);
 
-  // 更新顶部卡片
+  // 顶部卡片
   const ri=v=>v==null?'--':(+v>=0?`<span class="pos">+${n2(v)}%</span>`:`<span class="neg">${n2(v)}%</span>`);
-  document.getElementById('ci-ndx').innerHTML=ri(idx.ndx);
-  document.getElementById('ci-spx').innerHTML=ri(idx.spx);
-  document.getElementById('ci-usd').textContent=usd?n4(usd):'--';
+  document.getElementById('ci-n').innerHTML=ri(idx.ndx);
+  document.getElementById('ci-s').innerHTML=ri(idx.spx);
+  document.getElementById('ci-u').textContent=usd?n4(usd):'--';
 
-  // Step 2: 净值估算（串行队列，天天基金限制）
-  const allCodes=[...DB.ndx,...DB.spx].map(f=>f[0]);
-  const total=allCodes.length;
-  let done=0;
-
-  // 启动所有请求（队列内部串行）
-  const navPromises=allCodes.map(code=>navQueue(code).then(d=>{
+  // 2. 净值估算（串行队列）
+  const codes=ALL.map(f=>f[0]);
+  const total=codes.length; let done=0;
+  const navPs=codes.map(code=>navQ(code).then(d=>{
     done++;
-    st('busy',`加载中 ${done}/${total}`);
-    prog(30+Math.round(done/total*65));
+    setSt('busy',`加载中 ${done}/${total}`);
+    prog(25+Math.round(done/total*70));
     return{code,d};
   }));
-  const navList=await Promise.all(navPromises);
+  const navList=await Promise.all(navPs);
   prog(95);
 
-  // Step 3: 合并数据
-  const allDB=[...DB.ndx,...DB.spx];
-  allDB.forEach(f=>{
-    const code=f[0];
-    const t=DB.ndx.includes(f)?'ndx':'spx';
+  // 3. 合并
+  ALL.forEach(f=>{
+    const code=f[0], t=DB.ndx.includes(f)?'ndx':'spx';
     if(!D[t][code])D[t][code]={};
     const dd=D[t][code];
-
-    // 行情
-    const q=qtMap[code];
-    if(q){dd.price=q.price;dd.pct=q.pct;dd.amount=q.amount}
-
-    // 净值
-    const nr=navList.find(x=>x.code===code);
-    const nv=nr?.d;
-    if(nv){
-      dd.nav=nv.nav;
-      dd.navEst=nv.navEst;
-      dd.navPct=nv.navPct;
-      dd.navDate=nv.navDate;
-      // 溢价率：用盘中估值（navEst）；闭市或无估值则用昨日净值
-      const ref=nv.navEst||nv.nav;
-      if(dd.price&&ref&&ref!==0)dd.prem=(dd.price/ref-1)*100;
+    const q=qt[code]; if(q){dd.price=q.price;dd.pct=q.pct;dd.amount=q.amount}
+    const nr=navList.find(x=>x.code===code)?.d;
+    if(nr){
+      dd.nav=nr.nav; dd.navEst=nr.navEst; dd.navPct=nr.navPct; dd.navDate=nr.navDate;
+      // 实时溢价：现价 / 盘中估值 - 1
+      if(dd.price&&nr.navEst&&nr.navEst!==0) dd.realPrem=(dd.price/nr.navEst-1)*100;
+      // 最新溢价：现价 / T-1净值 - 1  ← 核心字段
+      if(dd.price&&nr.nav&&nr.nav!==0)       dd.latPrem=(dd.price/nr.nav-1)*100;
     }
   });
 
   prog(100);
   draw('ndx'); draw('spx');
   document.getElementById('ci-ts').textContent=new Date().toLocaleTimeString('zh-CN',{hour12:false});
-
-  const hasData=Object.values(D.ndx).some(d=>d.price!=null)||Object.values(D.spx).some(d=>d.price!=null);
-  st(hasData?'ok':'err',hasData?'数据已更新':'获取失败，请检查网络');
+  const has=Object.values(D.ndx).some(d=>d.price!=null)||Object.values(D.spx).some(d=>d.price!=null);
+  setSt(has?'ok':'err',has?'数据已更新':'获取失败，请检查网络');
   setTimeout(()=>prog(0),500);
   busy=false;
 }
+function doRefresh(){if(!busy)fetchAll()}
 
-function refresh(){if(!busy)fetchAll()}
+/* ═══════════════════════════════════════════════════════════
+   历史数据弹窗
+   数据来源：
+   - 历史净值：东方财富 F10DataApi (JSON，支持CORS)
+   - 历史收盘：腾讯 data.gtimg.cn (script注入)
+   计算：T-1溢价率 = 某日收盘价 / 该日T-1净值 - 1
+═══════════════════════════════════════════════════════════ */
+let chartInst=null;
 
-/* init */
-window.addEventListener('DOMContentLoaded',()=>{draw('ndx');draw('spx');fetchAll()});
+async function openHistory(code,name){
+  document.getElementById('mo-title').textContent=`${name}（${code}）历史溢价率`;
+  document.getElementById('mo-load').style.display='block';
+  document.getElementById('htbl').innerHTML='';
+  clearChart();
+  document.getElementById('overlay').classList.add('show');
+
+  try{
+    const [navMap, priceMap]=await Promise.all([
+      fetchHistNav(code),
+      fetchHistPrice(code),
+    ]);
+
+    // 合并：找共同日期，计算溢价率
+    // 净值日期 = T，对应的收盘价是当日(T)的价，T-1净值 = navMap[T-1日]
+    // 但我们直接用：某交易日 date 的 T-1溢价 = 当日收盘 / 净值[前一日]
+    const dates=Object.keys(priceMap).sort();
+    const navDates=Object.keys(navMap).sort();
+
+    const rows=[];
+    dates.forEach(date=>{
+      const price=priceMap[date];
+      // 找该日期在净值日期中的前一天（T-1净值）
+      const idx=navDates.indexOf(date);
+      const prevDate=idx>0?navDates[idx-1]:null;
+      const nav=prevDate?navMap[prevDate]:null;
+      const navChg=navMap[date]&&prevDate&&navMap[prevDate]?
+        ((navMap[date]-navMap[prevDate])/navMap[prevDate]*100):null;
+      const prem=(price&&nav&&nav!==0)?((price/nav-1)*100):null;
+      rows.push({date,price,nav,prem,navChg});
+    });
+
+    // 只取最近3个月
+    const cutoff=new Date(); cutoff.setMonth(cutoff.getMonth()-3);
+    const recent=rows.filter(r=>new Date(r.date)>=cutoff).reverse(); // 新→旧
+
+    document.getElementById('mo-load').style.display='none';
+    renderHistTable(recent);
+    renderChart(recent);
+  }catch(e){
+    document.getElementById('mo-load').textContent='加载失败：'+e.message;
+  }
+}
+
+/* 天天基金历史净值（分页，取3个月约65条，一页够） */
+async function fetchHistNav(code){
+  const edate=new Date().toISOString().slice(0,10);
+  const sd=new Date(); sd.setMonth(sd.getMonth()-4);
+  const sdate=sd.toISOString().slice(0,10);
+  const url=`https://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&code=${code}&page=1&sdate=${sdate}&edate=${edate}&per=100`;
+  const res=await fetch(url);
+  const text=await res.text();
+  // 返回格式: var apidata={ content:"<table>...</table>",records:xx,pages:xx,...}
+  const match=text.match(/content:"(.*?)",records/s);
+  if(!match)throw new Error('净值接口解析失败');
+  const html=match[1].replace(/\\"/g,'"').replace(/\\/g,'');
+  const doc=new DOMParser().parseFromString(html,'text/html');
+  const map={};
+  doc.querySelectorAll('tbody tr').forEach(tr=>{
+    const tds=tr.querySelectorAll('td');
+    if(tds.length<2)return;
+    const date=tds[0].textContent.trim();
+    const nav=parseFloat(tds[1].textContent.trim());
+    if(date&&!isNaN(nav))map[date]=nav;
+  });
+  return map;
+}
+
+/* 腾讯历史日K（script注入读全局变量）
+   URL: https://data.gtimg.cn/flashdata/hushen/latest/daily/sz159941.js
+   格式: \n日期(yymmdd) 开 高 低 收 量\n... */
+function fetchHistPrice(code){
+  return new Promise((res,rej)=>{
+    const prefix=exch(code);
+    const varName=`hushen_latest_daily_${prefix}${code}`;
+    const s=document.createElement('script');
+    let ok=false;
+    const done=()=>{
+      if(ok)return; ok=true;
+      clearTimeout(tid);
+      s.parentNode&&s.parentNode.removeChild(s);
+      const raw=window[varName];
+      if(!raw){delete window[varName];rej(new Error('收盘价数据为空'));return}
+      delete window[varName];
+      // 解析: "yymmdd open high low close vol\n..."
+      const map={};
+      raw.split('\n').forEach(line=>{
+        line=line.trim();
+        if(!line||line.startsWith('//'))return;
+        const parts=line.split(' ');
+        if(parts.length<5)return;
+        const ymd=parts[0];
+        const year=2000+parseInt(ymd.slice(0,2));
+        const mon=ymd.slice(2,4), day=ymd.slice(4,6);
+        const date=`${year}-${mon}-${day}`;
+        const close=parseFloat(parts[4]);
+        if(date&&!isNaN(close))map[date]=close;
+      });
+      res(map);
+    };
+    s.onload=done; s.onerror=()=>rej(new Error('收盘价接口加载失败'));
+    const tid=setTimeout(()=>rej(new Error('收盘价接口超时')),10000);
+    // 腾讯日K JS文件，加载后变量名为 hushen_latest_daily_{prefix}{code}
+    s.src=`https://data.gtimg.cn/flashdata/hushen/latest/daily/${prefix}${code}.js?r=${Date.now()}`;
+    document.head.appendChild(s);
+  });
+}
+
+function renderHistTable(rows){
+  const tbody=document.getElementById('htbl');
+  tbody.innerHTML='';
+  rows.forEach(r=>{
+    const tr=document.createElement('tr');
+    const pc=r.prem==null?'pno':pcls(r.prem);
+    tr.innerHTML=`
+      <td style="text-align:left;padding-left:10px;font-size:12px;color:var(--muted)">${r.date}</td>
+      <td class="nm">${r.price!=null?r.price.toFixed(4):'--'}</td>
+      <td class="nm" style="color:var(--text)">${r.nav!=null?r.nav.toFixed(4):'--'}</td>
+      <td class="${pc}">${r.prem!=null?fp(r.prem):'--'}</td>
+      <td class="nm ${r.navChg!=null?clr(r.navChg):'neu'}">${r.navChg!=null?fp(r.navChg):'--'}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ── 简易折线图（纯Canvas，无依赖）── */
+function clearChart(){
+  if(chartInst){cancelAnimationFrame(chartInst);chartInst=null}
+  const c=document.getElementById('hchart');
+  const ctx=c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height);
+}
+
+function renderChart(rows){
+  const c=document.getElementById('hchart');
+  const wrap=c.parentElement;
+  c.width=wrap.clientWidth||700;
+  c.height=wrap.clientHeight||200;
+  const ctx=c.getContext('2d');
+  const W=c.width,H=c.height;
+  const PAD={t:14,r:16,b:30,l:46};
+  const dw=W-PAD.l-PAD.r, dh=H-PAD.t-PAD.b;
+
+  // 过滤有溢价数据的行（从旧到新用于绘图）
+  const pts=rows.slice().reverse().filter(r=>r.prem!=null);
+  if(!pts.length)return;
+
+  const vals=pts.map(r=>r.prem);
+  let mn=Math.min(...vals,-2), mx=Math.max(...vals,4);
+  const pad=(mx-mn)*0.12; mn-=pad; mx+=pad;
+  const ys=v=>PAD.t+dh*(1-(v-mn)/(mx-mn));
+  const xs=i=>PAD.l+i*(dw/(pts.length-1||1));
+
+  // 背景
+  ctx.fillStyle='#fafafa'; ctx.fillRect(0,0,W,H);
+
+  // 参考线
+  const hlines=[
+    {v:3, color:'#fca5a5', label:'3%'},
+    {v:1, color:'#fcd34d', label:'1%'},
+    {v:0, color:'#d1d5db', label:'0%'},
+    {v:-1,color:'#86efac', label:'-1%'},
+  ];
+  ctx.font='10px Consolas,monospace';
+  hlines.forEach(h=>{
+    if(h.v<mn||h.v>mx)return;
+    const y=ys(h.v);
+    ctx.beginPath(); ctx.strokeStyle=h.color;
+    ctx.lineWidth=h.v===0?1:1; ctx.setLineDash(h.v===0?[]:[4,3]);
+    ctx.moveTo(PAD.l,y); ctx.lineTo(W-PAD.r,y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle=h.v===3?'#dc2626':h.v===1?'#92400e':h.v===-1?'#15803d':'#9ca3af';
+    ctx.textAlign='right'; ctx.fillText(h.label,PAD.l-4,y+3);
+  });
+
+  // 填充区域
+  ctx.beginPath();
+  pts.forEach((p,i)=>i===0?ctx.moveTo(xs(i),ys(p.prem)):ctx.lineTo(xs(i),ys(p.prem)));
+  ctx.lineTo(xs(pts.length-1),ys(0));
+  ctx.lineTo(xs(0),ys(0));
+  ctx.closePath();
+  ctx.fillStyle='rgba(37,99,235,0.07)'; ctx.fill();
+
+  // 折线
+  ctx.beginPath();
+  pts.forEach((p,i)=>i===0?ctx.moveTo(xs(i),ys(p.prem)):ctx.lineTo(xs(i),ys(p.prem)));
+  ctx.strokeStyle='#2563eb'; ctx.lineWidth=1.8; ctx.setLineDash([]);
+  ctx.stroke();
+
+  // 数据点（> |1%| 标注）
+  pts.forEach((p,i)=>{
+    const x=xs(i),y=ys(p.prem);
+    const color=p.prem>3?'#dc2626':p.prem>1?'#92400e':p.prem<-1?'#15803d':'#2563eb';
+    ctx.beginPath(); ctx.arc(x,y,2.5,0,Math.PI*2);
+    ctx.fillStyle=color; ctx.fill();
+  });
+
+  // X轴日期（每隔若干个点显示）
+  ctx.fillStyle='#9ca3af'; ctx.font='9px Arial,sans-serif'; ctx.textAlign='center';
+  const step=Math.max(1,Math.floor(pts.length/6));
+  pts.forEach((p,i)=>{
+    if(i%step!==0&&i!==pts.length-1)return;
+    ctx.fillText(p.date.slice(5),xs(i),H-8);
+  });
+}
+
+/* 关闭弹窗 */
+function closeModal(e){
+  if(e&&e.target!==document.getElementById('overlay')&&e.type==='click')return;
+  document.getElementById('overlay').classList.remove('show');
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+/* ── 初始化 ── */
+window.addEventListener('DOMContentLoaded',()=>{
+  draw('ndx'); draw('spx'); fetchAll();
+});
 </script>
 </body>
 </html>
