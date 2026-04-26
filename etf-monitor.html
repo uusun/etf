@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美股指数ETF监控</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0f2f5;
+  --card:#fff;
+  --border:#e4e7ed;
+  --text:#1d2129;
+  --muted:#6b7280;
+  --dim:#9ca3af;
+  --blue:#2563eb;
+  --blue-lt:#eff6ff;
+  --red:#dc2626;     /* 涨：红 */
+  --green:#16a34a;   /* 跌：绿 */
+  --prem-hi-bg:#fef2f2; --prem-hi-fg:#dc2626;
+  --prem-md-bg:#fffbeb; --prem-md-fg:#92400e;
+  --prem-lo-bg:#f0fdf4; --prem-lo-fg:#15803d;
+  --mono:'Consolas','Menlo','Courier New',monospace;
+  --sans:'Microsoft YaHei','PingFang SC',Arial,sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;min-height:100vh}
+
+/* header */
+.hd{background:var(--card);border-bottom:1px solid var(--border);
+    box-shadow:0 1px 4px rgba(0,0,0,.06);position:sticky;top:0;z-index:99}
+.hd-in{max-width:1600px;margin:0 auto;padding:10px 20px;
+       display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:9px}
+.logo-t{font-size:15px;font-weight:700}
+.logo-s{font-size:10px;color:var(--muted);margin-top:1px}
+.tabs{display:flex;gap:6px}
+.tab{padding:5px 16px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;
+     border:1px solid var(--border);background:var(--card);color:var(--muted);
+     font-family:var(--sans);transition:all .15s}
+.tab:hover{border-color:var(--blue);color:var(--blue)}
+.tab.on-ndx{background:var(--blue-lt);border-color:#93c5fd;color:var(--blue);font-weight:600}
+.tab.on-spx{background:#ecfeff;border-color:#67e8f9;color:#0e7490;font-weight:600}
+.sa{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;
+     background:var(--green);animation:blink 2s infinite}
+.dot.busy{background:#f59e0b}.dot.err{background:var(--red);animation:none}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+#st{font-size:11px;color:var(--muted)}
+#btn{font-size:13px;font-weight:500;color:var(--blue);background:var(--blue-lt);
+     border:1px solid #bfdbfe;border-radius:6px;padding:5px 14px;cursor:pointer;
+     font-family:var(--sans);transition:all .15s}
+#btn:hover{background:#dbeafe}
+#btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* progress */
+#bar{position:fixed;top:0;left:0;height:3px;background:var(--blue);
+     width:0;transition:width .25s;z-index:200}
+
+/* main */
+.mn{max-width:1600px;margin:0 auto;padding:14px 20px}
+.cards{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;
+      padding:10px 16px;display:flex;align-items:center;gap:10px;
+      box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.cdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cl{font-size:10px;color:var(--muted)}
+.cv{font-family:var(--mono);font-size:14px;font-weight:600;margin-top:2px}
+
+/* scroll hint */
+.sh{display:none;font-size:10px;color:var(--dim);text-align:center;padding:3px 0}
+@media(max-width:860px){.sh{display:block}}
+
+/* table */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px;
+    border:1px solid var(--border);background:var(--card);
+    box-shadow:0 1px 3px rgba(0,0,0,.04)}
+table{width:100%;border-collapse:collapse;min-width:1020px}
+thead th{background:#f8f9fb;color:var(--muted);font-size:10.5px;font-weight:700;
+         letter-spacing:.03em;padding:8px 9px;text-align:right;
+         border-bottom:1px solid var(--border);white-space:nowrap;
+         cursor:pointer;user-select:none;transition:color .12s;font-family:var(--sans)}
+thead th:first-child{text-align:left;padding-left:14px}
+thead th:nth-child(2){text-align:left}
+thead th:hover{color:var(--blue)}
+thead th.sa::after{content:' ▲';color:var(--blue);font-size:8px}
+thead th.sd::after{content:' ▼';color:var(--blue);font-size:8px}
+tbody tr{border-bottom:1px solid #f0f2f5;transition:background .1s}
+tbody tr:hover{background:#f7f9fc}
+tbody tr:last-child{border-bottom:none}
+tbody td{padding:7px 9px;text-align:right;white-space:nowrap;vertical-align:middle}
+tbody td:first-child{text-align:left;padding-left:14px}
+tbody td:nth-child(2){text-align:left}
+
+/* cell types */
+.cc{font-family:var(--mono);font-size:12px;color:var(--blue);font-weight:600}
+.cn{font-size:12px;color:var(--text);max-width:125px;overflow:hidden;
+    text-overflow:ellipsis;display:block}
+.nm{font-family:var(--mono);font-size:12px}
+.dm{font-family:var(--mono);font-size:12px;color:var(--dim)}
+.dt{font-size:11px;color:var(--muted)}
+.pos{color:var(--red)}
+.neg{color:var(--green)}
+.neu{color:var(--muted)}
+/* premium */
+.ph{background:var(--prem-hi-bg)!important;color:var(--prem-hi-fg)!important;font-family:var(--mono);font-size:12px}
+.pm{background:var(--prem-md-bg)!important;color:var(--prem-md-fg)!important;font-family:var(--mono);font-size:12px}
+.pn{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.pl{background:var(--prem-lo-bg)!important;color:var(--prem-lo-fg)!important;font-family:var(--mono);font-size:12px}
+
+/* legend */
+.lgd{display:flex;flex-wrap:wrap;align-items:center;gap:10px;
+     margin-top:12px;font-size:11px;color:var(--muted)}
+.li{display:inline-flex;align-items:center;gap:4px}
+.ld{width:10px;height:10px;border-radius:2px;display:inline-block;border:1px solid}
+.note{margin-top:9px;font-size:10px;color:var(--dim);line-height:1.9;
+      border-top:1px solid var(--border);padding-top:9px}
+
+@media(max-width:700px){
+  .hd-in,.mn{padding-left:10px;padding-right:10px}
+  table{min-width:900px}
+  .cards{gap:7px}
+}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+
+<div class="hd">
+  <div class="hd-in">
+    <div class="logo">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+        <rect width="26" height="26" rx="6" fill="#eff6ff"/>
+        <polyline points="3,19 8,11 13,15 18,7 23,7"
+          stroke="#2563eb" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <circle cx="23" cy="7" r="2" fill="#2563eb"/>
+      </svg>
+      <div>
+        <div class="logo-t">美股指数ETF监控</div>
+        <div class="logo-s">纳斯达克100 · 标普500 · 场内基金</div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab on-ndx" id="tn" onclick="go('ndx')">
+        纳斯达克100 <span style="opacity:.55;font-size:11px">(13只)</span>
+      </button>
+      <button class="tab" id="ts" onclick="go('spx')">
+        标普500 <span style="opacity:.55;font-size:11px">(5只)</span>
+      </button>
+    </div>
+
+    <div class="sa">
+      <span class="dot" id="dot"></span>
+      <span id="st">就绪</span>
+      <button id="btn" onclick="refresh()">⟳ 刷新数据</button>
+    </div>
+  </div>
+</div>
+
+<div class="mn">
+  <div class="cards">
+    <div class="card">
+      <div class="cdot" style="background:#2563eb"></div>
+      <div><div class="cl">纳指100期货 (NQ)</div><div class="cv" id="ci-ndx">--</div></div>
+    </div>
+    <div class="card">
+      <div class="cdot" style="background:#0e7490"></div>
+      <div><div class="cl">标普500期货 (ES)</div><div class="cv" id="ci-spx">--</div></div>
+    </div>
+    <div class="card">
+      <div class="cdot" style="background:#d97706"></div>
+      <div><div class="cl">USD/CNY 中间价</div><div class="cv" id="ci-usd" style="font-size:13px;color:var(--muted)">--</div></div>
+    </div>
+    <div class="card" style="margin-left:auto">
+      <div><div class="cl">最后更新</div>
+      <div class="cv" id="ci-ts" style="font-size:12px;color:var(--muted)">--</div></div>
+    </div>
+  </div>
+
+  <div class="sh">← 左右滑动查看完整数据 →</div>
+
+  <div id="wn"><div class="tw"><table><thead><tr id="hn"></tr></thead><tbody id="bn"></tbody></table></div></div>
+  <div id="ws" style="display:none"><div class="tw"><table><thead><tr id="hs"></tr></thead><tbody id="bs"></tbody></table></div></div>
+
+  <div class="lgd">
+    <b style="color:var(--muted)">溢价率</b>
+    <span class="li"><span class="ld" style="background:var(--prem-hi-bg);border-color:#fca5a5"></span><span style="color:var(--prem-hi-fg)">&gt;3% 高溢价</span></span>
+    <span class="li"><span class="ld" style="background:var(--prem-md-bg);border-color:#fcd34d"></span><span style="color:var(--prem-md-fg)">1%~3% 溢价</span></span>
+    <span class="li"><span class="ld" style="background:#fff;border-color:var(--border)"></span>-1%~1% 正常</span>
+    <span class="li"><span class="ld" style="background:var(--prem-lo-bg);border-color:#86efac"></span><span style="color:var(--prem-lo-fg)">&lt;-1% 折价</span></span>
+    <span style="margin-left:auto;color:var(--dim)">数据：天天基金 · 腾讯财经</span>
+  </div>
+  <div class="note">
+    ⚠ <b>溢价率</b> = (现价 ÷ 盘中估算净值 - 1) × 100%；闭市后使用昨日净值。
+    <b>净值涨跌%</b> 为天天基金盘中估算值（gztime 时点）。涨跌颜色遵循A股惯例（红涨绿跌）。
+    费率来自各基金2024年说明书，仅供参考，请以官方为准。本工具不构成投资建议。
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   基金数据库
+   格式: [代码, 简称, 管理+托管费%, 申购费%, 赎回费%]
+   ★ 新增基金：在对应数组末尾加一行
+   ===================================================================== */
+const DB = {
+  ndx:[
+    ['159941','广发纳指100ETF',    0.20,0.00,0.00],
+    ['513300','华夏纳指100ETF',    0.20,0.00,0.00],
+    ['513100','国泰纳指100ETF',    0.20,0.00,0.00],
+    ['159501','嘉实纳指100ETF',    0.20,0.00,0.00],
+    ['159632','华安纳斯达克ETF',   0.20,0.00,0.00],
+    ['513390','博时纳指100ETF',    0.20,0.00,0.00],
+    ['159660','汇添富纳指100ETF',  0.20,0.00,0.00],
+    ['159659','招商纳斯达克100ETF',0.20,0.00,0.00],
+    ['513110','华泰柏瑞纳指ETF',   0.20,0.00,0.00],
+    ['159696','易方达纳指100ETF',  0.20,0.00,0.00],
+    ['159513','大成纳斯达克100ETF',0.20,0.00,0.00],
+    ['513870','富国纳指100ETF',    0.20,0.00,0.00],
+    ['161130','易方达纳指100LOF',  0.60,1.20,0.50],
+  ],
+  spx:[
+    ['513500','博时标普500ETF',   0.20,0.00,0.00],
+    ['513650','南方标普500ETF',   0.20,0.00,0.00],
+    ['159612','国泰标普500ETF',   0.20,0.00,0.00],
+    ['159655','华夏标普500ETF',   0.20,0.00,0.00],
+    ['161125','易方达标普500LOF', 0.60,1.20,0.50],
+  ],
+};
+
+/* 列定义 */
+const COLS=[
+  {k:'code',      l:'代码',       t:'code'},
+  {k:'name',      l:'基金简称',   t:'name'},
+  {k:'price',     l:'现价',       t:'price'},
+  {k:'pct',       l:'涨跌%',      t:'pct'},
+  {k:'navEst',    l:'盘中估值',   t:'n4'},
+  {k:'prem',      l:'溢价率%',    t:'prem'},
+  {k:'nav',       l:'净值(T-1)',  t:'n4'},
+  {k:'navPct',    l:'净值涨跌%',  t:'pct'},
+  {k:'navDate',   l:'净值日期',   t:'date'},
+  {k:'amount',    l:'成交额(万)', t:'amt'},
+  {k:'fees',      l:'管理+托管%', t:'fee'},
+  {k:'purchase',  l:'申购费%',    t:'fee'},
+  {k:'redeem',    l:'赎回费%',    t:'fee'},
+];
+
+/* 状态 */
+let tab='ndx', sk='amount', sd=-1, pk='', busy=false;
+let D={ndx:{},spx:{}};
+
+/* =====================================================================
+   格式化
+   ===================================================================== */
+const n4=v=>v==null||isNaN(+v)?'--':(+v).toFixed(4);
+const n2=v=>v==null||isNaN(+v)?'--':(+v).toFixed(2);
+const fp=v=>{if(v==null||isNaN(+v))return'--';return(v>=0?'+':'')+n2(v)+'%'};
+const fa=v=>{
+  if(v==null||isNaN(+v))return'--';
+  const n=+v;
+  if(n>=100000)return(n/10000).toFixed(1)+'亿';
+  return n.toLocaleString('zh-CN',{maximumFractionDigits:0});
+};
+const clr=v=>v==null||isNaN(+v)?'neu':+v>0?'pos':+v<0?'neg':'neu';
+const pcls=v=>{
+  if(v==null||isNaN(+v))return'pn';
+  if(+v>3)return'ph'; if(+v>=1)return'pm';
+  if(+v<-1)return'pl'; return'pn';
+};
+
+/* =====================================================================
+   渲染
+   ===================================================================== */
+function head(t){
+  const tr=document.getElementById('h'+t[0]);
+  tr.innerHTML='';
+  COLS.forEach(c=>{
+    const th=document.createElement('th');
+    th.textContent=c.l;
+    th.onclick=()=>sort(c.k);
+    if(c.k===sk)th.classList.add(sd===1?'sa':'sd');
+    tr.appendChild(th);
+  });
+}
+function draw(t){
+  head(t);
+  const tbody=document.getElementById('b'+t[0]);
+  let rows=DB[t].map(f=>{
+    const d=D[t][f[0]]||{};
+    return{
+      code:f[0],name:f[1],fees:f[2],purchase:f[3],redeem:f[4],
+      price:d.price??null, pct:d.pct??null,
+      navEst:d.navEst??null, prem:d.prem??null,
+      nav:d.nav??null, navPct:d.navPct??null, navDate:d.navDate??'--',
+      amount:d.amount??null,
+    };
+  });
+  rows.sort((a,b)=>{
+    let av=a[sk],bv=b[sk];
+    const m=sd===1?Infinity:-Infinity;
+    if(av==null)av=m; if(bv==null)bv=m;
+    if(typeof av==='string')return sd*av.localeCompare(bv,'zh');
+    return sd*(av-bv);
+  });
+  tbody.innerHTML='';
+  rows.forEach(r=>{
+    const tr=document.createElement('tr');
+    COLS.forEach(c=>{
+      const td=document.createElement('td');
+      const v=r[c.k];
+      switch(c.t){
+        case'code': td.innerHTML=`<span class="cc">${r.code}</span>`; break;
+        case'name': td.innerHTML=`<span class="cn" title="${r.name}">${r.name}</span>`; break;
+        case'price':
+          td.className=`nm ${clr(r.pct)}`;
+          td.textContent=n4(v); break;
+        case'pct':
+          td.className=`nm ${clr(v)}`;
+          td.textContent=fp(v); break;
+        case'n4':
+          td.className='nm'; td.style.color='var(--text)';
+          td.textContent=n4(v); break;
+        case'prem':
+          td.className=pcls(v);
+          td.textContent=fp(v); break;
+        case'amt':
+          td.className='nm'; td.style.color=v!=null?'var(--text)':'var(--dim)';
+          td.textContent=fa(v); break;
+        case'date':
+          td.className='dt'; td.textContent=v||'--'; break;
+        case'fee':
+          td.className='dm'; td.textContent=n2(v); break;
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+function sort(k){
+  if(pk===k)sd=-sd; else sd=(k==='amount')?-1:1;
+  sk=k; pk=k; draw('ndx'); draw('spx');
+}
+function go(t){
+  tab=t;
+  document.getElementById('wn').style.display=t==='ndx'?'':'none';
+  document.getElementById('ws').style.display=t==='spx'?'':'none';
+  document.getElementById('tn').className='tab'+(t==='ndx'?' on-ndx':'');
+  document.getElementById('ts').className='tab'+(t==='spx'?' on-spx':'');
+}
+
+/* =====================================================================
+   状态 / 进度
+   ===================================================================== */
+function st(s,m){
+  document.getElementById('dot').className='dot'+(s==='busy'?' busy':s==='err'?' err':'');
+  document.getElementById('st').textContent=m;
+  const b=document.getElementById('btn');
+  b.disabled=s==='busy';
+  b.textContent=s==='busy'?'加载中…':'⟳ 刷新数据';
+}
+function prog(p){document.getElementById('bar').style.width=p+'%'}
+
+/* =====================================================================
+   JSONP 工具（通用，支持自定义回调参数名）
+   ===================================================================== */
+function jsonp(url,cbParam,timeout=8000){
+  return new Promise((res,rej)=>{
+    const id='_cb'+Date.now()+'_'+(Math.random()*1e6|0);
+    const s=document.createElement('script');
+    let done=false;
+    const fin=(val,err)=>{
+      if(done)return; done=true;
+      clearTimeout(tid);
+      delete window[id];
+      s.parentNode&&s.parentNode.removeChild(s);
+      err?rej(err):res(val);
+    };
+    window[id]=d=>fin(d);
+    s.onerror=()=>fin(null,new Error('script error'));
+    const tid=setTimeout(()=>fin(null,new Error('timeout')),timeout);
+    s.src=url+(url.includes('?')?'&':'?')+cbParam+'='+id+'&_='+Date.now();
+    document.head.appendChild(s);
+  });
+}
+
+/* =====================================================================
+   天天基金盘中估算净值 — JSONP
+   URL: https://fundgz.1234567.com.cn/js/{code}.js
+   回调固定名 jsonpgz，每次需串行（用队列）
+   返回字段:
+     dwjz  = 上一交易日单位净值
+     gsz   = 盘中估算净值
+     gszzl = 估算涨跌幅%
+     jzrq  = 净值日期
+   ===================================================================== */
+const _q=[], _prevCb=[];
+let _running=false;
+
+function navQueue(code){
+  return new Promise(res=>{_q.push({code,res});if(!_running)_drain()});
+}
+function _drain(){
+  if(!_q.length){_running=false;return}
+  _running=true;
+  const{code,res}=_q.shift();
+  const s=document.createElement('script');
+  let done=false;
+  const prev=window.jsonpgz;
+  const fin=val=>{
+    if(done)return; done=true;
+    clearTimeout(tid);
+    window.jsonpgz=prev;
+    s.parentNode&&s.parentNode.removeChild(s);
+    res(val);
+    _drain();
+  };
+  window.jsonpgz=d=>{
+    fin({
+      nav:   parseFloat(d.dwjz)||null,
+      navEst:parseFloat(d.gsz)||null,
+      navPct:parseFloat(d.gszzl)||null,
+      navDate:d.jzrq||'--',
+    });
+  };
+  s.onerror=()=>fin(null);
+  const tid=setTimeout(()=>fin(null),6000);
+  s.src=`https://fundgz.1234567.com.cn/js/${code}.js?rt=${Date.now()}`;
+  document.head.appendChild(s);
+}
+
+/* =====================================================================
+   腾讯财经实时行情 — script 标签注入（非标准 JSONP，读全局变量）
+   URL: https://qt.gtimg.cn/q=sz159941,sh513300,...
+   返回: var v_sz159941="51~名~代码~现价~昨收~今开~量~...~成交额(万)~...";
+   关键字段（~分割，0-based）:
+     3  = 现价
+     4  = 昨收
+     37 = 成交额（万元）  ← 腾讯直接给万元
+   ===================================================================== */
+function fetchQt(funds){
+  return new Promise(res=>{
+    const syms=funds.map(f=>(f[2]||'sz')+f[0]).join(',');
+    const s=document.createElement('script');
+    let done=false;
+    const fin=()=>{
+      if(done)return; done=true;
+      clearTimeout(tid);
+      s.parentNode&&s.parentNode.removeChild(s);
+      const out={};
+      funds.forEach(f=>{
+        const key='v_'+(f[2]||'sz')+f[0];
+        const raw=window[key];
+        if(!raw){delete window[key];return}
+        delete window[key];
+        const p=raw.split('~');
+        if(p.length<38)return;
+        const price=parseFloat(p[3]),prev=parseFloat(p[4]);
+        const amt=parseFloat(p[37])||0;
+        if(!price||!prev)return;
+        out[f[0]]={
+          price,
+          pct:prev?((price-prev)/prev*100):null,
+          amount:amt,   // 已是万元
+        };
+      });
+      res(out);
+    };
+    s.onload=fin;
+    s.onerror=fin;
+    const tid=setTimeout(fin,8000);
+    s.src=`https://qt.gtimg.cn/q=${syms}&r=${Date.now()}`;
+    document.head.appendChild(s);
+  });
+}
+
+/* =====================================================================
+   腾讯美股指数 — 同样 script 注入
+   代码: us_ndx=纳指100  us_spx=标普500
+   字段同上: 3=现价 4=昨收
+   ===================================================================== */
+function fetchIdx(){
+  return new Promise(res=>{
+    const s=document.createElement('script');
+    let done=false;
+    const fin=()=>{
+      if(done)return; done=true;
+      clearTimeout(tid);
+      s.parentNode&&s.parentNode.removeChild(s);
+      const parse=key=>{
+        const raw=window[key]; if(!raw){delete window[key];return null}
+        delete window[key];
+        const p=raw.split('~');
+        const cur=parseFloat(p[3]),prev=parseFloat(p[4]);
+        return(cur&&prev)?((cur-prev)/prev*100):null;
+      };
+      res({ndx:parse('v_us_ndx'),spx:parse('v_us_spx')});
+    };
+    s.onload=fin; s.onerror=()=>res({ndx:null,spx:null});
+    const tid=setTimeout(()=>res({ndx:null,spx:null}),8000);
+    s.src=`https://qt.gtimg.cn/q=us_ndx,us_spx&r=${Date.now()}`;
+    document.head.appendChild(s);
+  });
+}
+
+/* =====================================================================
+   汇率：腾讯美元人民币 — usdcnyboc（中间价）
+   ===================================================================== */
+function fetchUSD(){
+  return new Promise(res=>{
+    const s=document.createElement('script');
+    let done=false;
+    const fin=()=>{
+      if(done)return; done=true;
+      clearTimeout(tid);
+      s.parentNode&&s.parentNode.removeChild(s);
+      const raw=window['v_usdcnyboc']||window['v_fx_susdboc'];
+      if(raw){
+        delete window['v_usdcnyboc']; delete window['v_fx_susdboc'];
+        const p=raw.split('~');
+        res(parseFloat(p[3])||null);
+      } else res(null);
+    };
+    s.onload=fin; s.onerror=()=>res(null);
+    const tid=setTimeout(()=>res(null),6000);
+    s.src=`https://qt.gtimg.cn/q=usdcnyboc&r=${Date.now()}`;
+    document.head.appendChild(s);
+  });
+}
+
+/* =====================================================================
+   主流程
+   ===================================================================== */
+const allNdx=DB.ndx.map(f=>[f[0],f[1],'sz',...f.slice(2)]);
+const allSpx=DB.spx.map(f=>[f[0],f[1],'sh',...f.slice(2)]);
+// 修正：部分深交所 sz，部分上交所 sh（按代码前缀判断）
+function exch(code){return['1','5'].includes(code[0])?'sh':'sz'}
+const allFunds=[...DB.ndx,...DB.spx].map(f=>({...f,ex:exch(f[0])}));
+
+async function fetchAll(){
+  if(busy)return;
+  busy=true;
+  st('busy',`加载中 0/${allFunds.length}`);
+  prog(5);
+
+  // Step 1: 行情 + 指数 + 汇率（并发）
+  const fundsForQt=[...DB.ndx,...DB.spx].map(f=>([f[0],f[1],exch(f[0])]));
+  const [qtMap,idx,usd]=await Promise.all([
+    fetchQt(fundsForQt),
+    fetchIdx(),
+    fetchUSD(),
+  ]);
+  prog(30);
+
+  // 更新顶部卡片
+  const ri=v=>v==null?'--':(+v>=0?`<span class="pos">+${n2(v)}%</span>`:`<span class="neg">${n2(v)}%</span>`);
+  document.getElementById('ci-ndx').innerHTML=ri(idx.ndx);
+  document.getElementById('ci-spx').innerHTML=ri(idx.spx);
+  document.getElementById('ci-usd').textContent=usd?n4(usd):'--';
+
+  // Step 2: 净值估算（串行队列，天天基金限制）
+  const allCodes=[...DB.ndx,...DB.spx].map(f=>f[0]);
+  const total=allCodes.length;
+  let done=0;
+
+  // 启动所有请求（队列内部串行）
+  const navPromises=allCodes.map(code=>navQueue(code).then(d=>{
+    done++;
+    st('busy',`加载中 ${done}/${total}`);
+    prog(30+Math.round(done/total*65));
+    return{code,d};
+  }));
+  const navList=await Promise.all(navPromises);
+  prog(95);
+
+  // Step 3: 合并数据
+  const allDB=[...DB.ndx,...DB.spx];
+  allDB.forEach(f=>{
+    const code=f[0];
+    const t=DB.ndx.includes(f)?'ndx':'spx';
+    if(!D[t][code])D[t][code]={};
+    const dd=D[t][code];
+
+    // 行情
+    const q=qtMap[code];
+    if(q){dd.price=q.price;dd.pct=q.pct;dd.amount=q.amount}
+
+    // 净值
+    const nr=navList.find(x=>x.code===code);
+    const nv=nr?.d;
+    if(nv){
+      dd.nav=nv.nav;
+      dd.navEst=nv.navEst;
+      dd.navPct=nv.navPct;
+      dd.navDate=nv.navDate;
+      // 溢价率：用盘中估值（navEst）；闭市或无估值则用昨日净值
+      const ref=nv.navEst||nv.nav;
+      if(dd.price&&ref&&ref!==0)dd.prem=(dd.price/ref-1)*100;
+    }
+  });
+
+  prog(100);
+  draw('ndx'); draw('spx');
+  document.getElementById('ci-ts').textContent=new Date().toLocaleTimeString('zh-CN',{hour12:false});
+
+  const hasData=Object.values(D.ndx).some(d=>d.price!=null)||Object.values(D.spx).some(d=>d.price!=null);
+  st(hasData?'ok':'err',hasData?'数据已更新':'获取失败，请检查网络');
+  setTimeout(()=>prog(0),500);
+  busy=false;
+}
+
+function refresh(){if(!busy)fetchAll()}
+
+/* init */
+window.addEventListener('DOMContentLoaded',()=>{draw('ndx');draw('spx');fetchAll()});
+</script>
+</body>
+</html>
