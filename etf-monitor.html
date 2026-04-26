@@ -110,7 +110,7 @@ tbody td:nth-child(2){text-align:left}
       border-top:1px solid var(--border);padding-top:9px}
 
 /* ═══════════════════════════════
-   MODAL (历史数据弹窗)
+   MODAL (历史数据页)
 ═══════════════════════════════ */
 #overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;
          align-items:center;justify-content:center;padding:16px}
@@ -134,6 +134,12 @@ canvas#hchart{display:block;width:100%!important;height:100%!important}
 .chart-legend{display:flex;gap:16px;font-size:11px;color:var(--muted);margin-bottom:10px;flex-wrap:wrap}
 .chart-legend span{display:flex;align-items:center;gap:4px}
 .chart-legend i{display:inline-block;width:20px;height:2px;border-radius:1px}
+.hist-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.sum-card{background:#fafafa;border:1px solid var(--border);border-radius:6px;padding:8px 10px}
+.sum-l{font-size:10px;color:var(--muted);margin-bottom:3px}
+.sum-v{font-family:var(--mono);font-size:14px;font-weight:700}
+.sum-note{grid-column:1/-1;font-size:10px;color:var(--dim);line-height:1.6;margin-top:-2px}
+@media(max-width:700px){.hist-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 /* history table */
 .htw{overflow-x:auto;border-radius:6px;border:1px solid var(--border)}
@@ -164,7 +170,7 @@ canvas#hchart{display:block;width:100%!important;height:100%!important}
       </svg>
       <div>
         <div class="logo-t">美股指数ETF监控</div>
-        <div class="logo-s">纳斯达克100 · 标普500 · 点击代码查看3月溢价历史</div>
+        <div class="logo-s">纳斯达克100 · 标普500 · 点击代码新标签查看近1年溢价历史</div>
       </div>
     </div>
     <div class="tabs">
@@ -215,7 +221,7 @@ canvas#hchart{display:block;width:100%!important;height:100%!important}
     <span class="li"><span class="ld" style="background:var(--pmd-bg);border-color:#fcd34d"></span><span style="color:var(--pmd-fg)">1%~3% 溢价</span></span>
     <span class="li"><span class="ld" style="background:#fff;border-color:var(--border)"></span>-1%~1% 正常</span>
     <span class="li"><span class="ld" style="background:var(--plo-bg);border-color:#86efac"></span><span style="color:var(--plo-fg)">&lt;-1% 折价</span></span>
-    <span style="margin-left:auto;color:var(--dim)">数据：天天基金 · 腾讯财经 · 点击代码查看历史溢价走势</span>
+    <span style="margin-left:auto;color:var(--dim)">数据：天天基金 · 腾讯财经 · 点击代码新标签查看历史溢价走势</span>
   </div>
   <div class="note">
     ⚠ <b>实时溢价</b> = 现价 ÷ 盘中估算净值 − 1，盘中实时计算。
@@ -230,7 +236,7 @@ canvas#hchart{display:block;width:100%!important;height:100%!important}
     <div class="mo-hd">
       <div>
         <div class="mo-title" id="mo-title">历史溢价率</div>
-        <div class="mo-sub" id="mo-sub">近3个月 T-1日收盘溢价率 = (收盘价 ÷ T-1净值 − 1) × 100%</div>
+        <div class="mo-sub" id="mo-sub">近1年 T-1日收盘溢价率 = (收盘价 ÷ T-1净值 − 1) × 100%</div>
       </div>
       <button id="mo-close" onclick="closeModal()">✕</button>
     </div>
@@ -241,12 +247,14 @@ canvas#hchart{display:block;width:100%!important;height:100%!important}
         <span style="color:#92400e">▬ 1%线（溢价）</span>
         <span style="color:var(--plo-fg)">▬ -1%线（折价）</span>
       </div>
+      <div id="hist-summary" class="hist-summary"></div>
       <div class="chart-wrap"><canvas id="hchart"></canvas></div>
       <div class="htw">
         <table>
           <thead><tr>
             <th style="text-align:left;padding-left:10px">日期</th>
             <th>收盘价</th>
+            <th>T-1净值日</th>
             <th>T-1净值</th>
             <th>T-1溢价率%</th>
             <th>净值涨跌%</th>
@@ -373,7 +381,7 @@ function draw(t){
       const v=r[c.k];
       switch(c.t){
         case'code':
-          td.innerHTML=`<span class="cc" onclick="openHistory('${r.code}','${r.name}')">${r.code}</span>`;
+          td.innerHTML=`<span class="cc" title="新标签查看历史溢价" onclick="openHistoryTab('${r.code}','${r.name}')">${r.code}</span>`;
           break;
         case'name':
           td.innerHTML=`<span class="cn" title="${r.name}">${r.name}</span>`; break;
@@ -589,70 +597,390 @@ async function fetchAll(){
 function doRefresh(){if(!busy)fetchAll()}
 
 /* ═══════════════════════════════════════════════════════════
-   历史数据弹窗
+   历史数据页
    数据来源：
-   - 历史净值：东方财富 F10DataApi (JSON，支持CORS)
-   - 历史收盘：腾讯 data.gtimg.cn (script注入)
+   - 历史净值：东方财富 F10DataApi（script注入）
+   - 历史收盘：东方财富K线JSONP；腾讯日K回退
    计算：T-1溢价率 = 某日收盘价 / 该日T-1净值 - 1
 ═══════════════════════════════════════════════════════════ */
 let chartInst=null;
+let histReqId=0;
+const HIST_MONTHS=12;
+const HIST_LABEL='近1年';
+
+function ymd(d){return d.toISOString().slice(0,10)}
+function compactYmd(d){return ymd(d).replace(/-/g,'')}
+function addMonthsSafe(date, months){
+  const d=new Date(date.getTime());
+  const day=d.getDate();
+  d.setMonth(d.getMonth()+months);
+  if(d.getDate()<day)d.setDate(0);
+  return d;
+}
+function dateObj(s){return new Date(s+'T00:00:00')}
+
+
+function openHistoryTab(code,name){
+  const url=new URL(window.location.href);
+  url.searchParams.set('history','1');
+  url.searchParams.set('code',code);
+  url.searchParams.set('name',name);
+  window.open(url.toString(),'_blank','noopener');
+}
+
+function getFundNameByCode(code){
+  const row=ALL.find(f=>f[0]===code);
+  return row?row[1]:code;
+}
+
+function actualRangeLabel(rows){
+  if(!rows||!rows.length)return HIST_LABEL;
+  const old=dateObj(rows[rows.length-1].date);
+  const now=dateObj(rows[0].date);
+  const days=Math.max(1,Math.round((now-old)/86400000)+1);
+  if(days>=330)return '近1年';
+  if(days>=170)return '近半年';
+  if(days>=80)return '近3个月';
+  return `近${days}日`;
+}
+
+function renderHistoryShell(code,name){
+  document.body.innerHTML=`
+    <div id="bar"></div>
+    <div class="hd">
+      <div class="hd-in">
+        <div class="logo">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <rect width="26" height="26" rx="6" fill="#eff6ff"/>
+            <polyline points="3,19 8,11 13,15 18,7 23,7" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <circle cx="23" cy="7" r="2" fill="#2563eb"/>
+          </svg>
+          <div>
+            <div class="logo-t" id="mo-title">${name}（${code}）历史溢价率</div>
+            <div class="logo-s" id="mo-sub">${HIST_LABEL} T-1日收盘溢价率 = (收盘价 ÷ T-1净值 − 1) × 100%</div>
+          </div>
+        </div>
+        <div class="sa">
+          <button id="btn" onclick="location.href=location.pathname">← 返回监控表</button>
+        </div>
+      </div>
+    </div>
+    <div class="mn">
+      <div class="note" style="margin-top:0;margin-bottom:12px;border-top:none;padding-top:0">
+        <b>核心口径：</b>每个交易日的 T-1日溢价率 = 当日收盘价 ÷ 该交易日前最近一个可用基金净值 − 1。这里优先拉取${HIST_LABEL}；若接口只返回较短数据，会自动按可取得区间展示。
+      </div>
+      <div class="chart-legend">
+        <span><i style="background:#2563eb"></i>T-1日溢价率%</span>
+        <span style="color:var(--phi-fg)">▬ 3%线（高溢价）</span>
+        <span style="color:#92400e">▬ 1%线（溢价）</span>
+        <span style="color:var(--plo-fg)">▬ -1%线（折价）</span>
+      </div>
+      <div id="hist-summary" class="hist-summary"></div>
+      <div class="chart-wrap" style="height:320px"><canvas id="hchart"></canvas></div>
+      <div class="htw">
+        <table>
+          <thead><tr>
+            <th style="text-align:left;padding-left:10px">日期</th>
+            <th>收盘价</th>
+            <th>T-1净值日</th>
+            <th>T-1净值</th>
+            <th>T-1溢价率%</th>
+            <th>净值涨跌%</th>
+          </tr></thead>
+          <tbody id="htbl"></tbody>
+        </table>
+      </div>
+      <div id="mo-load" style="text-align:center;padding:20px;color:var(--dim);font-size:12px">加载中...</div>
+    </div>`;
+}
+
+function rangeDays(rows){
+  if(!rows||rows.length<2)return rows&&rows.length?1:0;
+  const ds=rows.map(r=>dateObj(r.date)).sort((a,b)=>a-b);
+  return Math.max(1,Math.round((ds[ds.length-1]-ds[0])/86400000)+1);
+}
+function pctNum(s){
+  if(s==null)return null;
+  const n=parseFloat(String(s).replace('%','').replace('+','').trim());
+  return isNaN(n)?null:n;
+}
+function dedupeRows(rows){
+  const m=new Map();
+  rows.forEach(r=>{if(r&&/^\d{4}-\d{2}-\d{2}$/.test(r.date)&&r.price&&r.nav&&r.prem!=null)m.set(r.date,r)});
+  return [...m.values()].sort((a,b)=>b.date.localeCompare(a.date));
+}
+
+async function loadHistoryRowsEastmoney(code,months=HIST_MONTHS){
+  const [navMap, priceMap]=await Promise.all([
+    fetchHistNav(code,months),
+    fetchHistPrice(code,months),
+  ]);
+  const rows=buildPremiumRows(navMap,priceMap);
+  const cutoff=addMonthsSafe(new Date(),-months);
+  return rows
+    .filter(r=>dateObj(r.date)>=cutoff)
+    .sort((a,b)=>b.date.localeCompare(a.date)); // 新→旧
+}
+
+async function loadHistoryRows(code,months=HIST_MONTHS){
+  return loadHistoryRowsEastmoney(code,months);
+}
+
+async function loadHistoryRowsWithFallback(code){
+  const errors=[];
+  let best=null;
+
+  // 1) 先尝试真正的近1年：东方财富ETF日K + 东方财富基金历史净值。
+  //    如果这个源可用，应当能拿到远超1个月的数据。
+  for(const m of [12,6,3]){
+    try{
+      const rows=await loadHistoryRowsEastmoney(code,m);
+      if(rows.length){
+        const candidate={rows,months:m,source:'东方财富K线 + 东方财富基金净值'};
+        if(!best || rangeDays(candidate.rows)>rangeDays(best.rows))best=candidate;
+        // 拿到至少约3个月，就先接受；否则继续尝试 HaoETF 快照源。
+        if(rangeDays(rows)>=80)return candidate;
+      }
+    }catch(e){errors.push(`东方财富${m}月：${e&&e.message?e.message:e}`)}
+  }
+
+  // 2) 你参考的 HaoETF 页面本身有“历史数据”表；用它作为强回退源。
+  //    注意：静态 GitHub Pages 通常不能直接跨域读 haoetf.com，所以优先走 r.jina.ai / allorigins 读取纯文本。
+  try{
+    const haoRows=await fetchHaoEtfRows(code);
+    if(haoRows.length){
+      const candidate={rows:haoRows,months:Math.ceil(rangeDays(haoRows)/30),source:'HaoETF历史数据快照'};
+      if(!best || rangeDays(candidate.rows)>=rangeDays(best.rows))return candidate;
+    }
+  }catch(e){errors.push(`HaoETF：${e&&e.message?e.message:e}`)}
+
+  if(best&&best.rows.length)return best;
+  throw new Error(errors.length?errors.join('；'):'历史数据为空');
+}
+
+async function initHistoryPage(){
+  const params=new URLSearchParams(location.search);
+  const code=params.get('code')||'';
+  const name=params.get('name')||getFundNameByCode(code);
+  if(!/^\d{6}$/.test(code)){
+    document.body.innerHTML='<div class="mn"><div class="card">基金代码参数错误。</div></div>';
+    return;
+  }
+  renderHistoryShell(code,name);
+  const load=document.getElementById('mo-load');
+  try{
+    const result=await loadHistoryRowsWithFallback(code);
+    const rows=result.rows;
+    if(!rows.length){
+      load.textContent='没有匹配到收盘价与T-1净值数据';
+      return;
+    }
+    const lbl=actualRangeLabel(rows);
+    document.getElementById('mo-sub').textContent=`${lbl} T-1日收盘溢价率 = (收盘价 ÷ T-1净值 − 1) × 100%`;
+    load.style.display='none';
+    renderHistSummary(rows,lbl,result.source);
+    renderHistTable(rows);
+    renderChart(rows);
+  }catch(e){
+    load.style.display='block';
+    load.textContent='加载失败：'+(e&&e.message?e.message:e);
+  }
+}
 
 async function openHistory(code,name){
+  const reqId=++histReqId;
   document.getElementById('mo-title').textContent=`${name}（${code}）历史溢价率`;
-  document.getElementById('mo-load').style.display='block';
+  const load=document.getElementById('mo-load');
+  load.style.display='block';
+  load.textContent='加载中...';
   document.getElementById('htbl').innerHTML='';
+  const sum=document.getElementById('hist-summary');
+  if(sum)sum.innerHTML='';
   clearChart();
   document.getElementById('overlay').classList.add('show');
 
   try{
-    const [navMap, priceMap]=await Promise.all([
-      fetchHistNav(code),
-      fetchHistPrice(code),
-    ]);
+    const result=await loadHistoryRowsWithFallback(code);
+    if(reqId!==histReqId)return;
 
-    // 合并：找共同日期，计算溢价率
-    // 净值日期 = T，对应的收盘价是当日(T)的价，T-1净值 = navMap[T-1日]
-    // 但我们直接用：某交易日 date 的 T-1溢价 = 当日收盘 / 净值[前一日]
-    const dates=Object.keys(priceMap).sort();
-    const navDates=Object.keys(navMap).sort();
+    const recent=result.rows;
 
-    const rows=[];
-    dates.forEach(date=>{
-      const price=priceMap[date];
-      // 找该日期在净值日期中的前一天（T-1净值）
-      const idx=navDates.indexOf(date);
-      const prevDate=idx>0?navDates[idx-1]:null;
-      const nav=prevDate?navMap[prevDate]:null;
-      const navChg=navMap[date]&&prevDate&&navMap[prevDate]?
-        ((navMap[date]-navMap[prevDate])/navMap[prevDate]*100):null;
-      const prem=(price&&nav&&nav!==0)?((price/nav-1)*100):null;
-      rows.push({date,price,nav,prem,navChg});
-    });
-
-    // 只取最近3个月
-    const cutoff=new Date(); cutoff.setMonth(cutoff.getMonth()-3);
-    const recent=rows.filter(r=>new Date(r.date)>=cutoff).reverse(); // 新→旧
-
-    document.getElementById('mo-load').style.display='none';
+    load.style.display='none';
+    if(!recent.length){
+      load.style.display='block';
+      load.textContent='没有匹配到历史收盘价与T-1净值数据';
+      return;
+    }
+    renderHistSummary(recent,actualRangeLabel(recent));
     renderHistTable(recent);
     renderChart(recent);
   }catch(e){
-    document.getElementById('mo-load').textContent='加载失败：'+e.message;
+    if(reqId!==histReqId)return;
+    load.style.display='block';
+    load.textContent='加载失败：'+(e&&e.message?e.message:e);
   }
 }
 
-/* 天天基金历史净值（分页，取3个月约65条，一页够） */
-async function fetchHistNav(code){
-  const edate=new Date().toISOString().slice(0,10);
-  const sd=new Date(); sd.setMonth(sd.getMonth()-4);
-  const sdate=sd.toISOString().slice(0,10);
-  const url=`https://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&code=${code}&page=1&sdate=${sdate}&edate=${edate}&per=100`;
-  const res=await fetch(url);
-  const text=await res.text();
-  // 返回格式: var apidata={ content:"<table>...</table>",records:xx,pages:xx,...}
-  const match=text.match(/content:"(.*?)",records/s);
-  if(!match)throw new Error('净值接口解析失败');
-  const html=match[1].replace(/\\"/g,'"').replace(/\\/g,'');
+function buildPremiumRows(navMap,priceMap){
+  const priceDates=Object.keys(priceMap).sort();
+  const navDates=Object.keys(navMap).sort();
+  const navIndex={}; navDates.forEach((d,i)=>navIndex[d]=i);
+
+  function prevNavDateBefore(tradeDate){
+    let lo=0,hi=navDates.length-1,ans=-1;
+    while(lo<=hi){
+      const mid=(lo+hi)>>1;
+      // 严格小于交易日，才是真正T-1可见净值；避免用当天收盘后才披露的净值
+      if(navDates[mid]<tradeDate){ans=mid;lo=mid+1}else{hi=mid-1}
+    }
+    return ans>=0?navDates[ans]:null;
+  }
+
+  const rows=[];
+  priceDates.forEach(date=>{
+    const price=priceMap[date];
+    const navDate=prevNavDateBefore(date);
+    if(!price||!navDate)return;
+    const nav=navMap[navDate];
+    const i=navIndex[navDate];
+    const preNavDate=i>0?navDates[i-1]:null;
+    const preNav=preNavDate?navMap[preNavDate]:null;
+    const navChg=(nav&&preNav)?((nav-preNav)/preNav*100):null;
+    const prem=(price&&nav&&nav!==0)?((price/nav-1)*100):null;
+    if(prem!=null&&!isNaN(prem))rows.push({date,price,navDate,nav,prem,navChg});
+  });
+  return rows;
+}
+
+async function fetchTextAny(urls,timeout=15000){
+  let lastErr=null;
+  for(const url of urls){
+    const ctrl=new AbortController();
+    const tid=setTimeout(()=>ctrl.abort(),timeout);
+    try{
+      const res=await fetch(url,{cache:'no-store',signal:ctrl.signal});
+      clearTimeout(tid);
+      if(!res.ok)throw new Error(`HTTP ${res.status}`);
+      const text=await res.text();
+      if(text&&text.length>50)return text;
+      throw new Error('返回文本为空');
+    }catch(e){
+      clearTimeout(tid);
+      lastErr=e;
+    }
+  }
+  throw lastErr||new Error('文本接口不可用');
+}
+
+function parseHaoEtfRowsFromHtml(text){
+  const rows=[];
+  if(!/<tr[\s>]/i.test(text))return rows;
+  const doc=new DOMParser().parseFromString(text,'text/html');
+  doc.querySelectorAll('tr').forEach(tr=>{
+    const tds=[...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
+    if(tds.length<6)return;
+    const date=tds[0];
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
+    const price=parseFloat(tds[1]);
+    const nav=parseFloat(tds[2]);
+    const prem=pctNum(tds[5]);
+    if(!isNaN(price)&&!isNaN(nav)&&prem!=null){
+      rows.push({date,price,navDate:'T-1',nav,prem,navChg:null,source:'haoetf'});
+    }
+  });
+  return rows;
+}
+
+function parseHaoEtfRowsFromText(text){
+  const rows=[];
+  const lines=String(text).split(/\n+/);
+  lines.forEach(line=>{
+    const raw=line.replace(/\|/g,' ').replace(/\s+/g,' ').trim();
+    // HaoETF 历史行：
+    // 2026-04-24 1.418 1.3788 1.3789 0.01% 2.84% 2242921 ...
+    const m=raw.match(/^(\d{4}-\d{2}-\d{2})\s+([0-9.]+)\s+([0-9.]+)\s+(?:[0-9.]+|-)\s+(?:[+\-]?[0-9.]+%|-)\s+([+\-]?[0-9.]+%)/);
+    if(!m)return;
+    const date=m[1], price=parseFloat(m[2]), nav=parseFloat(m[3]), prem=pctNum(m[4]);
+    if(!isNaN(price)&&!isNaN(nav)&&prem!=null){
+      rows.push({date,price,navDate:'T-1',nav,prem,navChg:null,source:'haoetf'});
+    }
+  });
+  return rows;
+}
+
+async function fetchHaoEtfRows(code){
+  const target=`https://www.haoetf.com/qdii/${code}`;
+  const urls=[
+    // Reader 会把 HaoETF 服务端渲染表转成纯文本，适合静态 GitHub Pages 跨域读取。
+    `https://r.jina.ai/https://www.haoetf.com/qdii/${code}`,
+    // 备用公共 CORS 代理。
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`,
+    // 最后尝试直连；若 HaoETF 未放开 CORS，浏览器会自动失败。
+    target,
+  ];
+  const text=await fetchTextAny(urls,18000);
+  let rows=parseHaoEtfRowsFromHtml(text);
+  if(!rows.length)rows=parseHaoEtfRowsFromText(text);
+  rows=dedupeRows(rows);
+  if(!rows.length)throw new Error('HaoETF历史表解析为空');
+  return rows;
+}
+
+
+
+function renderHistSummary(rows,label=HIST_LABEL,source=''){
+  const el=document.getElementById('hist-summary');
+  if(!el)return;
+  const vals=rows.filter(r=>r.prem!=null&&!isNaN(r.prem));
+  if(!vals.length){el.innerHTML='';return}
+  const latest=vals[0];
+  const arr=vals.map(r=>r.prem).sort((a,b)=>a-b);
+  const min=arr[0], max=arr[arr.length-1];
+  const avg=arr.reduce((a,b)=>a+b,0)/arr.length;
+  const rank=arr.filter(v=>v<=latest.prem).length;
+  const pct=rank/arr.length*100;
+  const level=latest.prem>3?'高溢价区':latest.prem>=1?'溢价偏高':latest.prem<-1?'折价区':'正常区间';
+  const cls=latest.prem>3?'phi':latest.prem>=1?'pmd':latest.prem<-1?'plo':'pno';
+  const from=rows[rows.length-1].date, to=rows[0].date;
+  el.innerHTML=`
+    <div class="sum-card"><div class="sum-l">最新日期</div><div class="sum-v">${latest.date.slice(5)}</div></div>
+    <div class="sum-card"><div class="sum-l">最新T-1溢价</div><div class="sum-v ${cls}">${fp(latest.prem)}</div></div>
+    <div class="sum-card"><div class="sum-l">${label}分位</div><div class="sum-v">${n2(pct)}%</div></div>
+    <div class="sum-card"><div class="sum-l">${label}均值</div><div class="sum-v">${fp(avg)}</div></div>
+    <div class="sum-card"><div class="sum-l">${label}区间</div><div class="sum-v" style="font-size:12px">${fp(min)} ~ ${fp(max)}</div></div>
+    <div class="sum-note">判断：${level}。数据源：${source||'历史接口'}；样本：${vals.length}条，区间 ${from} 至 ${to}。分位越高，代表当前溢价率越接近所选历史区间高位；分位越低，代表越接近所选历史区间低位。</div>`;
+}
+
+function loadScript(url,timeout=12000){
+  return new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    let done=false;
+    const finish=(err)=>{
+      if(done)return; done=true;
+      clearTimeout(tid);
+      s.parentNode&&s.parentNode.removeChild(s);
+      err?reject(err):resolve();
+    };
+    s.onload=()=>finish();
+    s.onerror=()=>finish(new Error('接口加载失败'));
+    const tid=setTimeout(()=>finish(new Error('接口超时')),timeout);
+    s.src=url;
+    document.head.appendChild(s);
+  });
+}
+
+/* 东方财富历史净值：改为 script 注入读取全局 apidata，避免 GitHub Pages 下 fetch 跨域失败 */
+async function fetchHistNav(code,months=HIST_MONTHS){
+  const edate=ymd(new Date());
+  const sdate=ymd(addMonthsSafe(new Date(),-(months+1))); // 多取1个月，保证T-1对齐有缓冲
+  const url=`https://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&code=${code}&page=1&sdate=${sdate}&edate=${edate}&per=400&rt=${Date.now()}`;
+  const old=window.apidata;
+  window.apidata=undefined;
+  await loadScript(url,12000);
+  const data=window.apidata;
+  window.apidata=old;
+  if(!data||!data.content)throw new Error('净值接口解析失败');
+  const html=String(data.content).replace(/\\\"/g,'"').replace(/\\\//g,'/').replace(/\\/g,'');
   const doc=new DOMParser().parseFromString(html,'text/html');
   const map={};
   doc.querySelectorAll('tbody tr').forEach(tr=>{
@@ -660,49 +988,159 @@ async function fetchHistNav(code){
     if(tds.length<2)return;
     const date=tds[0].textContent.trim();
     const nav=parseFloat(tds[1].textContent.trim());
-    if(date&&!isNaN(nav))map[date]=nav;
+    if(/^\d{4}-\d{2}-\d{2}$/.test(date)&&!isNaN(nav))map[date]=nav;
   });
+  if(!Object.keys(map).length)throw new Error('净值数据为空');
   return map;
 }
 
-/* 腾讯历史日K（script注入读全局变量）
-   URL: https://data.gtimg.cn/flashdata/hushen/latest/daily/sz159941.js
-   格式: \n日期(yymmdd) 开 高 低 收 量\n... */
-function fetchHistPrice(code){
-  return new Promise((res,rej)=>{
-    const prefix=exch(code);
-    const varName=`hushen_latest_daily_${prefix}${code}`;
+/* 历史收盘价：优先用东方财富K线JSONP，失败再回退腾讯日K */
+async function fetchHistPrice(code,months=HIST_MONTHS){
+  try{
+    const m=await fetchEastmoneyKline(code,months);
+    if(Object.keys(m).length)return m;
+  }catch(e){/* 回退腾讯 */}
+  const m=await fetchTencentDaily(code,months);
+  if(!Object.keys(m).length)throw new Error('收盘价数据为空');
+  return m;
+}
+
+function jsonp(url,cbParam='cb',timeout=12000){
+  return new Promise((resolve,reject)=>{
+    const cb='__cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);
     const s=document.createElement('script');
-    let ok=false;
-    const done=()=>{
-      if(ok)return; ok=true;
+    let done=false;
+    const sep=url.includes('?')?'&':'?';
+    const finish=(err,data)=>{
+      if(done)return; done=true;
       clearTimeout(tid);
+      try{delete window[cb]}catch(e){window[cb]=undefined}
       s.parentNode&&s.parentNode.removeChild(s);
-      const raw=window[varName];
-      if(!raw){delete window[varName];rej(new Error('收盘价数据为空'));return}
-      delete window[varName];
-      // 解析: "yymmdd open high low close vol\n..."
-      const map={};
-      raw.split('\n').forEach(line=>{
-        line=line.trim();
-        if(!line||line.startsWith('//'))return;
-        const parts=line.split(' ');
-        if(parts.length<5)return;
-        const ymd=parts[0];
-        const year=2000+parseInt(ymd.slice(0,2));
-        const mon=ymd.slice(2,4), day=ymd.slice(4,6);
-        const date=`${year}-${mon}-${day}`;
-        const close=parseFloat(parts[4]);
-        if(date&&!isNaN(close))map[date]=close;
-      });
-      res(map);
+      err?reject(err):resolve(data);
     };
-    s.onload=done; s.onerror=()=>rej(new Error('收盘价接口加载失败'));
-    const tid=setTimeout(()=>rej(new Error('收盘价接口超时')),10000);
-    // 腾讯日K JS文件，加载后变量名为 hushen_latest_daily_{prefix}{code}
-    s.src=`https://data.gtimg.cn/flashdata/hushen/latest/daily/${prefix}${code}.js?r=${Date.now()}`;
+    window[cb]=data=>finish(null,data);
+    s.onerror=()=>finish(new Error('接口加载失败'));
+    const tid=setTimeout(()=>finish(new Error('接口超时')),timeout);
+    s.src=url+sep+cbParam+'='+cb+'&_='+Date.now();
     document.head.appendChild(s);
   });
+}
+
+async function fetchJsonWithTimeout(url,timeout=12000){
+  const ctrl=new AbortController();
+  const tid=setTimeout(()=>ctrl.abort(),timeout);
+  try{
+    const res=await fetch(url,{cache:'no-store',signal:ctrl.signal});
+    clearTimeout(tid);
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  }catch(e){
+    clearTimeout(tid);
+    throw e;
+  }
+}
+function parseEastmoneyKlineData(data){
+  const list=data&&data.data&&Array.isArray(data.data.klines)?data.data.klines:[];
+  const map={};
+  list.forEach(line=>{
+    const p=String(line).split(',');
+    const date=p[0];
+    const close=parseFloat(p[2]); // f53 = 收盘价
+    if(/^\d{4}-\d{2}-\d{2}$/.test(date)&&!isNaN(close))map[date]=close;
+  });
+  return map;
+}
+async function fetchEastmoneyKline(code,months){
+  const secid=(code[0]==='5'?'1.':'0.')+code;
+  const beg=compactYmd(addMonthsSafe(new Date(),-(months+1)));
+  const end=compactYmd(new Date());
+  const base=`https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=${secid}&fields1=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13&fields2=f51,f52,f53,f54,f55,f56,f57,f58&klt=101&fqt=0&beg=${beg}&end=${end}&rtntype=6&lmt=1000000`;
+
+  // A. 现代浏览器直连 JSON；如果东方财富放开 CORS，这个最稳定。
+  try{
+    const data=await fetchJsonWithTimeout(base+'&_='+Date.now(),10000);
+    const map=parseEastmoneyKlineData(data);
+    if(Object.keys(map).length)return map;
+  }catch(e){/* 再试 JSONP */}
+
+  // B. 有些环境支持 cb JSONP。
+  for(const cbName of ['cb','callback']){
+    try{
+      const data=await jsonp(base,cbName,10000);
+      const map=parseEastmoneyKlineData(data);
+      if(Object.keys(map).length)return map;
+    }catch(e){/* 下一个 */}
+  }
+
+  return {};
+}
+
+function looksDailyText(v){
+  return typeof v==='string' && /\d{6,8}\s+[0-9.]+\s+[0-9.]+\s+[0-9.]+\s+[0-9.]+/.test(v);
+}
+function parseTencentDailyText(raw){
+  const map={};
+  String(raw).split(/\n+/).forEach(line=>{
+    line=line.trim();
+    if(!line||line.startsWith('//'))return;
+    const parts=line.split(/\s+/);
+    if(parts.length<5)return;
+    let ymd0=parts[0].replace(/-/g,'');
+    let date='';
+    if(/^\d{6}$/.test(ymd0))date=`20${ymd0.slice(0,2)}-${ymd0.slice(2,4)}-${ymd0.slice(4,6)}`;
+    else if(/^\d{8}$/.test(ymd0))date=`${ymd0.slice(0,4)}-${ymd0.slice(4,6)}-${ymd0.slice(6,8)}`;
+    else return;
+    const close=parseFloat(parts[4]);
+    if(date&&!isNaN(close))map[date]=close;
+  });
+  return map;
+}
+function fetchTencentOneDaily(url,yy){
+  return new Promise((resolve,reject)=>{
+    const candidates=[
+      'latest_daily_data','daily_data',`daily_data_${yy}`,
+      'hushen_latest_daily_data','hushen_daily_data'
+    ];
+    const before={}; candidates.forEach(k=>{before[k]=window[k];try{window[k]=undefined}catch(e){}});
+    const s=document.createElement('script');
+    let done=false;
+    const finish=(err)=>{
+      if(done)return; done=true;
+      clearTimeout(tid);
+      s.parentNode&&s.parentNode.removeChild(s);
+      let raw=null;
+      for(const k of candidates){if(looksDailyText(window[k])){raw=window[k];break}}
+      candidates.forEach(k=>{
+        if(before[k]!==undefined)window[k]=before[k];
+        else{try{delete window[k]}catch(e){window[k]=undefined}}
+      });
+      err?reject(err):(raw?resolve(raw):reject(new Error('腾讯日K变量为空')));
+    };
+    s.onload=()=>finish();
+    s.onerror=()=>finish(new Error('腾讯日K接口加载失败'));
+    const tid=setTimeout(()=>finish(new Error('腾讯日K接口超时')),10000);
+    s.src=url;
+    document.head.appendChild(s);
+  });
+}
+async function fetchTencentDaily(code,months){
+  const prefix=exch(code);
+  const now=new Date();
+  const begin=addMonthsSafe(now,-(months+1));
+  const years=[];
+  for(let y=now.getFullYear();y>=begin.getFullYear();y--)years.push(y);
+  const urls=[
+    {url:`https://data.gtimg.cn/flashdata/hushen/latest/daily/${prefix}${code}.js?r=${Date.now()}`,yy:String(now.getFullYear()).slice(2)},
+    ...years.map(y=>({url:`https://data.gtimg.cn/flashdata/hushen/daily/${String(y).slice(2)}/${prefix}${code}.js?r=${Date.now()}`,yy:String(y).slice(2)}))
+  ];
+  const map={};
+  for(const u of urls){
+    try{
+      const raw=await fetchTencentOneDaily(u.url,u.yy);
+      Object.assign(map,parseTencentDailyText(raw));
+    }catch(e){/* 单个源失败不影响整体 */}
+  }
+  return map;
 }
 
 function renderHistTable(rows){
@@ -714,6 +1152,7 @@ function renderHistTable(rows){
     tr.innerHTML=`
       <td style="text-align:left;padding-left:10px;font-size:12px;color:var(--muted)">${r.date}</td>
       <td class="nm">${r.price!=null?r.price.toFixed(4):'--'}</td>
+      <td class="dt">${r.navDate||'--'}</td>
       <td class="nm" style="color:var(--text)">${r.nav!=null?r.nav.toFixed(4):'--'}</td>
       <td class="${pc}">${r.prem!=null?fp(r.prem):'--'}</td>
       <td class="nm ${r.navChg!=null?clr(r.navChg):'neu'}">${r.navChg!=null?fp(r.navChg):'--'}</td>`;
@@ -804,13 +1243,20 @@ function renderChart(rows){
 
 /* 关闭弹窗 */
 function closeModal(e){
-  if(e&&e.target!==document.getElementById('overlay')&&e.type==='click')return;
-  document.getElementById('overlay').classList.remove('show');
+  const overlay=document.getElementById('overlay');
+  if(!overlay)return;
+  if(e&&e.target!==overlay&&e.type==='click')return;
+  overlay.classList.remove('show');
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 
 /* ── 初始化 ── */
 window.addEventListener('DOMContentLoaded',()=>{
+  const params=new URLSearchParams(location.search);
+  if(params.get('history')==='1'){
+    initHistoryPage();
+    return;
+  }
   draw('ndx'); draw('spx'); fetchAll();
 });
 </script>
