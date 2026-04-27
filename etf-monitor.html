@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>美股指数ETF监控</title>
+<title>美股ETF监控</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#f0f2f5;--card:#fff;--border:#e4e7ed;--text:#1d2129;
-  --muted:#6b7280;--dim:#9ca3af;--blue:#2563eb;--blt:#eff6ff;
+  --bg:#f0f2f5;--card:#fff;--bd:#e4e7ed;--txt:#1d2129;
+  --mut:#6b7280;--dim:#9ca3af;--blu:#2563eb;--blt:#eff6ff;
   --red:#dc2626;--grn:#16a34a;
   --phi-bg:#fef2f2;--phi-fg:#dc2626;
   --pmd-bg:#fffbeb;--pmd-fg:#92400e;
@@ -16,131 +16,101 @@
   --mono:'Consolas','Menlo','Courier New',monospace;
   --sans:'Microsoft YaHei','PingFang SC',Arial,sans-serif;
 }
-body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;min-height:100vh}
-
-.hd{background:var(--card);border-bottom:1px solid var(--border);
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:13px;min-height:100vh}
+.hd{background:var(--card);border-bottom:1px solid var(--bd);
     box-shadow:0 1px 4px rgba(0,0,0,.06);position:sticky;top:0;z-index:99}
 .hd-in{max-width:1600px;margin:0 auto;padding:10px 20px;
        display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .logo-t{font-size:15px;font-weight:700}
-.logo-s{font-size:10px;color:var(--muted);margin-top:1px}
+.logo-s{font-size:10px;color:var(--mut);margin-top:1px}
 .tabs{display:flex;gap:6px}
 .tab{padding:5px 16px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;
-     border:1px solid var(--border);background:var(--card);color:var(--muted);
+     border:1px solid var(--bd);background:var(--card);color:var(--mut);
      font-family:var(--sans);transition:all .15s}
-.tab:hover{border-color:var(--blue);color:var(--blue)}
-.tab.on-n{background:var(--blt);border-color:#93c5fd;color:var(--blue);font-weight:600}
+.tab:hover{border-color:var(--blu);color:var(--blu)}
+.tab.on-n{background:var(--blt);border-color:#93c5fd;color:var(--blu);font-weight:600}
 .tab.on-s{background:#ecfeff;border-color:#67e8f9;color:#0e7490;font-weight:600}
 .sa{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap}
 .dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;
      background:var(--grn);animation:blink 2s infinite}
 .dot.busy{background:#f59e0b}.dot.err{background:var(--red);animation:none}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-#st{font-size:11px;color:var(--muted)}
-#btn{font-size:13px;font-weight:500;color:var(--blue);background:var(--blt);
+#st{font-size:11px;color:var(--mut)}
+#btn{font-size:13px;font-weight:500;color:var(--blu);background:var(--blt);
      border:1px solid #bfdbfe;border-radius:6px;padding:5px 14px;cursor:pointer;
      font-family:var(--sans);transition:all .15s}
 #btn:hover{background:#dbeafe}
 #btn:disabled{opacity:.5;cursor:not-allowed}
-
-#bar{position:fixed;top:0;left:0;height:3px;background:var(--blue);
-     width:0;transition:width .25s;z-index:200}
-
+#bar{position:fixed;top:0;left:0;height:3px;background:var(--blu);width:0;transition:width .25s;z-index:200}
 .mn{max-width:1600px;margin:0 auto;padding:14px 20px}
 .cards{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:8px;
+.card{background:var(--card);border:1px solid var(--bd);border-radius:8px;
       padding:10px 16px;display:flex;align-items:center;gap:10px;
       box-shadow:0 1px 2px rgba(0,0,0,.04)}
 .cdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.cl{font-size:10px;color:var(--muted)}
+.cl{font-size:10px;color:var(--mut)}
 .cv{font-family:var(--mono);font-size:14px;font-weight:600;margin-top:2px}
-
 .sh{display:none;font-size:10px;color:var(--dim);text-align:center;padding:3px 0}
 @media(max-width:860px){.sh{display:block}}
-
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px;
-    border:1px solid var(--border);background:var(--card);
-    box-shadow:0 1px 3px rgba(0,0,0,.04)}
-table{width:100%;border-collapse:collapse;min-width:1120px}
-thead th{background:#f8f9fb;color:var(--muted);font-size:10.5px;font-weight:700;
+    border:1px solid var(--bd);background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.04)}
+table{width:100%;border-collapse:collapse;min-width:1100px}
+thead th{background:#f8f9fb;color:var(--mut);font-size:10.5px;font-weight:700;
          letter-spacing:.03em;padding:8px 9px;text-align:right;
-         border-bottom:1px solid var(--border);white-space:nowrap;
+         border-bottom:1px solid var(--bd);white-space:nowrap;
          cursor:pointer;user-select:none;transition:color .12s;font-family:var(--sans)}
 thead th:first-child{text-align:left;padding-left:14px}
 thead th:nth-child(2){text-align:left}
-thead th:hover{color:var(--blue)}
-thead th.sa::after{content:' ▲';color:var(--blue);font-size:8px}
-thead th.sd::after{content:' ▼';color:var(--blue);font-size:8px}
+thead th:hover{color:var(--blu)}
+thead th.sa::after{content:' ▲';color:var(--blu);font-size:8px}
+thead th.sd::after{content:' ▼';color:var(--blu);font-size:8px}
 tbody tr{border-bottom:1px solid #f0f2f5;transition:background .1s}
 tbody tr:hover{background:#f7f9fc}
 tbody tr:last-child{border-bottom:none}
 tbody td{padding:7px 9px;text-align:right;white-space:nowrap;vertical-align:middle}
 tbody td:first-child{text-align:left;padding-left:14px}
 tbody td:nth-child(2){text-align:left}
-
-.cc{font-family:var(--mono);font-size:12px;color:var(--blue);font-weight:600;
+.cc{font-family:var(--mono);font-size:12px;color:var(--blu);font-weight:600;
     cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 .cc:hover{color:#1d4ed8}
-.cn{font-size:12px;color:var(--text);max-width:130px;overflow:hidden;
-    text-overflow:ellipsis;display:block}
+.cn{font-size:12px;color:var(--txt);max-width:130px;overflow:hidden;text-overflow:ellipsis;display:block}
 .nm{font-family:var(--mono);font-size:12px}
 .dm{font-family:var(--mono);font-size:12px;color:var(--dim)}
-.dt{font-size:11px;color:var(--muted)}
-.pos{color:var(--red)}
-.neg{color:var(--grn)}
-.neu{color:var(--muted)}
-.phi{background:var(--phi-bg)!important;color:var(--phi-fg)!important;font-family:var(--mono);font-size:12px;font-weight:600}
-.pmd{background:var(--pmd-bg)!important;color:var(--pmd-fg)!important;font-family:var(--mono);font-size:12px;font-weight:600}
-.pno{font-family:var(--mono);font-size:12px;color:var(--muted)}
-.plo{background:var(--plo-bg)!important;color:var(--plo-fg)!important;font-family:var(--mono);font-size:12px;font-weight:600}
-
+.dt{font-size:11px;color:var(--mut)}
+.pos{color:var(--red)}.neg{color:var(--grn)}.neu{color:var(--mut)}
+.phi{background:var(--phi-bg)!important;color:var(--phi-fg)!important;font-family:var(--mono);font-size:12px;font-weight:700}
+.pmd{background:var(--pmd-bg)!important;color:var(--pmd-fg)!important;font-family:var(--mono);font-size:12px;font-weight:700}
+.pno{font-family:var(--mono);font-size:12px;color:var(--mut)}
+.plo{background:var(--plo-bg)!important;color:var(--plo-fg)!important;font-family:var(--mono);font-size:12px;font-weight:700}
 .lgd{display:flex;flex-wrap:wrap;align-items:center;gap:10px;
-     margin-top:12px;font-size:11px;color:var(--muted)}
+     margin-top:12px;font-size:11px;color:var(--mut)}
 .li{display:inline-flex;align-items:center;gap:4px}
 .ld{width:10px;height:10px;border-radius:2px;display:inline-block;border:1px solid}
 .note{margin-top:9px;font-size:10px;color:var(--dim);line-height:1.9;
-      border-top:1px solid var(--border);padding-top:9px}
-
-/* ── 历史页样式（页内隐藏，新标签打印用） ── */
-#histpage{display:none}
-
-@media(max-width:700px){
-  .hd-in,.mn{padding-left:10px;padding-right:10px}
-  table{min-width:900px}
-  .cards{gap:7px}
-}
+      border-top:1px solid var(--bd);padding-top:9px}
+@media(max-width:700px){.hd-in,.mn{padding-left:10px;padding-right:10px}table{min-width:900px}.cards{gap:7px}}
 </style>
 </head>
 <body>
 <div id="bar"></div>
 
-<!-- ═══ MAIN PAGE ═══ -->
-<div id="mainpage">
 <div class="hd">
   <div class="hd-in">
     <div style="display:flex;align-items:center;gap:9px">
       <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
         <rect width="26" height="26" rx="6" fill="#eff6ff"/>
-        <polyline points="3,19 8,11 13,15 18,7 23,7"
-          stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <polyline points="3,19 8,11 13,15 18,7 23,7" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
         <circle cx="23" cy="7" r="2" fill="#2563eb"/>
       </svg>
-      <div>
-        <div class="logo-t">美股指数ETF监控</div>
-        <div class="logo-s">纳斯达克100 · 标普500 · 点击代码查看3月溢价历史</div>
-      </div>
+      <div><div class="logo-t">美股指数ETF监控</div>
+      <div class="logo-s">纳斯达克100 · 标普500 · 点击代码查看3月溢价历史</div></div>
     </div>
     <div class="tabs">
-      <button class="tab on-n" id="tn" onclick="go('ndx')">
-        纳斯达克100 <span style="opacity:.55;font-size:11px">(13只)</span>
-      </button>
-      <button class="tab" id="ts" onclick="go('spx')">
-        标普500 <span style="opacity:.55;font-size:11px">(5只)</span>
-      </button>
+      <button class="tab on-n" id="tn" onclick="go('ndx')">纳斯达克100 <span style="opacity:.55;font-size:11px">(13只)</span></button>
+      <button class="tab" id="ts" onclick="go('spx')">标普500 <span style="opacity:.55;font-size:11px">(5只)</span></button>
     </div>
     <div class="sa">
-      <span class="dot" id="dot"></span>
-      <span id="st">就绪</span>
+      <span class="dot" id="dot"></span><span id="st">就绪</span>
       <button id="btn" onclick="doRefresh()">⟳ 刷新数据</button>
     </div>
   </div>
@@ -148,52 +118,39 @@ tbody td:nth-child(2){text-align:left}
 
 <div class="mn">
   <div class="cards">
-    <div class="card">
-      <div class="cdot" style="background:#2563eb"></div>
-      <div><div class="cl">纳指100期货 (NQ)</div><div class="cv" id="ci-n">--</div></div>
-    </div>
-    <div class="card">
-      <div class="cdot" style="background:#0e7490"></div>
-      <div><div class="cl">标普500期货 (ES)</div><div class="cv" id="ci-s">--</div></div>
-    </div>
-    <div class="card">
-      <div class="cdot" style="background:#d97706"></div>
-      <div><div class="cl">USD/CNY 中间价</div><div class="cv" id="ci-u" style="font-size:13px;color:var(--muted)">--</div></div>
-    </div>
+    <div class="card"><div class="cdot" style="background:#2563eb"></div>
+      <div><div class="cl">纳指100期货 (NQ)</div><div class="cv" id="ci-n">--</div></div></div>
+    <div class="card"><div class="cdot" style="background:#0e7490"></div>
+      <div><div class="cl">标普500期货 (ES)</div><div class="cv" id="ci-s">--</div></div></div>
+    <div class="card"><div class="cdot" style="background:#d97706"></div>
+      <div><div class="cl">USD/CNY 中间价</div><div class="cv" id="ci-u" style="font-size:13px;color:var(--mut)">--</div></div></div>
     <div class="card" style="margin-left:auto">
-      <div><div class="cl">最后更新</div>
-      <div class="cv" id="ci-ts" style="font-size:12px;color:var(--muted)">--</div></div>
-    </div>
+      <div><div class="cl">最后更新</div><div class="cv" id="ci-ts" style="font-size:12px;color:var(--mut)">--</div></div></div>
   </div>
-
   <div class="sh">← 左右滑动查看完整数据 →</div>
   <div id="wn"><div class="tw"><table><thead><tr id="hn"></tr></thead><tbody id="bn"></tbody></table></div></div>
   <div id="ws" style="display:none"><div class="tw"><table><thead><tr id="hs"></tr></thead><tbody id="bs"></tbody></table></div></div>
-
   <div class="lgd">
-    <b style="color:var(--muted)">溢价率</b>
-    <span class="li"><span class="ld" style="background:var(--phi-bg);border-color:#fca5a5"></span><span style="color:var(--phi-fg)">&gt;3% 高溢价</span></span>
-    <span class="li"><span class="ld" style="background:var(--pmd-bg);border-color:#fcd34d"></span><span style="color:var(--pmd-fg)">1%~3% 溢价</span></span>
-    <span class="li"><span class="ld" style="background:#fff;border-color:var(--border)"></span>-1%~1% 正常</span>
-    <span class="li"><span class="ld" style="background:var(--plo-bg);border-color:#86efac"></span><span style="color:var(--plo-fg)">&lt;-1% 折价</span></span>
-    <span style="margin-left:auto;color:var(--dim)">数据：天天基金 · 腾讯财经 · 集思录</span>
+    <b style="color:var(--mut)">溢价率</b>
+    <span class="li"><span class="ld" style="background:var(--phi-bg);border-color:#fca5a5"></span><span style="color:var(--phi-fg)">&gt;3%</span></span>
+    <span class="li"><span class="ld" style="background:var(--pmd-bg);border-color:#fcd34d"></span><span style="color:var(--pmd-fg)">1%~3%</span></span>
+    <span class="li"><span class="ld" style="background:#fff;border-color:var(--bd)"></span>-1%~1%</span>
+    <span class="li"><span class="ld" style="background:var(--plo-bg);border-color:#86efac"></span><span style="color:var(--plo-fg)">&lt;-1%</span></span>
+    <span style="margin-left:auto;color:var(--dim)">数据：天天基金 · 腾讯财经</span>
   </div>
   <div class="note">
-    ⚠ <b>重要说明：</b>
-    由于美股与A股交易时间错位，QDII基金盘中估值<b>不是真正的实时数据</b>（美股闭市期间估值固定）。
-    天天基金 gsz = 今日盘中推算估值（A股盘中固定，美股开盘后才更新）；dwjz = T-1官方净值（前一交易日收盘后公布）。<br>
-    <b>最新溢价</b>（现价÷T-1净值-1）是判断套利的核心参考。
-    <b>实时溢价</b>（现价÷盘中估值-1）反映当前相对于盘中推算值的偏差。<br>
-    涨跌颜色遵循A股惯例（红涨绿跌）。点击代码可在新标签页查看该基金近3月每日溢价走势。不构成投资建议。
+    ⚠ <b>盘中估值(gsz)</b>：天天基金推算，A股盘中固定（美股闭市）。
+    <b>净值(T-1)</b>：前一交易日官方净值(dwjz)。
+    <b>实时溢价</b> = 现价÷gsz−1。<b>最新溢价★</b> = 现价÷T-1净值−1（套利判断核心指标，加粗显示）。
+    红涨绿跌（A股惯例）。点击代码查看3月历史溢价走势，不构成投资建议。
   </div>
 </div>
-</div><!-- end mainpage -->
 
 <script>
-/* ═══════════════════════════════════════════════════════
+/* =============================================================
    基金数据库  [代码, 简称, 管+托%, 申购%, 赎回%]
    ★ 新增基金：末尾加一行
-═══════════════════════════════════════════════════════ */
+============================================================= */
 const DB={
   ndx:[
     ['159941','广发纳指100ETF',    0.20,0.00,0.00],
@@ -219,18 +176,16 @@ const DB={
   ],
 };
 const ALL=[...DB.ndx,...DB.spx];
-
-/* ── 列定义 ── */
 const COLS=[
   {k:'code',    l:'代码',      t:'code'},
   {k:'name',    l:'基金简称',  t:'name'},
   {k:'price',   l:'现价',      t:'price'},
   {k:'pct',     l:'涨跌%',     t:'pct'},
-  {k:'navEst',  l:'盘中估值',  t:'n4'},    // gsz（盘中推算，非真实时）
-  {k:'realPrem',l:'实时溢价%', t:'prem'},  // 现价/gsz-1
-  {k:'nav',     l:'净值(T-1)', t:'n4'},    // dwjz（T-1官方净值）
-  {k:'latPrem', l:'最新溢价%', t:'premH'}, // 现价/dwjz-1 ★核心
-  {k:'navPct',  l:'净值涨跌%', t:'pct'},   // gszzl
+  {k:'navEst',  l:'盘中估值',  t:'n4'},
+  {k:'realPrem',l:'实时溢价%', t:'prem'},
+  {k:'nav',     l:'净值(T-1)', t:'n4'},
+  {k:'latPrem', l:'最新溢价%★',t:'premB'},
+  {k:'navPct',  l:'净值涨跌%', t:'pct'},
   {k:'navDate', l:'净值日期',  t:'date'},
   {k:'amount',  l:'成交额(万)',t:'amt'},
   {k:'fees',    l:'管理+托管%',t:'fee'},
@@ -238,106 +193,49 @@ const COLS=[
   {k:'redeem',  l:'赎回费%',   t:'fee'},
 ];
 
-let tab='ndx', sk='amount', sd=-1, pk='', busy=false;
+let tab='ndx',sk='amount',sd=-1,pk='',busy=false;
 let D={ndx:{},spx:{}};
 
 function exch(c){return c[0]==='5'?'sh':'sz'}
-
-/* ── 格式化 ── */
 const n4=v=>v==null||isNaN(+v)?'--':(+v).toFixed(4);
 const n2=v=>v==null||isNaN(+v)?'--':(+v).toFixed(2);
 const fp=v=>{if(v==null||isNaN(+v))return'--';return(v>=0?'+':'')+n2(v)+'%'};
-const fa=v=>{
-  if(v==null||isNaN(+v))return'--';
-  const n=+v;
-  if(n>=100000)return(n/10000).toFixed(1)+'亿';
-  return n.toLocaleString('zh-CN',{maximumFractionDigits:0});
-};
+const fa=v=>{if(v==null||isNaN(+v))return'--';const n=+v;return n>=100000?(n/10000).toFixed(1)+'亿':n.toLocaleString('zh-CN',{maximumFractionDigits:0})};
 const clr=v=>v==null||isNaN(+v)?'neu':+v>0?'pos':+v<0?'neg':'neu';
-const pcls=v=>{
-  if(v==null||isNaN(+v))return'pno';
-  if(+v>3)return'phi'; if(+v>=1)return'pmd';
-  if(+v<-1)return'plo'; return'pno';
-};
+const pcls=v=>{if(v==null||isNaN(+v))return'pno';if(+v>3)return'phi';if(+v>=1)return'pmd';if(+v<-1)return'plo';return'pno'};
 
-/* ── 渲染 ── */
 function head(t){
-  const tr=document.getElementById('h'+t[0]);
-  tr.innerHTML='';
-  COLS.forEach(c=>{
-    const th=document.createElement('th');
-    th.textContent=c.l;
-    th.onclick=()=>srt(c.k);
-    if(c.k===sk)th.classList.add(sd===1?'sa':'sd');
-    tr.appendChild(th);
-  });
+  const tr=document.getElementById('h'+t[0]);tr.innerHTML='';
+  COLS.forEach(c=>{const th=document.createElement('th');th.textContent=c.l;th.onclick=()=>srt(c.k);if(c.k===sk)th.classList.add(sd===1?'sa':'sd');tr.appendChild(th)});
 }
-
 function draw(t){
   head(t);
   const tbody=document.getElementById('b'+t[0]);
-  let rows=DB[t].map(f=>{
-    const d=D[t][f[0]]||{};
-    return{
-      code:f[0],name:f[1],fees:f[2],purchase:f[3],redeem:f[4],
-      price:d.price??null, pct:d.pct??null,
-      navEst:d.navEst??null, realPrem:d.realPrem??null,
-      nav:d.nav??null, latPrem:d.latPrem??null,
-      navPct:d.navPct??null, navDate:d.navDate??'--',
-      amount:d.amount??null,
-    };
-  });
-  rows.sort((a,b)=>{
-    let av=a[sk],bv=b[sk];
-    const m=sd===1?Infinity:-Infinity;
-    if(av==null)av=m; if(bv==null)bv=m;
-    return sd*(typeof av==='string'?av.localeCompare(bv,'zh'):av-bv);
-  });
+  let rows=DB[t].map(f=>{const d=D[t][f[0]]||{};return{code:f[0],name:f[1],fees:f[2],purchase:f[3],redeem:f[4],price:d.price??null,pct:d.pct??null,navEst:d.navEst??null,realPrem:d.realPrem??null,nav:d.nav??null,latPrem:d.latPrem??null,navPct:d.navPct??null,navDate:d.navDate??'--',amount:d.amount??null}});
+  rows.sort((a,b)=>{let av=a[sk],bv=b[sk];const m=sd===1?Infinity:-Infinity;if(av==null)av=m;if(bv==null)bv=m;return sd*(typeof av==='string'?av.localeCompare(bv,'zh'):av-bv)});
   tbody.innerHTML='';
   rows.forEach(r=>{
     const tr=document.createElement('tr');
     COLS.forEach(c=>{
-      const td=document.createElement('td');
-      const v=r[c.k];
+      const td=document.createElement('td');const v=r[c.k];
       switch(c.t){
-        case'code':
-          td.innerHTML=`<span class="cc" onclick="openHist('${r.code}','${r.name}')">${r.code}</span>`;
-          break;
-        case'name':
-          td.innerHTML=`<span class="cn" title="${r.name}">${r.name}</span>`; break;
-        case'price':
-          td.className=`nm ${clr(r.pct)}`; td.textContent=n4(v); break;
-        case'pct':
-          td.className=`nm ${clr(v)}`; td.textContent=fp(v); break;
-        case'prem':
-          td.className=pcls(v); td.textContent=fp(v); break;
-        case'premH': {
-          // 最新溢价：更大字体+加粗高亮
-          td.className=pcls(v);
-          td.style.fontWeight='700';
-          td.textContent=fp(v);
-          break;
-        }
-        case'n4':
-          td.className='nm'; td.style.color='var(--text)'; td.textContent=n4(v); break;
-        case'amt':
-          td.className='nm'; td.style.color=v!=null?'var(--text)':'var(--dim)';
-          td.textContent=fa(v); break;
-        case'date':
-          td.className='dt'; td.textContent=v||'--'; break;
-        case'fee':
-          td.className='dm'; td.textContent=n2(v); break;
+        case'code': td.innerHTML=`<span class="cc" onclick="openHist('${r.code}','${r.name}')">${r.code}</span>`;break;
+        case'name': td.innerHTML=`<span class="cn" title="${r.name}">${r.name}</span>`;break;
+        case'price': td.className=`nm ${clr(r.pct)}`;td.textContent=n4(v);break;
+        case'pct': td.className=`nm ${clr(v)}`;td.textContent=fp(v);break;
+        case'prem': td.className=pcls(v);td.textContent=fp(v);break;
+        case'premB': td.className=pcls(v);td.style.fontWeight='700';td.textContent=fp(v);break;
+        case'n4': td.className='nm';td.style.color='var(--txt)';td.textContent=n4(v);break;
+        case'amt': td.className='nm';td.style.color=v!=null?'var(--txt)':'var(--dim)';td.textContent=fa(v);break;
+        case'date': td.className='dt';td.textContent=v||'--';break;
+        case'fee': td.className='dm';td.textContent=n2(v);break;
       }
       tr.appendChild(td);
     });
     tbody.appendChild(tr);
   });
 }
-
-function srt(k){
-  if(pk===k)sd=-sd; else sd=(k==='amount')?-1:1;
-  sk=k; pk=k; draw('ndx'); draw('spx');
-}
+function srt(k){if(pk===k)sd=-sd;else sd=(k==='amount')?-1:1;sk=k;pk=k;draw('ndx');draw('spx')}
 function go(t){
   tab=t;
   document.getElementById('wn').style.display=t==='ndx'?'':'none';
@@ -345,484 +243,329 @@ function go(t){
   document.getElementById('tn').className='tab'+(t==='ndx'?' on-n':'');
   document.getElementById('ts').className='tab'+(t==='spx'?' on-s':'');
 }
-
-/* ── 状态 ── */
 function setSt(s,m){
   document.getElementById('dot').className='dot'+(s==='busy'?' busy':s==='err'?' err':'');
   document.getElementById('st').textContent=m;
-  const b=document.getElementById('btn');
-  b.disabled=s==='busy'; b.textContent=s==='busy'?'加载中…':'⟳ 刷新数据';
+  const b=document.getElementById('btn');b.disabled=s==='busy';b.textContent=s==='busy'?'加载中…':'⟳ 刷新数据';
 }
 function prog(p){document.getElementById('bar').style.width=p+'%'}
 
-/* ═══════════════════════════════════════════════════════
-   天天基金估值 JSONP（串行队列，固定回调名 jsonpgz）
-   字段：
-     gsz   = 今日盘中估算净值（QDII基金A股盘中固定，美股盘中更新）
-     dwjz  = T-1官方净值
-     gszzl = 估算涨跌幅%
-     jzrq  = 净值日期
-═══════════════════════════════════════════════════════ */
+/* =============================================================
+   天天基金 JSONP 队列（串行，固定回调名 jsonpgz）
+   gsz   = 盘中估算净值（A股盘中QDII不动，美股开盘后才更新）
+   dwjz  = T-1官方净值 ← 最新溢价的分母
+   gszzl = 估算涨跌%
+   jzrq  = 净值日期
+============================================================= */
 const _q=[];let _run=false;
 function navQ(code){return new Promise(r=>{_q.push({code,r});if(!_run)_drain()})}
 function _drain(){
   if(!_q.length){_run=false;return}
   _run=true;
   const{code,r}=_q.shift();
-  const s=document.createElement('script');
-  let ok=false;
+  const s=document.createElement('script');let ok=false;
   const prev=window.jsonpgz;
-  const fin=val=>{
-    if(ok)return; ok=true; clearTimeout(tid);
-    window.jsonpgz=prev;
-    s.parentNode&&s.parentNode.removeChild(s);
-    r(val); _drain();
-  };
-  window.jsonpgz=d=>{
-    fin({
-      navEst: parseFloat(d.gsz)||null,   // 盘中估算净值
-      nav:    parseFloat(d.dwjz)||null,  // T-1官方净值
-      navPct: parseFloat(d.gszzl)||null, // 估算涨跌%
-      navDate:d.jzrq||'--',
-    });
-  };
+  const fin=val=>{if(ok)return;ok=true;clearTimeout(tid);window.jsonpgz=prev;s.parentNode&&s.parentNode.removeChild(s);r(val);_drain()};
+  window.jsonpgz=d=>fin({navEst:parseFloat(d.gsz)||null,nav:parseFloat(d.dwjz)||null,navPct:parseFloat(d.gszzl)||null,navDate:d.jzrq||'--'});
   s.onerror=()=>fin(null);
   const tid=setTimeout(()=>fin(null),6000);
   s.src=`https://fundgz.1234567.com.cn/js/${code}.js?rt=${Date.now()}`;
   document.head.appendChild(s);
 }
 
-/* ═══════════════════════════════════════════════════════
-   腾讯行情（script注入读全局变量）
-   3=现价 4=昨收 37=成交额(万元)
-═══════════════════════════════════════════════════════ */
+/* =============================================================
+   腾讯行情 script注入
+   p[3]=现价 p[4]=昨收 p[37]=成交额(万元)
+============================================================= */
 function fetchQt(funds){
   return new Promise(r=>{
     const syms=funds.map(f=>exch(f[0])+f[0]).join(',');
-    const s=document.createElement('script');
-    let ok=false;
+    const s=document.createElement('script');let ok=false;
     const fin=()=>{
-      if(ok)return; ok=true; clearTimeout(tid);
-      s.parentNode&&s.parentNode.removeChild(s);
+      if(ok)return;ok=true;clearTimeout(tid);s.parentNode&&s.parentNode.removeChild(s);
       const out={};
       funds.forEach(f=>{
-        const key='v_'+exch(f[0])+f[0];
-        const raw=window[key]; if(!raw){delete window[key];return}
-        delete window[key];
-        const p=raw.split('~');
-        if(p.length<38)return;
+        const key='v_'+exch(f[0])+f[0];const raw=window[key];
+        if(!raw){delete window[key];return}delete window[key];
+        const p=raw.split('~');if(p.length<38)return;
         const price=parseFloat(p[3]),prev=parseFloat(p[4]),amt=parseFloat(p[37])||0;
         if(!price||!prev)return;
-        out[f[0]]={price,pct:((price-prev)/prev*100),amount:amt};
+        out[f[0]]={price,pct:(price-prev)/prev*100,amount:amt};
       });
       r(out);
     };
-    s.onload=fin; s.onerror=fin;
-    const tid=setTimeout(fin,8000);
-    s.src=`https://qt.gtimg.cn/q=${syms}&r=${Date.now()}`;
-    document.head.appendChild(s);
+    s.onload=fin;s.onerror=fin;const tid=setTimeout(fin,8000);
+    s.src=`https://qt.gtimg.cn/q=${syms}&r=${Date.now()}`;document.head.appendChild(s);
   });
 }
-
 function fetchIdx(){
   return new Promise(r=>{
-    const s=document.createElement('script');
-    let ok=false;
+    const s=document.createElement('script');let ok=false;
     const fin=()=>{
-      if(ok)return; ok=true; clearTimeout(tid);
-      s.parentNode&&s.parentNode.removeChild(s);
-      const prs=key=>{
-        const raw=window[key]; if(!raw){delete window[key];return null}
-        delete window[key];
-        const p=raw.split('~');
-        const c=parseFloat(p[3]),v=parseFloat(p[4]);
-        return(c&&v)?((c-v)/v*100):null;
-      };
+      if(ok)return;ok=true;clearTimeout(tid);s.parentNode&&s.parentNode.removeChild(s);
+      const prs=key=>{const raw=window[key];if(!raw){delete window[key];return null}delete window[key];const p=raw.split('~');const c=parseFloat(p[3]),v=parseFloat(p[4]);return(c&&v)?(c-v)/v*100:null};
       r({ndx:prs('v_us_ndx'),spx:prs('v_us_spx')});
     };
-    s.onload=fin; s.onerror=()=>r({ndx:null,spx:null});
-    const tid=setTimeout(()=>r({ndx:null,spx:null}),8000);
-    s.src=`https://qt.gtimg.cn/q=us_ndx,us_spx&r=${Date.now()}`;
-    document.head.appendChild(s);
+    s.onload=fin;s.onerror=()=>r({ndx:null,spx:null});const tid=setTimeout(()=>r({ndx:null,spx:null}),8000);
+    s.src=`https://qt.gtimg.cn/q=us_ndx,us_spx&r=${Date.now()}`;document.head.appendChild(s);
   });
 }
-
 function fetchUSD(){
   return new Promise(r=>{
-    const s=document.createElement('script');
-    let ok=false;
-    const fin=()=>{
-      if(ok)return; ok=true; clearTimeout(tid);
-      s.parentNode&&s.parentNode.removeChild(s);
-      const raw=window['v_usdcnyboc'];
-      if(raw){delete window['v_usdcnyboc'];const p=raw.split('~');r(parseFloat(p[3])||null);}
-      else r(null);
-    };
-    s.onload=fin; s.onerror=()=>r(null);
-    const tid=setTimeout(()=>r(null),6000);
-    s.src=`https://qt.gtimg.cn/q=usdcnyboc&r=${Date.now()}`;
-    document.head.appendChild(s);
+    const s=document.createElement('script');let ok=false;
+    const fin=()=>{if(ok)return;ok=true;clearTimeout(tid);s.parentNode&&s.parentNode.removeChild(s);const raw=window['v_usdcnyboc'];if(raw){delete window['v_usdcnyboc'];r(parseFloat(raw.split('~')[3])||null)}else r(null)};
+    s.onload=fin;s.onerror=()=>r(null);const tid=setTimeout(()=>r(null),6000);
+    s.src=`https://qt.gtimg.cn/q=usdcnyboc&r=${Date.now()}`;document.head.appendChild(s);
   });
 }
 
-/* ═══════════════════════════════════════════════════════
-   主刷新流程
-═══════════════════════════════════════════════════════ */
+/* =============================================================
+   主刷新
+============================================================= */
 async function fetchAll(){
-  if(busy)return; busy=true;
-  setSt('busy','加载中…'); prog(5);
-
-  const [qt,idx,usd]=await Promise.all([fetchQt(ALL),fetchIdx(),fetchUSD()]);
+  if(busy)return;busy=true;setSt('busy','加载中…');prog(5);
+  const[qt,idx,usd]=await Promise.all([fetchQt(ALL),fetchIdx(),fetchUSD()]);
   prog(25);
-
   const ri=v=>v==null?'--':(+v>=0?`<span class="pos">+${n2(v)}%</span>`:`<span class="neg">${n2(v)}%</span>`);
   document.getElementById('ci-n').innerHTML=ri(idx.ndx);
   document.getElementById('ci-s').innerHTML=ri(idx.spx);
   document.getElementById('ci-u').textContent=usd?n4(usd):'--';
-
-  const total=ALL.length; let done=0;
-  const navPs=ALL.map(f=>navQ(f[0]).then(d=>{
-    done++; setSt('busy',`加载 ${done}/${total}`);
-    prog(25+Math.round(done/total*70)); return{code:f[0],d};
-  }));
+  const total=ALL.length;let done=0;
+  const navPs=ALL.map(f=>navQ(f[0]).then(d=>{done++;setSt('busy',`加载 ${done}/${total}`);prog(25+Math.round(done/total*70));return{code:f[0],d}}));
   const navList=await Promise.all(navPs);
   prog(95);
-
   ALL.forEach(f=>{
-    const code=f[0], t=DB.ndx.includes(f)?'ndx':'spx';
-    if(!D[t][code])D[t][code]={};
-    const dd=D[t][code];
-    const q=qt[code]; if(q){dd.price=q.price;dd.pct=q.pct;dd.amount=q.amount}
+    const code=f[0],t=DB.ndx.includes(f)?'ndx':'spx';
+    if(!D[t][code])D[t][code]={};const dd=D[t][code];
+    const q=qt[code];if(q){dd.price=q.price;dd.pct=q.pct;dd.amount=q.amount}
     const nr=navList.find(x=>x.code===code)?.d;
     if(nr){
-      dd.navEst=nr.navEst; dd.nav=nr.nav;
-      dd.navPct=nr.navPct; dd.navDate=nr.navDate;
-      // 实时溢价：现价 / 盘中估值 - 1
-      if(dd.price&&nr.navEst&&nr.navEst!==0) dd.realPrem=(dd.price/nr.navEst-1)*100;
-      // 最新溢价：现价 / T-1净值 - 1  ★核心字段
-      if(dd.price&&nr.nav&&nr.nav!==0)       dd.latPrem=(dd.price/nr.nav-1)*100;
+      dd.navEst=nr.navEst;dd.nav=nr.nav;dd.navPct=nr.navPct;dd.navDate=nr.navDate;
+      if(dd.price&&nr.navEst&&nr.navEst!==0)dd.realPrem=(dd.price/nr.navEst-1)*100;
+      if(dd.price&&nr.nav&&nr.nav!==0)      dd.latPrem=(dd.price/nr.nav-1)*100;
     }
   });
-
-  prog(100); draw('ndx'); draw('spx');
+  prog(100);draw('ndx');draw('spx');
   document.getElementById('ci-ts').textContent=new Date().toLocaleTimeString('zh-CN',{hour12:false});
   const has=Object.values(D.ndx).some(d=>d.price!=null)||Object.values(D.spx).some(d=>d.price!=null);
-  setSt(has?'ok':'err',has?'数据已更新':'获取失败，请检查网络');
-  setTimeout(()=>prog(0),500);
-  busy=false;
+  setSt(has?'ok':'err',has?'数据已更新':'获取失败');setTimeout(()=>prog(0),500);busy=false;
 }
 function doRefresh(){if(!busy)fetchAll()}
 
-/* ═══════════════════════════════════════════════════════
-   历史溢价 - 在新标签页打开
-   把数据存入 sessionStorage，新标签读取并渲染
-═══════════════════════════════════════════════════════ */
+/* =============================================================
+   历史溢价 - 新标签页
+   数据来源：
+   ① 历史净值：东方财富 open API（JSON，无需 Referer）
+      https://api.fund.eastmoney.com/f10/lsjz?callback=...&fundCode=...&page=1&pageSize=100&startDate=...&endDate=...&_=...
+   ② 历史收盘：腾讯 k线 JSON 接口（直接 fetch，支持 CORS）
+      https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_dayqfq&param={prefix}{code},day,{start},,60,qfq&r=...
+============================================================= */
 async function openHist(code,name){
-  // 先并发获取历史净值 + 历史收盘
+  // 打开新标签，先显示加载中
   const win=window.open('','_blank');
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <title>${name}(${code}) 历史溢价率</title>
-    <style>
-      *{box-sizing:border-box;margin:0;padding:0}
-      :root{--blue:#2563eb;--blt:#eff6ff;--red:#dc2626;--grn:#16a34a;
-            --border:#e4e7ed;--muted:#6b7280;--dim:#9ca3af;
-            --phi-bg:#fef2f2;--phi-fg:#dc2626;
-            --pmd-bg:#fffbeb;--pmd-fg:#92400e;
-            --plo-bg:#f0fdf4;--plo-fg:#15803d;
-            --mono:'Consolas','Menlo','Courier New',monospace;
-            --sans:'Microsoft YaHei','PingFang SC',Arial,sans-serif}
-      body{font-family:var(--sans);background:#f8f9fb;color:#1d2129;font-size:13px;padding:20px}
-      .hd{background:#fff;border:1px solid var(--border);border-radius:10px;
-          padding:16px 20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
-      .title{font-size:16px;font-weight:700;margin-bottom:4px}
-      .sub{font-size:11px;color:var(--muted)}
-      .loading{text-align:center;padding:60px;color:var(--muted);font-size:14px}
-      /* chart */
-      .cw{background:#fff;border:1px solid var(--border);border-radius:10px;
-          padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
-      .cw h3{font-size:13px;font-weight:600;margin-bottom:12px;color:#374151}
-      canvas{display:block;width:100%!important}
-      .cleg{display:flex;gap:16px;font-size:11px;color:var(--muted);margin-bottom:10px;flex-wrap:wrap}
-      .cleg span{display:flex;align-items:center;gap:5px}
-      .cleg i{display:inline-block;width:24px;height:2px;border-radius:1px}
-      /* table */
-      .tw{background:#fff;border:1px solid var(--border);border-radius:10px;
-          overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);overflow-x:auto}
-      table{width:100%;border-collapse:collapse;min-width:560px}
-      thead th{background:#f8f9fb;color:var(--muted);font-size:11px;font-weight:700;
-               padding:9px 12px;text-align:right;border-bottom:1px solid var(--border);
-               white-space:nowrap;font-family:var(--sans)}
-      thead th:first-child{text-align:left}
-      tbody tr{border-bottom:1px solid #f0f2f5}
-      tbody tr:hover{background:#f7f9fc}
-      tbody tr:last-child{border-bottom:none}
-      tbody td{padding:7px 12px;text-align:right;font-family:var(--mono);font-size:12px;white-space:nowrap}
-      tbody td:first-child{text-align:left;font-family:var(--sans);color:var(--muted);font-size:11px}
-      .pos{color:var(--red)}.neg{color:var(--grn)}.neu{color:var(--muted)}
-      .phi{background:var(--phi-bg);color:var(--phi-fg);font-weight:700}
-      .pmd{background:var(--pmd-bg);color:var(--pmd-fg);font-weight:700}
-      .pno{color:var(--muted)}
-      .plo{background:var(--plo-bg);color:var(--plo-fg);font-weight:700}
-      .note{margin-top:12px;font-size:10px;color:var(--dim);line-height:1.8}
-      .stat-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
-      .stat{background:#fff;border:1px solid var(--border);border-radius:8px;
-            padding:10px 16px;flex:1;min-width:120px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
-      .stat .sl{font-size:10px;color:var(--muted)}
-      .stat .sv{font-family:var(--mono);font-size:14px;font-weight:700;margin-top:3px}
-    </style>
-  </head><body>
-    <div class="hd">
-      <div class="title">${name}（${code}）近3月历史溢价率</div>
-      <div class="sub">T-1日溢价率 = 当日收盘价 ÷ 前一交易日官方净值 − 1 &nbsp;|&nbsp; 数据来源：东方财富 · 腾讯财经</div>
-    </div>
-    <div class="loading" id="ld">⏳ 正在加载历史数据，请稍候...</div>
-    <div id="content" style="display:none">
-      <div class="stat-row" id="stats"></div>
-      <div class="cw">
-        <h3>📈 近3月 T-1溢价率走势</h3>
-        <div class="cleg">
-          <span><i style="background:#2563eb"></i>T-1溢价率%</span>
-          <span><i style="background:#dc2626;border-top:2px dashed #dc2626;height:0"></i> 3%线</span>
-          <span><i style="background:#d97706;border-top:2px dashed #d97706;height:0"></i> 1%线</span>
-          <span><i style="background:#16a34a;border-top:2px dashed #16a34a;height:0"></i> -1%线</span>
-        </div>
-        <canvas id="cv" height="220"></canvas>
-      </div>
-      <div class="tw">
-        <table>
-          <thead><tr>
-            <th style="text-align:left">日期</th>
-            <th>收盘价</th>
-            <th>T-1净值</th>
-            <th>T-1溢价率%</th>
-            <th>净值涨跌%</th>
-          </tr></thead>
-          <tbody id="htb"></tbody>
-        </table>
-      </div>
-      <div class="note">
-        ⚠ T-1溢价率：用当日收盘价除以前一交易日官方净值。历史净值来自东方财富，历史收盘价来自腾讯财经日K接口。
-        数据仅供参考，不构成投资建议。
-      </div>
-    </div>
-  </body></html>`);
-  win.document.close();
+  if(!win){alert('请允许弹出窗口');return}
+
+  const H=buildHistHTML(code,name);
+  win.document.open();win.document.write(H);win.document.close();
 
   try{
-    const [navMap,priceMap]=await Promise.all([
-      fetchHistNav(code),
-      fetchHistPrice(code),
+    const[navMap,priceMap]=await Promise.all([
+      fetchHistNavJson(code),
+      fetchHistPriceJson(code),
     ]);
 
     const navDates=Object.keys(navMap).sort();
     const priceDates=Object.keys(priceMap).sort();
 
-    // 近3个月
-    const cut=new Date(); cut.setMonth(cut.getMonth()-3);
+    // 只取近3个月
+    const cut=new Date();cut.setMonth(cut.getMonth()-3);
     const cutStr=cut.toISOString().slice(0,10);
 
     const rows=[];
     priceDates.filter(d=>d>=cutStr).forEach(date=>{
       const price=priceMap[date];
-      const idx=navDates.indexOf(date);
-      const prevDate=idx>0?navDates[idx-1]:navDates.find(nd=>nd<date&&nd<date);
-      // 找前一个净值日期
-      let pDate=null;
-      for(let i=navDates.length-1;i>=0;i--){
-        if(navDates[i]<date){pDate=navDates[i];break}
-      }
-      const nav=pDate?navMap[pDate]:null;
+      // T-1净值：找price日期之前最近的净值日期
+      let prevNavDate=null;
+      for(let i=navDates.length-1;i>=0;i--){if(navDates[i]<date){prevNavDate=navDates[i];break}}
+      const nav=prevNavDate?navMap[prevNavDate]:null;
+      // 当日净值（用于计算日涨跌）
       const navToday=navMap[date]||null;
-      // 净值日涨跌：当日净值/前一日净值-1
       let navChg=null;
-      if(navToday&&pDate&&navMap[pDate])
-        navChg=(navToday/navMap[pDate]-1)*100;
+      if(navToday&&prevNavDate&&navMap[prevNavDate])navChg=(navToday/navMap[prevNavDate]-1)*100;
       const prem=(price&&nav&&nav!==0)?((price/nav-1)*100):null;
       rows.push({date,price,nav,prem,navChg});
     });
-    rows.reverse(); // 新→旧
+    rows.reverse();// 新→旧
 
-    // 统计
     const prems=rows.filter(r=>r.prem!=null).map(r=>r.prem);
     const avg=prems.length?prems.reduce((a,b)=>a+b,0)/prems.length:null;
     const mx=prems.length?Math.max(...prems):null;
     const mn=prems.length?Math.min(...prems):null;
     const cur=rows[0]?.prem??null;
 
-    const pclsW=v=>{
-      if(v==null||isNaN(+v))return'pno';
-      if(+v>3)return'phi'; if(+v>=1)return'pmd';
-      if(+v<-1)return'plo'; return'pno';
-    };
-    const fpW=v=>{if(v==null||isNaN(+v))return'--';return(v>=0?'+':'')+v.toFixed(2)+'%'};
-    const n4W=v=>v==null||isNaN(+v)?'--':(+v).toFixed(4);
-    const clrW=v=>v==null||isNaN(+v)?'neu':+v>0?'pos':+v<0?'neg':'neu';
+    // 填充统计卡片
+    const fp2=v=>{if(v==null||isNaN(+v))return'--';return(v>=0?'+':'')+v.toFixed(2)+'%'};
+    const n4w=v=>v==null||isNaN(+v)?'--':(+v).toFixed(4);
+    const pc=v=>{if(v==null||isNaN(+v))return'pno';if(+v>3)return'phi';if(+v>=1)return'pmd';if(+v<-1)return'plo';return'pno'};
+    const cr=v=>v==null||isNaN(+v)?'neu':+v>0?'pos':+v<0?'neg':'neu';
 
-    // 写入统计卡片
     const stats=win.document.getElementById('stats');
-    stats.innerHTML=`
-      <div class="stat"><div class="sl">当前溢价率</div><div class="sv ${pclsW(cur)}">${fpW(cur)}</div></div>
-      <div class="stat"><div class="sl">3月平均溢价</div><div class="sv ${pclsW(avg)}">${fpW(avg)}</div></div>
-      <div class="stat"><div class="sl">3月最高溢价</div><div class="sv ${pclsW(mx)}">${fpW(mx)}</div></div>
-      <div class="stat"><div class="sl">3月最低溢价</div><div class="sv ${pclsW(mn)}">${fpW(mn)}</div></div>
-      <div class="stat"><div class="sl">数据天数</div><div class="sv">${prems.length}天</div></div>
-    `;
+    if(stats)stats.innerHTML=`
+      <div class="stat"><div class="sl">当前最新溢价</div><div class="sv ${pc(cur)}">${fp2(cur)}</div></div>
+      <div class="stat"><div class="sl">3月平均溢价</div><div class="sv ${pc(avg)}">${fp2(avg)}</div></div>
+      <div class="stat"><div class="sl">3月最高溢价</div><div class="sv ${pc(mx)}">${fp2(mx)}</div></div>
+      <div class="stat"><div class="sl">3月最低溢价</div><div class="sv ${pc(mn)}">${fp2(mn)}</div></div>
+      <div class="stat"><div class="sl">有效数据天数</div><div class="sv">${prems.length}天</div></div>`;
 
-    // 写入表格
     const htb=win.document.getElementById('htb');
-    htb.innerHTML='';
-    rows.forEach(r=>{
-      const tr=win.document.createElement('tr');
-      tr.innerHTML=`
-        <td>${r.date}</td>
-        <td>${n4W(r.price)}</td>
-        <td>${n4W(r.nav)}</td>
-        <td class="${pclsW(r.prem)}" style="font-weight:${r.prem!=null&&Math.abs(r.prem)>1?'700':'400'}">${fpW(r.prem)}</td>
-        <td class="${clrW(r.navChg)}">${fpW(r.navChg)}</td>`;
-      htb.appendChild(tr);
-    });
+    if(htb){htb.innerHTML='';rows.forEach(r=>{const tr=win.document.createElement('tr');tr.innerHTML=`<td>${r.date}</td><td>${n4w(r.price)}</td><td>${n4w(r.nav)}</td><td class="${pc(r.prem)}">${fp2(r.prem)}</td><td class="${cr(r.navChg)}">${fp2(r.navChg)}</td>`;htb.appendChild(tr)})}
 
-    // 绘图
-    drawHistChart(win, rows.slice().reverse());
+    // 画图
+    drawChart(win,rows.slice().reverse());
 
-    win.document.getElementById('ld').style.display='none';
-    win.document.getElementById('content').style.display='block';
+    const ld=win.document.getElementById('ld');if(ld)ld.style.display='none';
+    const ct=win.document.getElementById('content');if(ct)ct.style.display='block';
+
+    if(!prems.length){const ld=win.document.getElementById('ld');if(ld){ld.style.display='block';ld.textContent='暂无溢价数据（净值与收盘日期无法匹配）'}}
 
   }catch(e){
-    win.document.getElementById('ld').textContent='加载失败：'+e.message;
+    const ld=win.document.getElementById('ld');
+    if(ld){ld.style.display='block';ld.textContent='加载失败：'+e.message}
+    console.error(e);
   }
 }
 
-/* 绘制历史溢价折线图 */
-function drawHistChart(win,rows){
-  const cv=win.document.getElementById('cv');
-  const W=cv.parentElement.clientWidth||700;
-  cv.width=W; cv.height=220;
-  const ctx=cv.getContext('2d');
-  const H=220;
-  const PAD={t:14,r:20,b:30,l:50};
-  const dw=W-PAD.l-PAD.r, dh=H-PAD.t-PAD.b;
-
-  const pts=rows.filter(r=>r.prem!=null);
-  if(!pts.length)return;
-
-  const vals=pts.map(r=>r.prem);
-  let lo=Math.min(...vals,-2), hi=Math.max(...vals,4);
-  const pad=(hi-lo)*0.12; lo-=pad; hi+=pad;
-  const ys=v=>PAD.t+dh*(1-(v-lo)/(hi-lo));
-  const xs=i=>PAD.l+i*(dw/(pts.length-1||1));
-
-  ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
-
-  // 参考线
-  [{v:3,c:'#fca5a5',l:'3%'},{v:1,c:'#fcd34d',l:'1%'},{v:0,c:'#d1d5db',l:'0%'},{v:-1,c:'#86efac',l:'-1%'}].forEach(h=>{
-    if(h.v<lo||h.v>hi)return;
-    const y=ys(h.v);
-    ctx.beginPath(); ctx.strokeStyle=h.c; ctx.lineWidth=1;
-    ctx.setLineDash(h.v===0?[]:[4,3]);
-    ctx.moveTo(PAD.l,y); ctx.lineTo(W-PAD.r,y); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle=h.v===3?'#dc2626':h.v===1?'#92400e':h.v===-1?'#15803d':'#9ca3af';
-    ctx.font='10px Consolas,monospace'; ctx.textAlign='right';
-    ctx.fillText(h.l,PAD.l-4,y+3);
-  });
-
-  // 填充
-  ctx.beginPath();
-  pts.forEach((p,i)=>i===0?ctx.moveTo(xs(i),ys(p.prem)):ctx.lineTo(xs(i),ys(p.prem)));
-  ctx.lineTo(xs(pts.length-1),H-PAD.b);
-  ctx.lineTo(PAD.l,H-PAD.b);
-  ctx.closePath();
-  ctx.fillStyle='rgba(37,99,235,0.07)'; ctx.fill();
-
-  // 折线
-  ctx.beginPath();
-  pts.forEach((p,i)=>i===0?ctx.moveTo(xs(i),ys(p.prem)):ctx.lineTo(xs(i),ys(p.prem)));
-  ctx.strokeStyle='#2563eb'; ctx.lineWidth=2; ctx.setLineDash([]);
-  ctx.stroke();
-
-  // 数据点
-  pts.forEach((p,i)=>{
-    const x=xs(i),y=ys(p.prem);
-    const c=p.prem>3?'#dc2626':p.prem>1?'#d97706':p.prem<-1?'#16a34a':'#2563eb';
-    ctx.beginPath(); ctx.arc(x,y,2.5,0,Math.PI*2);
-    ctx.fillStyle=c; ctx.fill();
-  });
-
-  // X轴日期
-  ctx.fillStyle='#9ca3af'; ctx.font='9px Arial'; ctx.textAlign='center';
-  const step=Math.max(1,Math.floor(pts.length/7));
-  pts.forEach((p,i)=>{
-    if(i%step!==0&&i!==pts.length-1)return;
-    ctx.fillText(p.date.slice(5),xs(i),H-8);
-  });
-}
-
-/* ── 历史净值（东方财富 F10DataApi，支持CORS） ── */
-async function fetchHistNav(code){
+/* ── 历史净值：东方财富 open API（JSON格式，CORS友好）── */
+async function fetchHistNavJson(code){
   const ed=new Date().toISOString().slice(0,10);
-  const sd=new Date(); sd.setMonth(sd.getMonth()-4);
+  const sd=new Date();sd.setMonth(sd.getMonth()-4);
   const sdate=sd.toISOString().slice(0,10);
-  const url=`https://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&code=${code}&page=1&sdate=${sdate}&edate=${ed}&per=120`;
-  const res=await fetch(url);
+  // 东方财富移动端接口，返回标准JSON，无需特殊头
+  const url=`https://api.fund.eastmoney.com/f10/lsjz?callback=cb&fundCode=${code}&page=1&pageSize=120&startDate=${sdate}&endDate=${ed}&_=${Date.now()}`;
+  const res=await fetch(url,{headers:{Referer:'https://fund.eastmoney.com/'}});
   const text=await res.text();
-  const m=text.match(/content:"([\s\S]*?)",records:/);
-  if(!m)throw new Error('净值数据解析失败');
-  const html=m[1].replace(/\\x([0-9A-Fa-f]{2})/g,(_,h)=>String.fromCharCode(parseInt(h,16)))
-                  .replace(/\\u([0-9A-Fa-f]{4})/g,(_,h)=>String.fromCharCode(parseInt(h,16)))
-                  .replace(/\\/g,'');
-  const doc=new DOMParser().parseFromString(html,'text/html');
+  // 返回格式: cb({...}) 或 纯JSON
+  const jsonStr=text.startsWith('cb(')?text.slice(3,-1):text;
+  const json=JSON.parse(jsonStr);
   const map={};
-  doc.querySelectorAll('tbody tr').forEach(tr=>{
-    const tds=tr.querySelectorAll('td');
-    if(tds.length<2)return;
-    const date=tds[0].textContent.trim();
-    const nav=parseFloat(tds[1].textContent.trim());
-    if(date&&!isNaN(nav))map[date]=nav;
+  (json?.Data?.LSJZList||[]).forEach(item=>{
+    const date=item.FSRQ;// "2025-01-10"
+    const nav=parseFloat(item.DWJZ);
+    if(date&&!isNaN(nav)&&nav>0)map[date]=nav;
   });
+  if(!Object.keys(map).length)throw new Error(`净值接口返回0条数据 (code=${code})`);
   return map;
 }
 
-/* ── 历史收盘（腾讯日K，script注入） ── */
-function fetchHistPrice(code){
-  return new Promise((res,rej)=>{
-    const prefix=exch(code);
-    const varName=`hushen_latest_daily_${prefix}${code}`;
-    const s=document.createElement('script');
-    let ok=false;
-    const fin=()=>{
-      if(ok)return; ok=true; clearTimeout(tid);
-      s.parentNode&&s.parentNode.removeChild(s);
-      const raw=window[varName];
-      if(!raw){delete window[varName];rej(new Error('收盘价数据为空，该接口可能不支持此代码'));return}
-      delete window[varName];
-      const map={};
-      raw.split('\n').forEach(line=>{
-        line=line.trim();
-        if(!line||line.startsWith('//'))return;
-        const parts=line.split(' ');
-        if(parts.length<5)return;
-        const ymd=parts[0];
-        if(ymd.length!==6)return;
-        const date=`20${ymd.slice(0,2)}-${ymd.slice(2,4)}-${ymd.slice(4,6)}`;
-        const close=parseFloat(parts[4]);
-        if(!isNaN(close)&&close>0)map[date]=close;
-      });
-      if(!Object.keys(map).length)rej(new Error('解析到0条收盘记录'));
-      else res(map);
-    };
-    s.onload=fin;
-    s.onerror=()=>rej(new Error('收盘价JS文件加载失败，网络或接口问题'));
-    const tid=setTimeout(()=>rej(new Error('收盘价接口超时')),12000);
-    s.src=`https://data.gtimg.cn/flashdata/hushen/latest/daily/${prefix}${code}.js?r=${Date.now()}`;
-    document.head.appendChild(s);
+/* ── 历史收盘：腾讯 ifzq k线接口（JSON格式，CORS友好）── */
+async function fetchHistPriceJson(code){
+  const prefix=exch(code);
+  const sd=new Date();sd.setMonth(sd.getMonth()-4);
+  const sdate=sd.toISOString().slice(0,10).replace(/-/g,'');
+  // 腾讯 ifzq 接口：返回后复权日K线 JSON
+  const url=`https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?_var=kline_dayqfq&param=${prefix}${code},day,${sdate},,120,qfq&r=${Date.now()}`;
+  const res=await fetch(url);
+  const text=await res.text();
+  // 格式: var kline_dayqfq={...}  或直接JSON
+  const jsonStr=text.includes('=')?text.slice(text.indexOf('=')+1).trim():text;
+  const json=JSON.parse(jsonStr);
+  // 数据路径: json.data["{prefix}{code}"].day 或 .qfqday
+  const sym=prefix+code;
+  const kdata=json?.data?.[sym]?.qfqday||json?.data?.[sym]?.day||[];
+  const map={};
+  kdata.forEach(item=>{
+    // item = ["2025-01-10", open, close, high, low, vol, ...]  注意腾讯顺序
+    // 实际字段: [日期, 开盘, 收盘, 最高, 最低, 成交量, 成交额, ...]
+    if(!Array.isArray(item)||item.length<3)return;
+    const date=item[0];// "2025-01-10"
+    const close=parseFloat(item[2]);// 第3个字段是收盘价
+    if(date&&!isNaN(close)&&close>0)map[date]=close;
   });
+  if(!Object.keys(map).length)throw new Error(`收盘价接口返回0条数据 (code=${code})`);
+  return map;
 }
 
-/* ── 初始化 ── */
-window.addEventListener('DOMContentLoaded',()=>{
-  draw('ndx'); draw('spx'); fetchAll();
-});
+/* ── 绘图 ── */
+function drawChart(win,rows){
+  const cv=win.document.getElementById('cv');if(!cv)return;
+  const W=cv.parentElement.clientWidth||720;cv.width=W;cv.height=220;
+  const ctx=cv.getContext('2d'),H=220;
+  const PAD={t:14,r:20,b:32,l:52};
+  const dw=W-PAD.l-PAD.r,dh=H-PAD.t-PAD.b;
+  const pts=rows.filter(r=>r.prem!=null);if(!pts.length)return;
+  const vals=pts.map(r=>r.prem);
+  let lo=Math.min(...vals,-2),hi=Math.max(...vals,4);
+  const pad=(hi-lo)*0.12;lo-=pad;hi+=pad;
+  const ys=v=>PAD.t+dh*(1-(v-lo)/(hi-lo));
+  const xs=i=>PAD.l+i*(dw/(pts.length-1||1));
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
+  [{v:3,c:'#fca5a5',l:'3%',fg:'#dc2626'},{v:1,c:'#fde68a',l:'1%',fg:'#92400e'},{v:0,c:'#d1d5db',l:'0%',fg:'#9ca3af'},{v:-1,c:'#86efac',l:'-1%',fg:'#15803d'}].forEach(h=>{
+    if(h.v<lo||h.v>hi)return;const y=ys(h.v);
+    ctx.beginPath();ctx.strokeStyle=h.c;ctx.lineWidth=1;ctx.setLineDash(h.v===0?[]:[4,3]);
+    ctx.moveTo(PAD.l,y);ctx.lineTo(W-PAD.r,y);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=h.fg;ctx.font='10px Consolas,monospace';ctx.textAlign='right';ctx.fillText(h.l,PAD.l-4,y+3);
+  });
+  ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(xs(i),ys(p.prem)):ctx.lineTo(xs(i),ys(p.prem)));
+  ctx.lineTo(xs(pts.length-1),H-PAD.b);ctx.lineTo(PAD.l,H-PAD.b);ctx.closePath();
+  ctx.fillStyle='rgba(37,99,235,0.07)';ctx.fill();
+  ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(xs(i),ys(p.prem)):ctx.lineTo(xs(i),ys(p.prem)));
+  ctx.strokeStyle='#2563eb';ctx.lineWidth=2;ctx.setLineDash([]);ctx.stroke();
+  pts.forEach((p,i)=>{const x=xs(i),y=ys(p.prem);const c=p.prem>3?'#dc2626':p.prem>1?'#d97706':p.prem<-1?'#16a34a':'#2563eb';ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fillStyle=c;ctx.fill()});
+  ctx.fillStyle='#9ca3af';ctx.font='9px Arial';ctx.textAlign='center';
+  const step=Math.max(1,Math.floor(pts.length/7));
+  pts.forEach((p,i)=>{if(i%step!==0&&i!==pts.length-1)return;ctx.fillText(p.date.slice(5),xs(i),H-8)});
+}
+
+/* ── 历史页 HTML 模板 ── */
+function buildHistHTML(code,name){
+  return`<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${name}(${code}) 历史溢价</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--phi-bg:#fef2f2;--phi-fg:#dc2626;--pmd-bg:#fffbeb;--pmd-fg:#92400e;--plo-bg:#f0fdf4;--plo-fg:#15803d;--bd:#e4e7ed;--mut:#6b7280;--dim:#9ca3af;--mono:'Consolas','Menlo','Courier New',monospace;--sans:'Microsoft YaHei','PingFang SC',Arial,sans-serif}
+body{font-family:var(--sans);background:#f8f9fb;color:#1d2129;font-size:13px;padding:20px;max-width:960px;margin:0 auto}
+.hd{background:#fff;border:1px solid var(--bd);border-radius:10px;padding:16px 20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.title{font-size:16px;font-weight:700;margin-bottom:3px}
+.sub{font-size:11px;color:var(--mut)}
+#ld{text-align:center;padding:60px;color:var(--mut);font-size:14px}
+.stat-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.stat{background:#fff;border:1px solid var(--bd);border-radius:8px;padding:10px 16px;flex:1;min-width:110px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.sl{font-size:10px;color:var(--mut)}.sv{font-family:var(--mono);font-size:14px;font-weight:700;margin-top:3px}
+.cw{background:#fff;border:1px solid var(--bd);border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.cw h3{font-size:13px;font-weight:600;margin-bottom:10px}
+canvas{display:block;width:100%!important}
+.tw{background:#fff;border:1px solid var(--bd);border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:480px}
+thead th{background:#f8f9fb;color:var(--mut);font-size:11px;font-weight:700;padding:9px 12px;text-align:right;border-bottom:1px solid var(--bd);white-space:nowrap}
+thead th:first-child{text-align:left}
+tbody tr{border-bottom:1px solid #f0f2f5}tbody tr:hover{background:#f7f9fc}tbody tr:last-child{border-bottom:none}
+tbody td{padding:7px 12px;text-align:right;font-family:var(--mono);font-size:12px}
+tbody td:first-child{text-align:left;font-family:var(--sans);color:var(--mut);font-size:11px}
+.pos{color:#dc2626}.neg{color:#16a34a}.neu{color:var(--mut)}
+.phi{background:var(--phi-bg);color:var(--phi-fg);font-weight:700}
+.pmd{background:var(--pmd-bg);color:var(--pmd-fg);font-weight:700}
+.pno{color:var(--mut)}.plo{background:var(--plo-bg);color:var(--plo-fg);font-weight:700}
+.note{margin-top:12px;font-size:10px;color:var(--dim);line-height:1.8}
+</style></head><body>
+<div class="hd">
+  <div class="title">${name}（${code}）近3月 T-1溢价率</div>
+  <div class="sub">T-1溢价率 = 当日收盘价 ÷ 前一交易日净值 − 1 &nbsp;|&nbsp; 数据：东方财富 · 腾讯财经</div>
+</div>
+<div id="ld">⏳ 正在加载历史数据，请稍候…</div>
+<div id="content" style="display:none">
+  <div class="stat-row" id="stats"></div>
+  <div class="cw"><h3>📈 近3月 T-1溢价率走势</h3><canvas id="cv" height="220"></canvas></div>
+  <div class="tw"><table>
+    <thead><tr><th style="text-align:left">日期</th><th>收盘价</th><th>T-1净值</th><th>T-1溢价率%</th><th>净值涨跌%</th></tr></thead>
+    <tbody id="htb"></tbody>
+  </table></div>
+  <div class="note">⚠ T-1溢价率用当日收盘价除以前一交易日官方净值计算。净值来自东方财富，收盘价来自腾讯财经。数据仅供参考，不构成投资建议。</div>
+</div>
+</body></html>`;
+}
+
+window.addEventListener('DOMContentLoaded',()=>{draw('ndx');draw('spx');fetchAll()});
 </script>
 </body>
 </html>
