@@ -1,0 +1,1170 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A股权益超级基金移动止盈监控</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --panel2: #f8fafc;
+      --card: #ffffff;
+      --muted: #64748b;
+      --text: #0f172a;
+      --line: #d8e1ee;
+      --red: #dc2626;
+      --green: #16a34a;
+      --yellow: #d97706;
+      --blue: #2563eb;
+      --purple: #7c3aed;
+      --white: #ffffff;
+      --shadow: 0 16px 38px rgba(15,23,42,.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(37,99,235,.10), transparent 34rem),
+        radial-gradient(circle at top right, rgba(124,58,237,.08), transparent 30rem),
+        linear-gradient(180deg, #f8fbff 0%, var(--bg) 55%, #eef3f9 100%);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.55;
+    }
+    header {
+      padding: 26px 26px 10px;
+      max-width: 1480px;
+      margin: 0 auto;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(22px, 3vw, 34px);
+      letter-spacing: .02em;
+      color: #0b1220;
+    }
+    .sub { color: var(--muted); font-size: 14px; }
+    .wrap { max-width: 1480px; margin: 0 auto; padding: 14px 26px 42px; }
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr .8fr auto auto auto;
+      gap: 10px;
+      align-items: end;
+      margin-bottom: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      padding: 10px;
+      background: rgba(255,255,255,.88);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(15,23,42,.08);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+    label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 4px; }
+    input, select, button {
+      width: 100%;
+      border: 1px solid rgba(100,116,139,.25);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #ffffff;
+      color: var(--text);
+      outline: none;
+    }
+    input:focus, select:focus { border-color: rgba(37,99,235,.55); box-shadow: 0 0 0 3px rgba(37,99,235,.10); }
+    button {
+      cursor: pointer;
+      font-weight: 650;
+      background: linear-gradient(135deg, #2563eb, #0891b2);
+      color: #fff;
+      border: 0;
+      white-space: nowrap;
+    }
+    button.secondary { background: #ffffff; color: #0f172a; border: 1px solid rgba(100,116,139,.30); }
+    button.danger { background: linear-gradient(135deg, #dc2626, #f97316); }
+    .grid { display: grid; gap: 14px; }
+    .cards { grid-template-columns: repeat(6, minmax(0, 1fr)); margin-bottom: 14px; }
+    .card {
+      background: linear-gradient(180deg, #ffffff, #f8fafc);
+      border: 1px solid rgba(15,23,42,.08);
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      min-height: 108px;
+    }
+    .card .k { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+    .card .v { font-size: clamp(18px, 2vw, 26px); font-weight: 800; letter-spacing: .01em; }
+    .card .s { margin-top: 6px; font-size: 12px; color: var(--muted); }
+    .positive { color: var(--red); }
+    .negative { color: var(--green); }
+    .neutral { color: var(--blue); }
+    .warn { color: var(--yellow); }
+    .section {
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(15,23,42,.08);
+      border-radius: 22px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+    }
+    .section h2 { margin: 0 0 12px; font-size: 18px; color: #0b1220; }
+    .two { display: grid; grid-template-columns: 1fr; gap: 18px; }
+    canvas {
+      width: 100%;
+      height: 520px;
+      background: #ffffff;
+      border: 1px solid rgba(15,23,42,.10);
+      border-radius: 18px;
+      display: block;
+      cursor: crosshair;
+    }
+    .smallcanvas { height: 420px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td {
+      padding: 9px 8px;
+      border-bottom: 1px solid rgba(15,23,42,.08);
+      text-align: right;
+      white-space: nowrap;
+    }
+    th {
+      color: #334155;
+      background: #eef4ff;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      font-size: 12px;
+      box-shadow: 0 1px 0 rgba(15,23,42,.08);
+    }
+    td:first-child, th:first-child, td:nth-child(2), th:nth-child(2) { text-align: left; }
+    tr:hover td { background: rgba(37,99,235,.05); }
+    .tablebox {
+      overflow: auto;
+      max-height: 620px;
+      border-radius: 16px;
+      border: 1px solid rgba(15,23,42,.08);
+      background: #fff;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(100,116,139,.12);
+      color: #475569;
+      font-size: 12px;
+    }
+    .badge.ok { background: rgba(22,163,74,.10); color: #15803d; }
+    .badge.bad { background: rgba(220,38,38,.10); color: #b91c1c; }
+    .badge.warn { background: rgba(217,119,6,.12); color: #b45309; }
+    .note { color: var(--muted); font-size: 13px; margin-top: 8px; }
+    .alert {
+      border-radius: 18px;
+      padding: 14px;
+      border: 1px solid rgba(217,119,6,.25);
+      background: rgba(217,119,6,.08);
+      margin-bottom: 14px;
+    }
+    .alert.critical { border-color: rgba(220,38,38,.30); background: rgba(220,38,38,.08); }
+    .alert.safe { border-color: rgba(22,163,74,.22); background: rgba(22,163,74,.08); }
+    .settings { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 10px; }
+    .progress { height: 10px; background: #e2e8f0; border-radius: 999px; overflow: hidden; border: 1px solid rgba(100,116,139,.14); margin-top: 10px; }
+    .bar { height: 100%; background: linear-gradient(90deg, #22c55e, #f59e0b, #ef4444); width: 0%; transition: width .4s ease; }
+    details { border: 1px solid rgba(15,23,42,.08); border-radius: 16px; padding: 12px; background: rgba(248,250,252,.78); }
+    summary { cursor: pointer; font-weight: 700; }
+    code { color: #075985; background: rgba(14,165,233,.10); padding: 1px 5px; border-radius: 5px; }
+    .chart-tooltip {
+      position: fixed;
+      pointer-events: none;
+      display: none;
+      z-index: 1000;
+      min-width: 190px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.98);
+      border: 1px solid rgba(15,23,42,.16);
+      box-shadow: 0 16px 36px rgba(15,23,42,.16);
+      color: #0f172a;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+    .chart-tooltip strong { font-size: 13px; }
+    .chart-tooltip .muted { color: #64748b; }
+    @media (max-width: 1120px) {
+      .toolbar { grid-template-columns: 1fr 1fr; }
+      .cards { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .settings { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      .wrap, header { padding-left: 12px; padding-right: 12px; }
+      .toolbar, .settings { grid-template-columns: 1fr; }
+      .cards { grid-template-columns: 1fr; }
+      canvas { height: 320px; }
+      .smallcanvas { height: 300px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>A股权益「超级基金」移动止盈监控</h1>
+    <div class="sub">
+      14 只基金按当前份额合并为一个账户；页面只做净值监控、盈亏测算和止盈触发提醒，不自动交易。
+      <span class="badge" id="generatedBadge">配置生成：2026-05-08 20:21:59｜14只基金版</span>
+    </div>
+  </header>
+
+  <div id="chartTooltip" class="chart-tooltip"></div>
+
+  <main class="wrap">
+    <div class="toolbar">
+      <div>
+        <label>数据模式</label>
+        <select id="modeSelect">
+          <option value="official">确认净值优先：使用最新披露单位净值</option>
+          <option value="estimate">估算优先：盘中用天天基金估算净值</option>
+        </select>
+      </div>
+      <div>
+        <label>止盈方案</label>
+        <select id="strategySelect">
+          <option value="balanced">均衡：8% / 12% / 16%</option>
+          <option value="conservative">保守：4% 全部退出</option>
+          <option value="aggressive">激进：20% / 25% / 30% / 35%</option>
+        </select>
+      </div>
+      <div>
+        <label>手动最高市值，留空则自动历史高点</label>
+        <input id="manualPeakInput" placeholder="例如 3614668.34" inputmode="decimal" />
+      </div>
+      <button id="refreshBtn">刷新净值</button>
+      <button class="secondary" id="setPeakBtn">当前设为新高</button>
+      <button class="secondary" id="exportBtn">导出 CSV</button>
+    </div>
+
+    <div id="statusAlert" class="alert safe">正在读取公开净值接口……</div>
+
+    <section class="grid cards">
+      <div class="card">
+        <div class="k">当前总市值</div>
+        <div class="v" id="totalValue">--</div>
+        <div class="s" id="totalDate">--</div>
+      </div>
+      <div class="card">
+        <div class="k">今日盈亏</div>
+        <div class="v" id="dayPnl">--</div>
+        <div class="s" id="dayPct">--</div>
+      </div>
+      <div class="card">
+        <div class="k">持有盈亏</div>
+        <div class="v" id="holdPnl">--</div>
+        <div class="s" id="holdPct">--</div>
+      </div>
+      <div class="card">
+        <div class="k">历史 / 手动高点</div>
+        <div class="v" id="peakValue">--</div>
+        <div class="s" id="peakSource">--</div>
+      </div>
+      <div class="card">
+        <div class="k">距高点回撤</div>
+        <div class="v" id="drawdownNow">--</div>
+        <div class="s" id="nextLine">--</div>
+        <div class="progress"><div class="bar" id="ddBar"></div></div>
+      </div>
+      <div class="card">
+        <div class="k">建议动作</div>
+        <div class="v" id="actionText">--</div>
+        <div class="s" id="actionDetail">--</div>
+      </div>
+    </section>
+
+    <section class="section two">
+      <div>
+        <h2>超级基金总市值 / 止盈线</h2>
+        <canvas id="valueChart"></canvas>
+        <div class="note">组合历史曲线按当前份额 × 各基金历史单位净值重建；如果某只基金上市/成立较晚，曲线从 14 只基金都有有效净值后开始。</div>
+      </div>
+      <div>
+        <h2>回撤曲线</h2>
+        <canvas id="drawdownChart" class="smallcanvas"></canvas>
+        <div class="note">红线越深代表越接近或跌破当前方案的止盈触发线。</div>
+        <div id="stopPlanBox" style="margin-top:12px;"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>14 只基金持仓明细</h2>
+      <div class="tablebox">
+        <table id="fundTable">
+          <thead>
+            <tr>
+              <th>代码</th>
+              <th>名称</th>
+              <th>份额</th>
+              <th>最新净值</th>
+              <th>净值日期/时间</th>
+              <th>日涨跌</th>
+              <th>今日盈亏</th>
+              <th>当前市值</th>
+              <th>持有成本</th>
+              <th>持有盈亏</th>
+              <th>持有收益率</th>
+              <th>权重</th>
+              <th>接口状态</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="note">
+        红色代表盈利或上涨，绿色代表亏损或下跌。A 股基金一般在交易日 16:00–23:00 陆续披露正式净值；盘中估算仅适合做监控，不适合作为最终成交依据。
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>接口自检与部署说明</h2>
+      <details open>
+        <summary>这个页面如何获取净值？</summary>
+        <p>
+          页面优先通过 <code>https://fund.eastmoney.com/pingzhongdata/{基金代码}.js</code> 读取历史单位净值；
+          盘中估算模式会再尝试通过 <code>https://fundgz.1234567.com.cn/js/{基金代码}.js</code> 读取估算净值。
+          因为是 GitHub Pages 静态网页，无法放后端代理，所以这里采用 JSONP / script 标签方式规避浏览器 CORS 限制。
+        </p>
+        <p>
+          如果某个接口被浏览器、网络或对方站点策略拦截，该基金会自动退回到本文件内置的基准净值与市值，并在“接口状态”列标记。
+        </p>
+      </details>
+      <details>
+        <summary>上传 GitHub Pages 的最简单方法</summary>
+        <ol>
+          <li>新建一个 GitHub 仓库，例如 <code>fund-monitor</code>。</li>
+          <li>把本文件改名或保持为 <code>index.html</code>，上传到仓库根目录。</li>
+          <li>进入仓库 Settings → Pages → Branch 选择 <code>main</code> / <code>root</code>。</li>
+          <li>打开 GitHub Pages 给出的地址即可。</li>
+        </ol>
+        <p class="warn">注意：如果仓库或 Pages 是公开的，你的基金代码、份额、成本、市值会被公开看到。</p>
+      </details>
+    </section>
+  </main>
+
+  <script>
+    const HOLDINGS = [
+  {
+    "code": "010027",
+    "name": "景顺长城核心中景一年持有期混合",
+    "shares": 345945.15,
+    "cost": 349992.71,
+    "unitCost": 1.0117,
+    "baselineValue": 301214.44,
+    "baselineNav": 0.8707,
+    "baselineDailyPnl": 8025.93,
+    "baselineHoldPnl": -48778.27,
+    "baselineWeight": 0.0359
+  },
+  {
+    "code": "014362",
+    "name": "睿远稳进配置两年持有混合A",
+    "shares": 804975.85,
+    "cost": 767785.96,
+    "unitCost": 0.9538,
+    "baselineValue": 981185.06,
+    "baselineNav": 1.2189,
+    "baselineDailyPnl": 7486.28,
+    "baselineHoldPnl": 213399.1,
+    "baselineWeight": 0.1169
+  },
+  {
+    "code": "010340",
+    "name": "易方达高质量严选三年持有混合",
+    "shares": 299576.0,
+    "cost": 301403.41,
+    "unitCost": 1.0061,
+    "baselineValue": 310630.35,
+    "baselineNav": 1.0369,
+    "baselineDailyPnl": 6830.33,
+    "baselineHoldPnl": 9226.94,
+    "baselineWeight": 0.037
+  },
+  {
+    "code": "007120",
+    "name": "睿远成长价值混合C",
+    "shares": 217244.27,
+    "cost": 417695.56,
+    "unitCost": 1.9227,
+    "baselineValue": 502116.68,
+    "baselineNav": 2.3113,
+    "baselineDailyPnl": 5539.73,
+    "baselineHoldPnl": 84421.12,
+    "baselineWeight": 0.0598
+  },
+  {
+    "code": "163417",
+    "name": "兴全合宜灵活配置混合(LOF)A",
+    "shares": 108436.78,
+    "cost": 223997.86,
+    "unitCost": 2.0657,
+    "baselineValue": 239981.44,
+    "baselineNav": 2.2131,
+    "baselineDailyPnl": 5454.37,
+    "baselineHoldPnl": 15983.58,
+    "baselineWeight": 0.0286
+  },
+  {
+    "code": "010273",
+    "name": "嘉实价值长青混合A",
+    "shares": 294019.11,
+    "cost": 297517.94,
+    "unitCost": 1.0119,
+    "baselineValue": 307985.02,
+    "baselineNav": 1.0475,
+    "baselineDailyPnl": 5380.55,
+    "baselineHoldPnl": 10467.08,
+    "baselineWeight": 0.0367
+  },
+  {
+    "code": "007119",
+    "name": "睿远成长价值混合A",
+    "shares": 125970.64,
+    "cost": 249900.55,
+    "unitCost": 1.9838,
+    "baselineValue": 299558.18,
+    "baselineNav": 2.378,
+    "baselineDailyPnl": 3313.03,
+    "baselineHoldPnl": 49657.63,
+    "baselineWeight": 0.0357
+  },
+  {
+    "code": "006608",
+    "name": "泓德研究优选混合",
+    "shares": 207564.24,
+    "cost": 291876.83,
+    "unitCost": 1.4062,
+    "baselineValue": 316784.54,
+    "baselineNav": 1.5262,
+    "baselineDailyPnl": 2864.39,
+    "baselineHoldPnl": 24907.71,
+    "baselineWeight": 0.0377
+  },
+  {
+    "code": "011006",
+    "name": "工银圆丰三年持有期混合",
+    "shares": 111964.82,
+    "cost": 113308.4,
+    "unitCost": 1.012,
+    "baselineValue": 90433.99,
+    "baselineNav": 0.8077,
+    "baselineDailyPnl": 2855.1,
+    "baselineHoldPnl": -22874.41,
+    "baselineWeight": 0.0108
+  },
+  {
+    "code": "169101",
+    "name": "东方红睿丰混合",
+    "shares": 49328.51,
+    "cost": 67200.23,
+    "unitCost": 1.3623,
+    "baselineValue": 117451.18,
+    "baselineNav": 2.381,
+    "baselineDailyPnl": 2811.73,
+    "baselineHoldPnl": 50250.95,
+    "baselineWeight": 0.014
+  },
+  {
+    "code": "501054",
+    "name": "东方红睿泽三年定开混合A",
+    "shares": 157228.2,
+    "cost": 271941.89,
+    "unitCost": 1.7296,
+    "baselineValue": 252036.8,
+    "baselineNav": 1.603,
+    "baselineDailyPnl": 2782.94,
+    "baselineHoldPnl": -19905.09,
+    "baselineWeight": 0.03
+  },
+  {
+    "code": "010186",
+    "name": "嘉实核心成长混合A",
+    "shares": 155320.13,
+    "cost": 157168.44,
+    "unitCost": 1.0119,
+    "baselineValue": 131152.32,
+    "baselineNav": 0.8444,
+    "baselineDailyPnl": 2702.57,
+    "baselineHoldPnl": -26016.12,
+    "baselineWeight": 0.0156
+  },
+  {
+    "code": "001511",
+    "name": "兴全新视野定期开放混合型发起式",
+    "shares": 53373.5,
+    "cost": 96002.92,
+    "unitCost": 1.7987,
+    "baselineValue": 138877.85,
+    "baselineNav": 2.602,
+    "baselineDailyPnl": 1974.82,
+    "baselineHoldPnl": 42874.93,
+    "baselineWeight": 0.0165
+  },
+  {
+    "code": "501049",
+    "name": "东方红睿玺三年定开混合A",
+    "shares": 130349.13,
+    "cost": 162519.3,
+    "unitCost": 1.2468,
+    "baselineValue": 127377.17,
+    "baselineNav": 0.9772,
+    "baselineDailyPnl": -208.56,
+    "baselineHoldPnl": -35142.13,
+    "baselineWeight": 0.0152
+  }
+];
+
+    const STRATEGIES = {
+      conservative: {
+        name: "保守：4% 全部退出",
+        thresholds: [0.04],
+        sells: [1.0],
+        desc: "只要从高点回撤达到 4%，提示全部清仓。适合最重视不再被套。"
+      },
+      balanced: {
+        name: "均衡：8% / 12% / 16%",
+        thresholds: [0.08, 0.12, 0.16],
+        sells: [0.50, 0.333, 0.167],
+        desc: "8% 先卖一半，12% 再卖三分之一，16% 全部退出。默认方案。"
+      },
+      aggressive: {
+        name: "激进：20% / 25% / 30% / 35%",
+        thresholds: [0.20, 0.25, 0.30, 0.35],
+        sells: [0.10, 0.20, 0.30, 0.40],
+        desc: "给主升浪最大空间，但回撤承受度最高。"
+      }
+    };
+
+    const LS = {
+      mode: "superfund_mode",
+      strategy: "superfund_strategy",
+      manualPeak: "superfund_manual_peak"
+    };
+
+    let state = {
+      rows: [],
+      portfolioSeries: [],
+      drawdownSeries: [],
+      latest: null,
+      loading: false
+    };
+
+    function fmtMoney(x, digits = 2) {
+      if (!isFinite(x)) return "--";
+      return "¥" + x.toLocaleString("zh-CN", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    }
+    function fmtNum(x, digits = 2) {
+      if (!isFinite(x)) return "--";
+      return x.toLocaleString("zh-CN", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    }
+    function fmtPct(x, digits = 2) {
+      if (!isFinite(x)) return "--";
+      return (x * 100).toFixed(digits) + "%";
+    }
+    function fmtPctRaw(x, digits = 2) {
+      if (!isFinite(x)) return "--";
+      return x.toFixed(digits) + "%";
+    }
+    function clsByPnL(x) {
+      return x > 0 ? "positive" : x < 0 ? "negative" : "neutral";
+    }
+    function dateStrFromMs(ms) {
+      const d = new Date(ms);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+    function todayTs() { return Date.now(); }
+
+    function loadScript(url, timeout = 12000) {
+      return new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        let done = false;
+        const timer = setTimeout(() => {
+          if (done) return;
+          done = true;
+          s.remove();
+          reject(new Error("timeout"));
+        }, timeout);
+        s.src = url;
+        s.async = true;
+        s.onload = () => {
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
+          setTimeout(() => resolve(), 0);
+        };
+        s.onerror = () => {
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
+          s.remove();
+          reject(new Error("script error"));
+        };
+        document.head.appendChild(s);
+      });
+    }
+
+    async function getPingzhongData(code) {
+      const keys = ["fS_name", "fS_code", "Data_netWorthTrend", "Data_ACWorthTrend", "syl_1n", "syl_6y", "syl_3y", "syl_1y"];
+      keys.forEach(k => { try { delete window[k]; } catch(e) { window[k] = undefined; } });
+      const url = `https://fund.eastmoney.com/pingzhongdata/${code}.js?v=${todayTs()}`;
+      await loadScript(url);
+      const trendRaw = Array.isArray(window.Data_netWorthTrend) ? window.Data_netWorthTrend : [];
+      const trend = trendRaw
+        .filter(d => d && isFinite(+d.y) && d.x)
+        .map(d => ({
+          date: dateStrFromMs(+d.x),
+          nav: +d.y,
+          pct: isFinite(+d.equityReturn) ? +d.equityReturn : NaN
+        }));
+      if (!trend.length) throw new Error("empty history");
+      return {
+        code: window.fS_code || code,
+        name: window.fS_name || "",
+        history: trend,
+        source: "pingzhongdata"
+      };
+    }
+
+    async function getFundGzData(code) {
+      return new Promise((resolve, reject) => {
+        const old = window.jsonpgz;
+        let settled = false;
+        const cleanup = () => {
+          try { window.jsonpgz = old; } catch(e) {}
+        };
+        const timer = setTimeout(() => {
+          if (settled) return;
+          settled = true;
+          cleanup();
+          reject(new Error("timeout"));
+        }, 10000);
+        window.jsonpgz = (data) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          cleanup();
+          resolve(data || {});
+        };
+        loadScript(`https://fundgz.1234567.com.cn/js/${code}.js?rt=${todayTs()}`, 9500)
+          .catch(err => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            cleanup();
+            reject(err);
+          });
+      });
+    }
+
+    async function loadOneFund(holding, mode) {
+      let hist = null, gz = null, status = [];
+      try {
+        hist = await getPingzhongData(holding.code);
+        status.push("历史OK");
+      } catch (e) {
+        status.push("历史失败");
+      }
+      if (mode === "estimate") {
+        try {
+          gz = await getFundGzData(holding.code);
+          if (gz && (gz.gsz || gz.dwjz)) status.push("估算OK");
+          else status.push("估算空");
+        } catch (e) {
+          status.push("估算失败");
+        }
+      }
+
+      const lastHist = hist?.history?.[hist.history.length - 1];
+      let nav = holding.baselineNav;
+      let navDate = "内置基准";
+      let dailyPct = NaN;
+      let source = "内置基准";
+      let history = hist?.history || [{ date: "baseline", nav: holding.baselineNav, pct: NaN }];
+
+      if (lastHist) {
+        nav = lastHist.nav;
+        navDate = lastHist.date;
+        dailyPct = lastHist.pct;
+        source = "东方财富历史净值";
+      }
+
+      if (mode === "estimate" && gz) {
+        const gsz = parseFloat(gz.gsz);
+        const gszzl = parseFloat(gz.gszzl);
+        const dwjz = parseFloat(gz.dwjz);
+        if (isFinite(gsz) && gsz > 0) {
+          nav = gsz;
+          navDate = gz.gztime || gz.jzrq || navDate;
+          dailyPct = isFinite(gszzl) ? gszzl : dailyPct;
+          source = "天天基金估算";
+        } else if (isFinite(dwjz) && dwjz > 0) {
+          nav = dwjz;
+          navDate = gz.jzrq || navDate;
+          source = "天天基金确认净值";
+        }
+      }
+
+      const value = nav * holding.shares;
+      const prevValue = isFinite(dailyPct) ? value / (1 + dailyPct / 100) : NaN;
+      const dayPnl = isFinite(prevValue) ? value - prevValue : NaN;
+      const holdPnl = value - holding.cost;
+      const holdPct = holdPnl / holding.cost;
+      return {
+        ...holding,
+        nav,
+        navDate,
+        dailyPct,
+        value,
+        prevValue,
+        dayPnl,
+        holdPnl,
+        holdPct,
+        source,
+        history,
+        status: status.join(" / ")
+      };
+    }
+
+    function buildPortfolioSeries(rows) {
+      const allDates = new Set();
+      const maps = new Map();
+      rows.forEach(r => {
+        const m = new Map();
+        (r.history || []).forEach(p => {
+          if (p.date !== "baseline") {
+            m.set(p.date, p.nav);
+            allDates.add(p.date);
+          }
+        });
+        maps.set(r.code, m);
+      });
+      const dates = Array.from(allDates).sort();
+      const last = new Map();
+      const series = [];
+      for (const date of dates) {
+        for (const r of rows) {
+          const m = maps.get(r.code);
+          if (m && m.has(date)) last.set(r.code, m.get(date));
+        }
+        const hasAll = rows.every(r => last.has(r.code));
+        if (!hasAll) continue;
+        const value = rows.reduce((sum, r) => sum + (last.get(r.code) || 0) * r.shares, 0);
+        series.push({ date, value });
+      }
+      const latestValue = rows.reduce((s, r) => s + r.value, 0);
+      const latestDate = rows.map(r => r.navDate).sort().slice(-1)[0] || "latest";
+      if (series.length) {
+        const lastPoint = series[series.length - 1];
+        const normalizedDate = String(latestDate).slice(0, 10);
+        if (normalizedDate && normalizedDate === lastPoint.date) lastPoint.value = latestValue;
+        else series.push({ date: normalizedDate || "latest", value: latestValue });
+      } else {
+        series.push({ date: "current", value: latestValue });
+      }
+      return series.filter(p => isFinite(p.value) && p.value > 0);
+    }
+
+    function drawdowns(series) {
+      let peak = -Infinity;
+      return series.map(p => {
+        peak = Math.max(peak, p.value);
+        return { date: p.date, value: p.value, peak, dd: p.value / peak - 1 };
+      });
+    }
+
+    function getManualPeak() {
+      const x = parseFloat(localStorage.getItem(LS.manualPeak) || "");
+      return isFinite(x) && x > 0 ? x : null;
+    }
+    function getStrategy() {
+      return STRATEGIES[document.getElementById("strategySelect").value] || STRATEGIES.balanced;
+    }
+
+    function calcAction(total, peak, strategy) {
+      const dd = total / peak - 1;
+      const absdd = -dd;
+      let triggered = [];
+      strategy.thresholds.forEach((t, i) => {
+        if (absdd >= t) triggered.push({ threshold: t, sell: strategy.sells[i] });
+      });
+      const nextIdx = strategy.thresholds.findIndex(t => absdd < t);
+      const nextThreshold = nextIdx >= 0 ? strategy.thresholds[nextIdx] : null;
+      const nextValue = nextThreshold ? peak * (1 - nextThreshold) : null;
+      const sellSum = triggered.reduce((s, x) => s + x.sell, 0);
+      return { dd, absdd, triggered, nextThreshold, nextValue, sellSum: Math.min(1, sellSum) };
+    }
+
+    function stopPlanHtml(total, peak, strategy) {
+      const action = calcAction(total, peak, strategy);
+      const rows = strategy.thresholds.map((t, i) => {
+        const line = peak * (1 - t);
+        const hit = action.absdd >= t;
+        return `<tr>
+          <td>${fmtPct(t,0)}</td>
+          <td>${fmtMoney(line)}</td>
+          <td>${(strategy.sells[i]*100).toFixed(1)}%</td>
+          <td>${hit ? '<span class="badge bad">已触发</span>' : '<span class="badge ok">未触发</span>'}</td>
+        </tr>`;
+      }).join("");
+      return `
+        <div class="note" style="margin-bottom:8px;">${strategy.desc}</div>
+        <div class="tablebox" style="max-height:none;">
+          <table>
+            <thead><tr><th>回撤线</th><th>触发市值</th><th>建议卖出</th><th>状态</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderTable(rows) {
+      const total = rows.reduce((s, r) => s + r.value, 0);
+      const tbody = document.querySelector("#fundTable tbody");
+      tbody.innerHTML = rows
+        .slice()
+        .sort((a,b) => b.value - a.value)
+        .map(r => {
+          const statusClass = r.status.includes("失败") ? (r.status.includes("OK") ? "warn" : "bad") : "ok";
+          return `<tr>
+            <td><strong>${r.code}</strong></td>
+            <td title="${r.name}">${r.name}</td>
+            <td>${fmtNum(r.shares, 2)}</td>
+            <td>${fmtNum(r.nav, 4)}</td>
+            <td>${r.navDate || "--"}</td>
+            <td class="${clsByPnL(r.dailyPct)}">${isFinite(r.dailyPct) ? fmtPctRaw(r.dailyPct) : "--"}</td>
+            <td class="${clsByPnL(r.dayPnl)}">${fmtMoney(r.dayPnl)}</td>
+            <td>${fmtMoney(r.value)}</td>
+            <td>${fmtMoney(r.cost)}</td>
+            <td class="${clsByPnL(r.holdPnl)}">${fmtMoney(r.holdPnl)}</td>
+            <td class="${clsByPnL(r.holdPct)}">${fmtPct(r.holdPct)}</td>
+            <td>${fmtPct(r.value / total)}</td>
+            <td><span class="badge ${statusClass}">${r.source}</span></td>
+          </tr>`;
+        }).join("");
+    }
+
+    function renderDashboard() {
+      const rows = state.rows;
+      if (!rows.length) return;
+      const total = rows.reduce((s, r) => s + r.value, 0);
+      const prevTotal = rows.reduce((s, r) => s + (isFinite(r.prevValue) ? r.prevValue : r.value), 0);
+      const dayPnl = total - prevTotal;
+      const cost = rows.reduce((s, r) => s + r.cost, 0);
+      const holdPnl = total - cost;
+      const holdPct = holdPnl / cost;
+      const series = buildPortfolioSeries(rows);
+      state.portfolioSeries = series;
+      state.drawdownSeries = drawdowns(series);
+      const autoPeakObj = state.drawdownSeries.reduce((best, p) => !best || p.peak > best.peak ? p : best, null);
+      const autoPeak = autoPeakObj?.peak || total;
+      const manualPeak = getManualPeak();
+      const peak = manualPeak || autoPeak;
+      const strategy = getStrategy();
+      const action = calcAction(total, peak, strategy);
+
+      document.getElementById("totalValue").textContent = fmtMoney(total);
+      document.getElementById("totalDate").textContent = "最新数据：" + new Date().toLocaleString("zh-CN");
+      document.getElementById("dayPnl").textContent = fmtMoney(dayPnl);
+      document.getElementById("dayPnl").className = "v " + clsByPnL(dayPnl);
+      document.getElementById("dayPct").textContent = fmtPct(dayPnl / prevTotal);
+      document.getElementById("holdPnl").textContent = fmtMoney(holdPnl);
+      document.getElementById("holdPnl").className = "v " + clsByPnL(holdPnl);
+      document.getElementById("holdPct").textContent = "持有收益率：" + fmtPct(holdPct);
+      document.getElementById("peakValue").textContent = fmtMoney(peak);
+      document.getElementById("peakSource").textContent = manualPeak ? "手动高点" : "按历史净值自动高点";
+      document.getElementById("drawdownNow").textContent = fmtPct(action.dd);
+      document.getElementById("drawdownNow").className = "v " + (action.dd <= -0.08 ? "negative" : action.dd < 0 ? "warn" : "positive");
+      document.getElementById("nextLine").textContent = action.nextThreshold
+        ? `下一档：回撤 ${fmtPct(action.nextThreshold,0)}，市值 ${fmtMoney(action.nextValue)}`
+        : "所有止盈档位均已触发";
+      document.getElementById("ddBar").style.width = Math.min(100, action.absdd / (strategy.thresholds[strategy.thresholds.length - 1] || .16) * 100).toFixed(0) + "%";
+
+      const alert = document.getElementById("statusAlert");
+      if (action.triggered.length) {
+        const labels = action.triggered.map(x => fmtPct(x.threshold,0)).join("、");
+        document.getElementById("actionText").textContent = "触发止盈";
+        document.getElementById("actionText").className = "v negative";
+        document.getElementById("actionDetail").textContent = `已跌破 ${labels}，累计建议卖出 ${(action.sellSum*100).toFixed(1)}% 初始仓位`;
+        alert.className = "alert critical";
+        alert.innerHTML = `<strong>止盈触发：</strong>当前回撤 ${fmtPct(action.dd)}，已触发 ${labels}。按“${strategy.name}”累计建议卖出 ${(action.sellSum*100).toFixed(1)}% 初始仓位。`;
+      } else {
+        document.getElementById("actionText").textContent = "未触发";
+        document.getElementById("actionText").className = "v positive";
+        document.getElementById("actionDetail").textContent = action.nextThreshold
+          ? `距离下一档还差 ${fmtMoney(total - action.nextValue)}`
+          : "暂无";
+        alert.className = "alert safe";
+        alert.innerHTML = `<strong>状态正常：</strong>当前回撤 ${fmtPct(action.dd)}，尚未触发“${strategy.name}”。`;
+      }
+
+      document.getElementById("stopPlanBox").innerHTML = stopPlanHtml(total, peak, strategy);
+      renderTable(rows);
+      drawValueChart(document.getElementById("valueChart"), series, peak, strategy);
+      drawDrawdownChart(document.getElementById("drawdownChart"), state.drawdownSeries, strategy);
+      state.latest = { total, dayPnl, cost, holdPnl, holdPct, peak, strategy };
+    }
+
+    function chartSetup(canvas) {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { ctx, w: rect.width, h: rect.height };
+    }
+    function niceTicks(min, max, count = 5) {
+      if (!isFinite(min) || !isFinite(max) || min === max) return [min || 0, max || 1];
+      const step0 = Math.abs(max - min) / Math.max(1, count);
+      const mag = Math.pow(10, Math.floor(Math.log10(step0)));
+      const norm = step0 / mag;
+      const step = (norm < 1.5 ? 1 : norm < 3 ? 2 : norm < 7 ? 5 : 10) * mag;
+      const start = Math.floor(min / step) * step;
+      const end = Math.ceil(max / step) * step;
+      const ticks = [];
+      for (let v = start; v <= end + step * .5; v += step) ticks.push(v);
+      return ticks;
+    }
+    function drawAxes(ctx, w, h, pad, minY, maxY, yFmt) {
+      ctx.clearRect(0,0,w,h);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0,0,w,h);
+      ctx.strokeStyle = "rgba(100,116,139,.16)";
+      ctx.lineWidth = 1;
+      ctx.font = "11px -apple-system, BlinkMacSystemFont, Segoe UI";
+      ctx.fillStyle = "#64748b";
+      const ticks = niceTicks(minY, maxY, 5);
+      ticks.forEach(t => {
+        const y = pad.t + (maxY - t) / (maxY - minY) * (h - pad.t - pad.b);
+        ctx.beginPath();
+        ctx.moveTo(pad.l, y);
+        ctx.lineTo(w - pad.r, y);
+        ctx.stroke();
+        ctx.fillText(yFmt(t), 8, y + 4);
+      });
+      ctx.strokeStyle = "rgba(100,116,139,.32)";
+      ctx.strokeRect(pad.l, pad.t, w - pad.l - pad.r, h - pad.t - pad.b);
+    }
+    function drawLine(ctx, points, getX, getY, color, width=2) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.beginPath();
+      points.forEach((p, i) => {
+        const x = getX(p, i), y = getY(p, i);
+        if (i === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      });
+      ctx.stroke();
+    }
+    function tooltipEl() {
+      return document.getElementById("chartTooltip");
+    }
+    function bindChartTooltip(canvas, formatter) {
+      canvas.onmousemove = (e) => {
+        const points = canvas._chartPoints || [];
+        if (!points.length) return;
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        let best = points[0];
+        let bestDist = Math.abs(mx - best.x);
+        for (const p of points) {
+          const d = Math.abs(mx - p.x);
+          if (d < bestDist) { best = p; bestDist = d; }
+        }
+        const tip = tooltipEl();
+        tip.innerHTML = formatter(best.raw);
+        tip.style.display = "block";
+        const x = Math.min(e.clientX + 16, window.innerWidth - 230);
+        const y = Math.min(e.clientY + 16, window.innerHeight - 130);
+        tip.style.left = x + "px";
+        tip.style.top = y + "px";
+      };
+      canvas.onmouseleave = () => {
+        const tip = tooltipEl();
+        if (tip) tip.style.display = "none";
+      };
+    }
+    function drawValueChart(canvas, series, peak, strategy) {
+      if (!series.length) return;
+      const {ctx,w,h} = chartSetup(canvas);
+      const pad = { l: 82, r: 28, t: 26, b: 38 };
+      const stopVals = strategy.thresholds.map(t => peak * (1 - t));
+      const vals = series.map(p => p.value).concat([peak], stopVals);
+      const minY = Math.min(...vals) * 0.98;
+      const maxY = Math.max(...vals) * 1.02;
+      const getX = (_, i) => pad.l + i / Math.max(1, series.length - 1) * (w - pad.l - pad.r);
+      const getY = p => pad.t + (maxY - p.value) / (maxY - minY) * (h - pad.t - pad.b);
+      drawAxes(ctx, w, h, pad, minY, maxY, v => (v/10000).toFixed(0) + "万");
+      strategy.thresholds.forEach((t, i) => {
+        const lineVal = peak * (1 - t);
+        const yy = pad.t + (maxY - lineVal) / (maxY - minY) * (h - pad.t - pad.b);
+        ctx.strokeStyle = i === 0 ? "rgba(217,119,6,.78)" : "rgba(220,38,38,.62)";
+        ctx.setLineDash([6,5]);
+        ctx.beginPath(); ctx.moveTo(pad.l, yy); ctx.lineTo(w - pad.r, yy); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = i === 0 ? "#b45309" : "#b91c1c";
+        ctx.fillText(`-${(t*100).toFixed(0)}% ${(lineVal/10000).toFixed(0)}万`, pad.l + 8, yy - 6);
+      });
+      const peakY = pad.t + (maxY - peak) / (maxY - minY) * (h - pad.t - pad.b);
+      ctx.strokeStyle = "rgba(37,99,235,.55)";
+      ctx.setLineDash([3,4]);
+      ctx.beginPath(); ctx.moveTo(pad.l, peakY); ctx.lineTo(w-pad.r, peakY); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "#1d4ed8";
+      ctx.fillText("高点 " + (peak/10000).toFixed(0) + "万", pad.l + 8, peakY - 6);
+
+      drawLine(ctx, series, getX, getY, "#2563eb", 2.4);
+      const last = series[series.length - 1];
+      const lx = getX(last, series.length - 1), ly = getY(last);
+      ctx.fillStyle = "#1d4ed8";
+      ctx.beginPath(); ctx.arc(lx, ly, 4, 0, Math.PI*2); ctx.fill();
+
+      ctx.fillStyle = "#64748b";
+      ctx.fillText(series[0].date, pad.l, h - 12);
+      ctx.textAlign = "right";
+      ctx.fillText(series[series.length - 1].date, w - pad.r, h - 12);
+      ctx.textAlign = "left";
+
+      canvas._chartPoints = series.map((p, i) => ({ x: getX(p, i), y: getY(p), raw: { ...p, peak, dd: p.value / peak - 1 } }));
+      bindChartTooltip(canvas, p => `
+        <strong>${p.date}</strong><br>
+        <span class="muted">超级基金市值</span>：${fmtMoney(p.value)}<br>
+        <span class="muted">相对当前高点</span>：${fmtPct(p.dd)}
+      `);
+    }
+    function drawDrawdownChart(canvas, ddSeries, strategy) {
+      if (!ddSeries.length) return;
+      const {ctx,w,h} = chartSetup(canvas);
+      const pad = { l: 66, r: 26, t: 24, b: 36 };
+      const vals = ddSeries.map(p => p.dd).concat(strategy.thresholds.map(t => -t), [0]);
+      const minY = Math.min(...vals) * 1.1;
+      const maxY = 0.02;
+      const getX = (_, i) => pad.l + i / Math.max(1, ddSeries.length - 1) * (w - pad.l - pad.r);
+      const getY = p => pad.t + (maxY - p.dd) / (maxY - minY) * (h - pad.t - pad.b);
+      drawAxes(ctx, w, h, pad, minY, maxY, v => (v*100).toFixed(0) + "%");
+      strategy.thresholds.forEach(t => {
+        const yy = pad.t + (maxY + t) / (maxY - minY) * (h - pad.t - pad.b);
+        ctx.strokeStyle = "rgba(220,38,38,.56)";
+        ctx.setLineDash([6,5]);
+        ctx.beginPath(); ctx.moveTo(pad.l, yy); ctx.lineTo(w-pad.r, yy); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#b91c1c";
+        ctx.fillText(`-${(t*100).toFixed(0)}%`, pad.l + 8, yy - 6);
+      });
+      drawLine(ctx, ddSeries, getX, getY, "#dc2626", 2);
+      ctx.fillStyle = "#64748b";
+      ctx.fillText(ddSeries[0].date, pad.l, h - 12);
+      ctx.textAlign = "right";
+      ctx.fillText(ddSeries[ddSeries.length - 1].date, w - pad.r, h - 12);
+      ctx.textAlign = "left";
+
+      canvas._chartPoints = ddSeries.map((p, i) => ({ x: getX(p, i), y: getY(p), raw: p }));
+      bindChartTooltip(canvas, p => `
+        <strong>${p.date}</strong><br>
+        <span class="muted">当日市值</span>：${fmtMoney(p.value)}<br>
+        <span class="muted">阶段高点</span>：${fmtMoney(p.peak)}<br>
+        <span class="muted">回撤</span>：${fmtPct(p.dd)}
+      `);
+    }
+
+    async function refresh() {
+      if (state.loading) return;
+      state.loading = true;
+      document.getElementById("refreshBtn").textContent = "刷新中…";
+      const mode = document.getElementById("modeSelect").value;
+      localStorage.setItem(LS.mode, mode);
+      localStorage.setItem(LS.strategy, document.getElementById("strategySelect").value);
+      const alert = document.getElementById("statusAlert");
+      alert.className = "alert";
+      alert.innerHTML = "正在读取 14 只基金净值。若网络较慢，页面会逐只显示读取进度。";
+
+      const rows = [];
+      for (let i = 0; i < HOLDINGS.length; i++) {
+        const h = HOLDINGS[i];
+        alert.innerHTML = `正在读取：${h.code} ${h.name}（${i+1} / ${HOLDINGS.length}）`;
+        try {
+          const row = await loadOneFund(h, mode);
+          rows.push(row);
+        } catch (e) {
+          rows.push({
+            ...h,
+            nav: h.baselineNav,
+            navDate: "内置基准",
+            dailyPct: NaN,
+            value: h.baselineValue,
+            prevValue: h.baselineValue - h.baselineDailyPnl,
+            dayPnl: h.baselineDailyPnl,
+            holdPnl: h.baselineHoldPnl,
+            holdPct: h.baselineHoldPnl / h.cost,
+            source: "内置基准",
+            history: [{date:"baseline", nav:h.baselineNav, pct:NaN}],
+            status: "全部失败"
+          });
+        }
+      }
+      state.rows = rows;
+      state.loading = false;
+      document.getElementById("refreshBtn").textContent = "刷新净值";
+      renderDashboard();
+    }
+
+    function exportCsv() {
+      const headers = ["代码","名称","份额","最新净值","日期","日涨跌%","今日盈亏","当前市值","持有成本","持有盈亏","持有收益率%","来源"];
+      const lines = [headers.join(",")];
+      state.rows.forEach(r => {
+        lines.push([
+          r.code, r.name, r.shares, r.nav, r.navDate,
+          isFinite(r.dailyPct) ? r.dailyPct : "",
+          isFinite(r.dayPnl) ? r.dayPnl : "",
+          r.value, r.cost, r.holdPnl, r.holdPct*100, r.source
+        ].map(v => `"${String(v ?? "").replaceAll('"','""')}"`).join(","));
+      });
+      const blob = new Blob(["\ufeff" + lines.join("\n")], {type:"text/csv;charset=utf-8"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `superfund-monitor-${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function init() {
+      document.getElementById("modeSelect").value = localStorage.getItem(LS.mode) || "official";
+      document.getElementById("strategySelect").value = localStorage.getItem(LS.strategy) || "balanced";
+      const mp = localStorage.getItem(LS.manualPeak);
+      if (mp) document.getElementById("manualPeakInput").value = mp;
+      document.getElementById("refreshBtn").addEventListener("click", refresh);
+      document.getElementById("exportBtn").addEventListener("click", exportCsv);
+      document.getElementById("strategySelect").addEventListener("change", () => {
+        localStorage.setItem(LS.strategy, document.getElementById("strategySelect").value);
+        renderDashboard();
+      });
+      document.getElementById("modeSelect").addEventListener("change", refresh);
+      document.getElementById("manualPeakInput").addEventListener("change", (e) => {
+        const x = parseFloat(e.target.value);
+        if (isFinite(x) && x > 0) localStorage.setItem(LS.manualPeak, String(x));
+        else localStorage.removeItem(LS.manualPeak);
+        renderDashboard();
+      });
+      document.getElementById("setPeakBtn").addEventListener("click", () => {
+        const total = state.rows.reduce((s, r) => s + r.value, 0);
+        if (isFinite(total) && total > 0) {
+          localStorage.setItem(LS.manualPeak, String(total.toFixed(2)));
+          document.getElementById("manualPeakInput").value = total.toFixed(2);
+          renderDashboard();
+        }
+      });
+      window.addEventListener("resize", () => {
+        if (state.rows.length) renderDashboard();
+      });
+      refresh();
+    }
+    init();
+  </script>
+</body>
+</html>
