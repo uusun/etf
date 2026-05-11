@@ -1,147 +1,145 @@
 {
-  "updated_at": "2026-05-11T15:34:36.123836+00:00",
-  "as_of": "2026-05-09",
+  "updated_at": "2026-05-11T16:20:07+00:00",
   "items": {
     "014362": {
       "code": "014362",
       "name": "睿远稳进配置两年持有混合A",
-      "nav": 1.2185,
-      "date": "2026-05-09",
-      "daily_pct": null,
-      "source": "内置基准-待GitHub Actions更新",
-      "ok": false,
-      "diagnosis": "initial baseline"
+      "nav": 1.2246,
+      "date": "2026-05-11",
+      "daily_pct": 0.5,
+      "source": "AKShare fund_open_fund_info_em",
+      "ok": true,
+      "diagnosis": ""
     },
     "001511": {
       "code": "001511",
       "name": "兴全新视野定期开放混合型发起式",
-      "nav": 2.596,
-      "date": "2026-05-09",
-      "daily_pct": null,
-      "source": "内置基准-待GitHub Actions更新",
-      "ok": false,
-      "diagnosis": "initial baseline"
+      "nav": 2.654,
+      "date": "2026-05-11",
+      "daily_pct": 2.23,
+      "source": "AKShare fund_open_fund_info_em",
+      "ok": true,
+      "diagnosis": ""
     },
     "007120": {
       "code": "007120",
       "name": "睿远成长价值混合C",
-      "nav": 2.4436,
-      "date": "2026-05-09",
-      "daily_pct": null,
-      "source": "内置基准-待GitHub Actions更新",
-      "ok": false,
-      "diagnosis": "initial baseline"
+      "nav": 2.5312,
+      "date": "2026-05-11",
+      "daily_pct": 3.58,
+      "source": "AKShare fund_open_fund_info_em",
+      "ok": true,
+      "diagnosis": ""
     },
     "169101": {
       "code": "169101",
       "name": "东方红睿丰混合",
-      "nav": 2.425,
-      "date": "2026-05-09",
-      "daily_pct": null,
-      "source": "内置基准-待GitHub Actions更新",
-      "ok": false,
-      "diagnosis": "initial baseline"
+      "nav": 2.466,
+      "date": "2026-05-11",
+      "daily_pct": 1.69,
+      "source": "AKShare fund_open_fund_info_em",
+      "ok": true,
+      "diagnosis": ""
     },
     "007119": {
       "code": "007119",
       "name": "睿远成长价值混合A",
-      "nav": 2.5142,
-      "date": "2026-05-09",
-      "daily_pct": null,
-      "source": "内置基准-待GitHub Actions更新",
-      "ok": false,
-      "diagnosis": "initial baseline"
+      "nav": 2.6044,
+      "date": "2026-05-11",
+      "daily_pct": 3.59,
+      "source": "AKShare fund_open_fund_info_em",
+      "ok": true,
+      "diagnosis": ""
     },
     "006608": {
       "code": "006608",
       "name": "泓德研究优选混合",
-      "nav": 1.5296,
-      "date": "2026-05-09",
-      "daily_pct": null,
-      "source": "内置基准-待GitHub Actions更新",
-      "ok": false,
-      "diagnosis": "initial baseline"
+      "nav": 1.5439,
+      "date": "2026-05-11",
+      "daily_pct": 0.93,
+      "source": "AKShare fund_open_fund_info_em",
+      "ok": true,
+      "diagnosis": ""
     },
     "163417": {
       "code": "163417",
       "name": "兴全合宜灵活配置混合(LOF)A",
-      "nav": 2.2152,
-      "date": "2026-05-09",
-      "daily_pct": null,
-      "source": "内置基准-待GitHub Actions更新",
-      "ok": false,
-      "diagnosis": "initial baseline"
+      "nav": 2.2578,
+      "date": "2026-05-11",
+      "daily_pct": 1.92,
+      "source": "AKShare fund_open_fund_info_em",
+      "ok": true,
+      "diagnosis": ""
     },
     "010340": {
       "code": "010340",
       "name": "易方达高质量严选三年持有混合",
-      "nav": 1.0399,
-      "date": "2026-05-09",
-      "daily_pct": null,
-      "source": "内置基准-待GitHub Actions更新",
-      "ok": false,
-      "diagnosis": "initial baseline"
+      "nav": 1.0565,
+      "date": "2026-05-11",
+      "daily_pct": 1.6,
+      "source": "AKShare fund_open_fund_info_em",
+      "ok": true,
+      "diagnosis": ""
     },
     "010273": {
       "code": "010273",
       "name": "嘉实价值长青混合A",
-      "nav": 1.0487,
-      "date": "2026-05-09",
-      "daily_pct": null,
-      "source": "内置基准-待GitHub Actions更新",
-      "ok": false,
-      "diagnosis": "initial baseline"
+      "nav": 1.0528,
+      "date": "2026-05-11",
+      "daily_pct": 0.39,
+      "source": "AKShare fund_open_fund_info_em",
+      "ok": true,
+      "diagnosis": ""
     },
     "010186": {
       "code": "010186",
       "name": "嘉实核心成长混合A",
-      "nav": 0.8432,
-      "date": "2026-05-09",
-      "daily_pct": null,
-      "source": "内置基准-待GitHub Actions更新",
-      "ok": false,
-      "diagnosis": "initial baseline"
+      "nav": 0.8652,
+      "date": "2026-05-11",
+      "daily_pct": 2.61,
+      "source": "AKShare fund_open_fund_info_em",
+      "ok": true,
+      "diagnosis": ""
     },
     "010027": {
       "code": "010027",
       "name": "景顺长城核心中景一年持有期混合",
-      "nav": 0.8713,
-      "date": "2026-05-09",
-      "daily_pct": null,
-      "source": "内置基准-待GitHub Actions更新",
-      "ok": false,
-      "diagnosis": "initial baseline"
+      "nav": 0.8966,
+      "date": "2026-05-11",
+      "daily_pct": 2.9,
+      "source": "AKShare fund_open_fund_info_em",
+      "ok": true,
+      "diagnosis": ""
     },
     "501054": {
       "code": "501054",
       "name": "东方红睿泽三年定开混合A",
-      "nav": 1.6304,
-      "date": "2026-05-09",
-      "daily_pct": null,
-      "source": "内置基准-待GitHub Actions更新",
-      "ok": false,
-      "diagnosis": "initial baseline"
+      "nav": 1.6502,
+      "date": "2026-05-11",
+      "daily_pct": 1.21,
+      "source": "AKShare fund_open_fund_info_em",
+      "ok": true,
+      "diagnosis": ""
     },
     "011006": {
       "code": "011006",
       "name": "工银圆丰三年持有期混合",
-      "nav": 0.7966,
-      "date": "2026-05-09",
-      "daily_pct": null,
-      "source": "内置基准-待GitHub Actions更新",
-      "ok": false,
-      "diagnosis": "initial baseline"
+      "nav": 0.8125,
+      "date": "2026-05-11",
+      "daily_pct": 2.0,
+      "source": "AKShare fund_open_fund_info_em",
+      "ok": true,
+      "diagnosis": ""
     },
     "501049": {
       "code": "501049",
       "name": "东方红睿玺三年定开混合A",
-      "nav": 0.9549,
-      "date": "2026-05-09",
-      "daily_pct": null,
-      "source": "内置基准-待GitHub Actions更新",
-      "ok": false,
-      "diagnosis": "initial baseline"
+      "nav": 0.9563,
+      "date": "2026-05-11",
+      "daily_pct": 0.15,
+      "source": "AKShare fund_open_fund_info_em",
+      "ok": true,
+      "diagnosis": ""
     }
-  },
-  "note": "首次上传的内置基准。GitHub Actions 成功运行后会自动替换为最新净值。"
+  }
 }
