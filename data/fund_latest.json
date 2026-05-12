@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-05-12T13:18:52+00:00",
+  "updated_at": "2026-05-12T13:24:55+00:00",
   "items": {
     "014362": {
       "code": "014362",
@@ -34,9 +34,9 @@
     "169101": {
       "code": "169101",
       "name": "东方红睿丰混合",
-      "nav": 2.475,
-      "date": "2026-05-12",
-      "daily_pct": 0.36,
+      "nav": 2.466,
+      "date": "2026-05-11",
+      "daily_pct": 1.69,
       "source": "AKShare fund_open_fund_info_em",
       "ok": true,
       "diagnosis": ""
@@ -104,12 +104,12 @@
     "010027": {
       "code": "010027",
       "name": "景顺长城核心中景一年持有期混合",
-      "nav": 0.8951,
-      "date": "2026-05-12",
-      "daily_pct": -0.16,
-      "source": "天天基金fundgz估算",
+      "nav": 0.8966,
+      "date": "2026-05-11",
+      "daily_pct": 2.9,
+      "source": "AKShare fund_open_fund_info_em",
       "ok": true,
-      "diagnosis": "history_from_akshare: Response ended prematurely; history_from_eastmoney_f10: [Errno 2] No such file or directory: var apidata={ content:\"<table class='w782 comm lsjz'><thead><tr><th class='first'>净值日期</th><th>单位净值</th><th>累计净值</th><th>日增长率</th><th>申购状态</th><th>赎回状态</th><th class='tor last'>分红送配</th></tr></thead><tbody><tr><td>2026-05-12</td><td class='tor bold'>0.8950</td><td class='tor bold'>0.8950</td><td class='tor bold grn'>-0.18%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr><tr><td>2026-05-11</td><td class='tor bold'>0.8966</td><td class='tor bold'>0.8966</td><td class='tor bold red'>2.90%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr><tr><td>2026-05-08</td><td class='tor bold'>0.8713</td><td class='tor bold'>0.8713</td><td class='tor bold grn'>-0.75%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr><tr><td>2026-05-07</td><td class='tor bold'>0.8779</td><td class='tor bold'>0.8779</td><td class='tor bold red'>0.83%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr><tr><td>2026-05-06</td><td class='tor bold'>0.8707</td><td class='tor bold'>0.8707</td><td class='tor bold red'>2.74%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr><tr><td>2026-04-30</td><td class='tor bold'>0.8475</td><td class='tor bold'>0.8475</td><td class='tor bold red'>0.44%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr><tr><td>2026-04-29</td><td class='tor bold'>0.8438</td><td class='tor bold'>0.8438</td><td class='tor bold red'>1.31%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr><tr><td>2026-04-28</td><td class='tor bold'>0.8329</td><td class='tor bold'>0.8329</td><td class='tor bold grn'>-0.80%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr><tr><td>2026-04-27</td><td class='tor bold'>0.8396</td><td class='tor bold'>0.8396</td><td class='tor bold red'>0.71%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr><tr><td>2026-04-24</td><td class='tor bold'>0.8337</td><td class='tor bold'>0.8337</td><td class='tor bold grn'>-0.01%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr><tr><td>2026-04-23</td><td class='tor bold'>0.8338</td><td class='tor bold'>0.8338</td><td class='tor bold grn'>-1.08%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr><tr><td>2026-04-22</td><td class='tor bold'>0.8429</td><td class='tor bold'>0.8429</td><td class='tor bold red'>0.29%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr><tr><td>2026-04-21</td><td class='tor bold'>0.8405</td><td class='tor bold'>0.8405</td><td class='tor bold red'>0.57%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr><tr><td>2026-04-20</td><td class='tor bold'>0.8357</td><td class='tor bold'>0.8357</td><td class='tor bold red'>0.86%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr><tr><td>2026-04-17</td><td class='tor bold'>0.8286</td><td class='tor bold'>0.8286</td><td class='tor bold grn'>-0.28%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr><tr><td>2026-04-16</td><td class='tor bold'>0.8309</td><td class='tor bold'>0.8309</td><td class='tor bold red'>1.59%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr><tr><td>2026-04-15</td><td class='tor bold'>0.8179</td><td class='tor bold'>0.8179</td><td class='tor bold red'>0.26%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr><tr><td>2026-04-14</td><td class='tor bold'>0.8158</td><td class='tor bold'>0.8158</td><td class='tor bold red'>0.64%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr><tr><td>2026-04-13</td><td class='tor bold'>0.8106</td><td class='tor bold'>0.8106</td><td class='tor bold grn'>-0.27%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr><tr><td>2026-04-10</td><td class='tor bold'>0.8128</td><td class='tor bold'>0.8128</td><td class='tor bold red'>0.38%</td><td>开放申购</td><td>开放赎回</td><td class='red unbold'></td></tr></tbody></table>\",records:1284,pages:65,curpage:1};"
+      "diagnosis": ""
     },
     "501054": {
       "code": "501054",
