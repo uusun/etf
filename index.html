@@ -24,7 +24,7 @@ label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px} input,s
 <body>
 <header><h1>A股权益「超级基金」止盈监控</h1><div class="sub">14 只基金合并为单一账户；收益口径锚定真实收益核算报告，移动止盈高点默认从 2026-05-07 起算。<span class="badge info">生成：2026-05-11 接口手动选择版</span></div></header>
 <main class="wrap">
-<div class="toolbar"><div><label>数据模式</label><select id="modeSelect"><option value="official">确认净值优先</option><option value="estimate">盘中估算优先</option></select></div><div><label>净值接口</label><select id="sourceSelect"><option value="auto">自动：东财历史 + 天天最新</option><option value="tiantian">天天基金优先</option><option value="eastmoney">东方财富优先</option><option value="sina">新浪财经优先，失败回退天天</option><option value="tencent">腾讯财经优先，失败回退天天</option><option value="baseline">内置基准，不联网</option></select></div><div><label>止盈方案</label><select id="strategySelect"><option value="balanced">均衡：8% / 12% / 16%</option><option value="conservative">保守：4% 全部退出</option><option value="aggressive">激进：20% / 25% / 30% / 35%</option></select></div><div><label>手动监控高点，留空则按 2026-05-07 起自动高点</label><input id="manualPeakInput" placeholder="例如 4166576.50" inputmode="decimal"></div><button id="refreshBtn">刷新净值</button><button class="secondary" id="setPeakBtn">当前设为监控高点</button><button class="secondary" id="exportBtn">导出 CSV</button></div>
+<div class="toolbar"><div><label>数据模式</label><select id="modeSelect"><option value="official">确认净值优先</option><option value="estimate">盘中估算优先</option></select></div><div><label>净值接口</label><select id="sourceSelect"><option value="auto">自动：本地JSON + 前端补采</option><option value="local">本地JSON快照</option><option value="tiantian">天天基金实时</option><option value="eastmoney">东方财富实时</option><option value="sina">新浪优先，失败回退天天</option><option value="tencent">腾讯优先，失败回退天天</option><option value="baseline">内置基准，不联网</option></select></div><div><label>止盈方案</label><select id="strategySelect"><option value="balanced">均衡：8% / 12% / 16%</option><option value="conservative">保守：4% 全部退出</option><option value="aggressive">激进：20% / 25% / 30% / 35%</option></select></div><div><label>手动监控高点，留空则按 2026-05-07 起自动高点</label><input id="manualPeakInput" placeholder="例如 4166576.50" inputmode="decimal"></div><button id="refreshBtn">刷新净值</button><button class="secondary" id="setPeakBtn">当前设为监控高点</button><button class="secondary" id="exportBtn">导出 CSV</button></div>
 <div id="statusAlert" class="alert safe">正在读取公开净值接口……</div>
 <section class="grid cards"><div class="card"><div class="k">当前总市值</div><div class="v" id="totalValue">--</div><div class="s" id="totalDate">--</div></div><div class="card"><div class="k">今日盈亏</div><div class="v" id="dayPnl">--</div><div class="s" id="dayPct">--</div></div><div class="card"><div class="k">真实累计盈亏</div><div class="v" id="holdPnl">--</div><div class="s" id="holdPct">--</div></div><div class="card"><div class="k">监控高点</div><div class="v" id="peakValue">--</div><div class="s" id="peakSource">--</div></div><div class="card"><div class="k">距监控高点回撤</div><div class="v" id="drawdownNow">--</div><div class="s" id="nextLine">--</div><div class="progress"><div class="bar" id="ddBar"></div></div></div><div class="card"><div class="k">建议动作</div><div class="v" id="actionText">--</div><div class="s" id="actionDetail">--</div></div></section>
 <section class="decision-grid"><div class="decision-card"><div class="decision-head"><div><div class="decision-title">第一层：移动止盈主策略</div><div class="decision-summary" id="movingSummary">--</div></div><div class="decision-status" id="movingBadge">--</div></div><div id="stopPlanBox"></div></div><div class="decision-card"><div class="decision-head"><div><div class="decision-title">第二层：固定目标止盈</div><div class="decision-summary" id="fixedSummary">--</div></div><div class="decision-status" id="fixedBadge">--</div></div><div id="fixedPlanBox"></div></div><div class="decision-card"><div class="decision-head"><div><div class="decision-title">第三层：净值分位 / 热度止盈</div><div class="decision-summary" id="heatSummary">--</div></div><div class="decision-status" id="heatBadge">--</div></div><div id="heatPlanBox"></div></div><div class="decision-card"><div class="decision-head"><div><div class="decision-title">第四层：均线趋势确认</div><div class="decision-summary" id="trendSummary">--</div></div><div class="decision-status" id="trendBadge">--</div></div><div id="trendPlanBox"></div></div></section>
@@ -32,7 +32,7 @@ label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px} input,s
 <section class="section"><h2>超级基金总市值 / 止盈线</h2><div class="rangebar" id="rangeBar"><button data-range="all" class="active">全部</button><button data-range="3y">近三年</button><button data-range="1y">近一年</button><button data-range="6m">近六月</button><button data-range="3m">近三月</button><button data-range="1m">近一月</button><span class="note" style="margin:0 4px 0 10px;">自定义：</span><input type="date" id="customStart"><input type="date" id="customEnd"><button data-range="custom" id="customRangeBtn">应用</button></div><div class="chartwrap"><canvas id="valueChart"></canvas><div id="valueTip" class="tooltip"></div></div><div class="note">曲线从 2020-10-27 开始展示；移动止盈监控高点只从 2026-05-07 起算。早期历史高点仅作为背景，不参与当前止盈触发。</div></section>
 <section class="section"><h2>监控回撤曲线（2026-05-07 起算）</h2><div class="chartwrap"><canvas id="drawdownChart" class="smallcanvas"></canvas><div id="drawdownTip" class="tooltip"></div></div></section>
 <section class="section"><h2>14 只基金持仓明细</h2><div class="tablebox no-scroll"><table id="fundTable"><thead><tr><th data-key="code" class="sortable">代码</th><th data-key="name" class="sortable">名称</th><th data-key="shares" class="sortable">份额</th><th data-key="nav" class="sortable">最新净值</th><th data-key="navDate" class="sortable">净值日期/时间</th><th data-key="dailyPct" class="sortable">日涨跌</th><th data-key="dayPnl" class="sortable">今日盈亏</th><th data-key="value" class="sortable">当前市值</th><th data-key="invested" class="sortable">真实投入</th><th data-key="redeemed" class="sortable">已赎回</th><th data-key="dividend" class="sortable">分红</th><th data-key="netPnl" class="sortable">真实盈亏</th><th data-key="netReturn" class="sortable">真实收益率</th><th data-key="weight" class="sortable">权重</th><th data-key="source" class="sortable">接口状态</th></tr></thead><tbody></tbody></table></div><div class="note">真实盈亏 = 当前市值 + 已赎回 + 分红 − 真实投入。总账户口径优先锚定你提供的核算报告。</div></section>
-<section class="section"><h2>数据口径说明</h2><details open><summary>收益、投入与高点的口径</summary><p>整体收益口径来自 <code>14只基金真实收益核算报告_20260509.xlsx</code>：总投入 732.90 万、赎回 335.60 万、分红 11.52 万、2026-05-09 当前持仓 416.66 万、净盈亏 30.88 万、总收益率 4.21%。网页每天刷新后，会用最新市值相对 2026-05-09 基准市值的变化，动态更新整体盈亏。</p><p>移动止盈使用“监控高点”：默认只从 <code>2026-05-07</code> 起寻找高点。2020-10-27 起的历史曲线继续展示，但早期高点不作为当前止盈线计算依据。</p></details><details><summary>公开净值接口</summary><p>页面现在支持手动选择净值接口：自动多源、天天基金、东方财富、新浪财经、腾讯财经、内置基准。自动模式下，东方财富主要负责历史曲线，天天基金负责最新确认净值/盘中估算；若天天基金异常，再尝试新浪和腾讯。若选择某个指定接口，最新净值会优先按该接口刷新，接口状态列会显示实际采用的数据源和诊断链路。</p></details></section>
+<section class="section"><h2>数据口径说明</h2><details open><summary>收益、投入与高点的口径</summary><p>整体收益口径来自 <code>14只基金真实收益核算报告_20260509.xlsx</code>：总投入 732.90 万、赎回 335.60 万、分红 11.52 万、2026-05-09 当前持仓 416.66 万、净盈亏 30.88 万、总收益率 4.21%。网页每天刷新后，会用最新市值相对 2026-05-09 基准市值的变化，动态更新整体盈亏。</p><p>移动止盈使用“监控高点”：默认只从 <code>2026-05-07</code> 起寻找高点。2020-10-27 起的历史曲线继续展示，但早期高点不作为当前止盈线计算依据。</p></details><details><summary>公开净值接口</summary><p>页面现在支持手动选择净值接口：自动、本地JSON、天天基金、东方财富、新浪财经、腾讯财经、内置基准。自动模式下会先读 GitHub Actions 生成的本地JSON，但仍会用前端天天基金尝试补采；如果前端拿到的日期更新，会覆盖本地旧快照。若手动选择天天/东财/新浪/腾讯，则最新净值会绕过本地JSON，避免“本地有旧数据就不再抓接口”。</p></details></section>
 </main>
 <script>
 const HOLDINGS = [
@@ -238,8 +238,8 @@ async function getSinaFundData(code){const candidates=["of_","fu_"].map(prefix=>
 function parseTencentText(txt){if(!txt||typeof txt!=="string")throw new Error("empty tencent");const p=txt.split("~");const nums=p.map(x=>parseFloat(x)).filter(x=>isFinite(x)&&x>0&&x<100);let unitNav=NaN,estNav=NaN,pct=NaN,date="";for(const x of nums){if(isValidNav(x)){unitNav=x;break}}for(const x of p){const s=String(x||"").trim();if(/\d{4}-\d{2}-\d{2}/.test(s)){date=(s.match(/\d{4}-\d{2}-\d{2}/)||[""])[0];break}}for(const x of p){const n=parseFloat(x);if(isFinite(n)&&Math.abs(n)<30&&String(x).includes(".")){pct=n;break}}if(!isValidNav(unitNav)&&!isValidNav(estNav))throw new Error("invalid tencent nav");return{unitNav,estNav,pct,date,source:"腾讯财经基金行情"}}
 async function getTencentFundData(code){const txt=await loadMarketScriptOnce(`https://qt.gtimg.cn/q=of_${code}`,`v_of_${code}`,3500);return parseTencentText(txt)}
 let LOCAL_FUND_DATA_CACHE = undefined;
-async function getLocalFundData(){
-  if(LOCAL_FUND_DATA_CACHE!==undefined) return LOCAL_FUND_DATA_CACHE;
+async function getLocalFundData(force=false){
+  if(!force && LOCAL_FUND_DATA_CACHE!==undefined) return LOCAL_FUND_DATA_CACHE;
   const out={latest:null,history:null,loaded:false,updatedAt:"",error:""};
   try{
     const bust=`_=${todayTs()}`;
@@ -256,7 +256,7 @@ async function getLocalFundData(){
 function localLatestFor(localData,code){
   const item=localData&&localData.latest&&localData.latest.items&&localData.latest.items[code];
   if(!item||!isValidNav(item.nav))return null;
-  return {nav:+item.nav,date:prettyDateTime(item.date)||cleanDate(item.date)||REPORT.asOf,pct:isFinite(+item.daily_pct)?+item.daily_pct:NaN,source:item.source||"本地JSON最新净值",diagnosis:item.diagnosis||""};
+  return {nav:+item.nav,date:prettyDateTime(item.date_time)||prettyDateTime(item.date)||cleanDate(item.date)||REPORT.asOf,pct:isFinite(+item.daily_pct)?+item.daily_pct:NaN,source:item.source||"本地JSON最新净值",diagnosis:item.diagnosis||"",dateOk:item.date_ok,expected:item.expected_trade_date||"",estimated:!!item.estimated};
 }
 function localHistoryFor(localData,code){
   const arr=localData&&localData.history&&localData.history.items&&localData.history.items[code];
@@ -271,15 +271,19 @@ async function loadOneFund(h,mode,sourcePref="auto",localData=null){
 let hist=null,gz=null,sina=null,tencent=null,status=[];
 const pref=sourcePref||"auto";
 const useBaselineOnly=pref==="baseline";
-const localHist=localHistoryFor(localData,h.code);
-const localLatest=localLatestFor(localData,h.code);
-if(!useBaselineOnly){
+const useLocalOnly=pref==="local";
+const allowLocalLatest=(pref==="auto"||pref==="local");
+const allowLocalHistory=(!useBaselineOnly&&pref!=="eastmoney");
+const localHist=allowLocalHistory?localHistoryFor(localData,h.code):null;
+const localLatest=allowLocalLatest?localLatestFor(localData,h.code):null;
+if(useBaselineOnly){status.push("手动选择内置基准")}
+else{
   if(localHist){hist={history:localHist,source:"本地JSON历史净值"};status.push("本地历史OK")}
   else{try{hist=await getPingzhongData(h.code);status.push("东财历史OK")}catch(e){status.push("东财历史失败:"+(e&&e.message?e.message:""))}}
-  if(localLatest)status.push("本地最新OK"+(localLatest.diagnosis?":"+localLatest.diagnosis:""));
-}else{status.push("手动选择内置基准")}
-// 天天基金现在作为最新净值主通道：除“内置基准”外都预先读取，给新浪/腾讯失败时快速回退。
-if(!useBaselineOnly){
+  if(localLatest)status.push("本地最新OK"+(localLatest.dateOk===false?"(日期偏旧)":"")+(localLatest.diagnosis?":"+localLatest.diagnosis:""));
+}
+// 除“本地JSON快照 / 内置基准”外，最新净值都尝试前端接口；自动模式也会补采，用来覆盖本地旧日期。
+if(!useBaselineOnly&&!useLocalOnly){
   try{gz=await getFundGzData(h.code);status.push(gz&&(gz.gsz||gz.dwjz)?"天天OK":"天天空")}catch(e){status.push("天天失败:"+(e&&e.message?e.message:""))}
 }
 if(pref==="sina"){
@@ -288,7 +292,6 @@ if(pref==="sina"){
 if(pref==="tencent"){
   try{tencent=await getTencentFundData(h.code);status.push("腾讯OK")}catch(e){status.push("腾讯失败:"+(e&&e.message?e.message:"")+"；回退天天")}
 }
-// 自动模式下，新浪/腾讯只作为最后短超时备用，不允许拖慢整页。
 if(pref==="auto"&&!(gz&&(isValidNav(gz.dwjz)||isValidNav(gz.gsz)))){
   try{sina=await getSinaFundData(h.code);status.push("新浪OK")}catch(e){status.push("新浪失败:"+(e&&e.message?e.message:""))}
 }
@@ -297,43 +300,49 @@ if(pref==="auto"&&!(gz&&(isValidNav(gz.dwjz)||isValidNav(gz.gsz)))&&!sina){
 }
 let history=hist?.history||[{date:REPORT.asOf,nav:h.baselineNav,pct:NaN}];
 let lastHist=latestFromHistory(history);
-let nav=lastHist?.nav||h.baselineNav,navDate=lastHist?.date||REPORT.asOf,dailyPct=isFinite(lastHist?.pct)?lastHist.pct:NaN,source=hist?"东方财富历史净值":"内置基准";
+let nav=lastHist?.nav||h.baselineNav,navDate=lastHist?.date||REPORT.asOf,dailyPct=isFinite(lastHist?.pct)?lastHist.pct:NaN,source=hist?hist.source:"内置基准";
+function applyLocal(force=false){
+  if(!localLatest)return false;
+  if(force||source==="内置基准"||!isValidNav(nav)||cmpDate(cleanDate(localLatest.date),cleanDate(navDate))>=0){
+    nav=localLatest.nav;navDate=localLatest.date||navDate;dailyPct=localLatest.pct;source=localLatest.source||"本地JSON最新净值";return true;
+  }
+  return false;
+}
 function applyTianTian(force=false){
   if(!gz)return false;
   const gsz=parseFloat(gz.gsz),gszzl=parseFloat(gz.gszzl),dwjz=parseFloat(gz.dwjz);
   const {jzrq,gzTime,gzDate,bestGzDate}=normalizeGzDate(gz);
-  // 盘中估算优先：直接用 gsz/gztime。
   if(mode==="estimate"&&isValidNav(gsz)){
     nav=gsz;navDate=gzTime||gzDate||jzrq||navDate;dailyPct=isFinite(gszzl)?gszzl:dailyPct;source="天天基金估算";return true;
   }
-  // 关键修复：如果 gztime 比 jzrq 更新，就说明最新可用值来自估算字段，日期也必须跟 gztime。
-  if(isValidNav(gsz)&&gzDate&&(!jzrq||gzDate>=jzrq)&&(force||source==="内置基准"||cmpDate(gzDate,navDate)>=0)){
+  if(isValidNav(gsz)&&gzDate&&(!jzrq||gzDate>=jzrq)&&(force||source==="内置基准"||cmpDate(gzDate,cleanDate(navDate))>=0)){
     nav=gsz;navDate=gzTime||gzDate;dailyPct=isFinite(gszzl)?gszzl:dailyPct;source="天天基金估算";return true;
   }
-  if(isValidNav(dwjz)&&(force||source==="内置基准"||cmpDate(bestGzDate||jzrq,navDate)>=0)){
+  if(isValidNav(dwjz)&&(force||source==="内置基准"||cmpDate(bestGzDate||jzrq,cleanDate(navDate))>=0)){
     nav=dwjz;navDate=jzrq||gzTime||gzDate||navDate;dailyPct=isFinite(gszzl)?gszzl:dailyPct;source="天天基金确认净值";return true;
   }
-  if(isValidNav(gsz)&&(force||source==="内置基准"||cmpDate(gzDate,navDate)>=0)){
+  if(isValidNav(gsz)&&(force||source==="内置基准"||cmpDate(gzDate,cleanDate(navDate))>=0)){
     nav=gsz;navDate=gzTime||gzDate||jzrq||navDate;dailyPct=isFinite(gszzl)?gszzl:dailyPct;source="天天基金估算";return true;
   }
   return false;
 }
 function applyAlt(alt,force=false){
   if(!alt)return false;
-  if(force||source==="内置基准"||!isValidNav(nav)||cmpDate(alt.date,navDate)>=0){
+  if(force||source==="内置基准"||!isValidNav(nav)||cmpDate(cleanDate(alt.date),cleanDate(navDate))>=0){
     if(isValidNav(alt.unitNav)){nav=alt.unitNav;source=alt.source.includes("腾讯")?"腾讯财经确认净值":"新浪财经确认净值"}
     else if(isValidNav(alt.estNav)){nav=alt.estNav;source=alt.source.includes("腾讯")?"腾讯财经估算":"新浪财经估算"}
     else return false;
-    navDate=prettyDateTime(alt.date)||navDate;dailyPct=isFinite(alt.pct)?alt.pct:dailyPct;return true;
+    navDate=prettyDateTime(alt.date)||cleanDate(alt.date)||navDate;dailyPct=isFinite(alt.pct)?alt.pct:dailyPct;return true;
   }
   return false;
 }
-function applyHistoryOrBaseline(){if(hist){source="东方财富历史净值";return true}nav=h.baselineNav;navDate=REPORT.asOf;dailyPct=NaN;source="内置基准";return false}
+function applyHistoryOrBaseline(){if(hist){source=hist.source||"历史净值";return true}nav=h.baselineNav;navDate=REPORT.asOf;dailyPct=NaN;source="内置基准";return false}
 if(pref==="baseline"){
   nav=h.baselineNav;navDate=REPORT.asOf;dailyPct=NaN;source="内置基准";
-}else if(localLatest){
-  nav=localLatest.nav;navDate=localLatest.date||navDate;dailyPct=localLatest.pct;source=localLatest.source||"本地JSON最新净值";
+}else if(pref==="local"){
+  if(!applyLocal(true))applyHistoryOrBaseline();
 }else if(pref==="eastmoney"){
+  // 强制东财：不用本地最新；东财历史失败时才回退天天。
   if(!hist){if(!applyTianTian(true))applyHistoryOrBaseline()}
 }else if(pref==="tiantian"){
   if(!applyTianTian(true))applyHistoryOrBaseline();
@@ -342,8 +351,10 @@ if(pref==="baseline"){
 }else if(pref==="tencent"){
   if(!applyAlt(tencent,true)){ if(!applyTianTian(true))applyHistoryOrBaseline(); }
 }else{
+  // 自动：本地JSON先作为底稿，但天天/新浪/腾讯只要日期更新或同日有效，就覆盖本地旧快照。
+  applyLocal(true);
   applyTianTian(false);
-  if(source==="内置基准")applyAlt(sina||tencent,false);
+  if(source==="内置基准"||String(source).includes("本地JSON"))applyAlt(sina||tencent,false);
 }
 if((!hist||history.length===1)&&gz){
   const dwjz=parseFloat(gz.dwjz),gszzl=parseFloat(gz.gszzl),gsz=parseFloat(gz.gsz);const {jzrq,gzTime,gzDate}=normalizeGzDate(gz);
@@ -371,7 +382,8 @@ function chartSetup(canvas){const dpr=window.devicePixelRatio||1,rect=canvas.get
 function drawValueChart(canvas,series,peak,strategy,hoverIdx=state.hoverValue){if(!series.length)return;const {ctx,w,h}=chartSetup(canvas),pad={l:78,r:24,t:24,b:34},volH=110,gap=18,mainB=pad.b+volH+gap,vals=series.map(p=>p.value).concat([peak],strategy.thresholds.map(t=>peak*(1-t))),minY=Math.min(...vals)*.985,maxY=Math.max(...vals)*1.015,x=(p,i)=>pad.l+i/Math.max(1,series.length-1)*(w-pad.l-pad.r),y=p=>pad.t+(maxY-p.value)/(maxY-minY)*(h-pad.t-mainB);drawGrid(ctx,w,h,{...pad,b:mainB},minY,maxY,v=>(v/10000).toFixed(0)+"万");strategy.thresholds.forEach((t,i)=>{const val=peak*(1-t),yy=pad.t+(maxY-val)/(maxY-minY)*(h-pad.t-mainB);ctx.strokeStyle=i===0?"#f59e0b":"#ef4444";ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(pad.l,yy);ctx.lineTo(w-pad.r,yy);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=i===0?"#b45309":"#991b1b";ctx.fillText(`-${(t*100).toFixed(0)}% ${(val/10000).toFixed(0)}万`,pad.l+8,yy-5)});const peakY=pad.t+(maxY-peak)/(maxY-minY)*(h-pad.t-mainB);ctx.strokeStyle="#2563eb";ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(pad.l,peakY);ctx.lineTo(w-pad.r,peakY);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle="#1d4ed8";ctx.fillText("监控高点 "+(peak/10000).toFixed(0)+"万",pad.l+8,peakY-6);drawLine(ctx,series,x,y,"#2563eb",2.3);const maxAbs=Math.max(1,...series.map(p=>Math.abs(p.dayPnl||0))),vTop=h-pad.b-volH,vMid=vTop+volH/2;ctx.strokeStyle="#e2e8f0";ctx.beginPath();ctx.moveTo(pad.l,vMid);ctx.lineTo(w-pad.r,vMid);ctx.stroke();for(let i=0;i<series.length;i++){const p=series[i],xx=x(p,i),bw=Math.max(1,(w-pad.l-pad.r)/series.length*.65),bh=Math.abs(p.dayPnl||0)/maxAbs*(volH/2-8);ctx.fillStyle=(p.dayPnl||0)>=0?"rgba(220,38,38,.5)":"rgba(22,163,74,.5)";if((p.dayPnl||0)>=0)ctx.fillRect(xx-bw/2,vMid-bh,bw,bh);else ctx.fillRect(xx-bw/2,vMid,bw,bh)}ctx.fillStyle="#64748b";ctx.fillText("日盈亏柱",8,vMid+4);ctx.fillText(series[0].date,pad.l,h-10);ctx.textAlign="right";ctx.fillText(series[series.length-1].date,w-pad.r,h-10);ctx.textAlign="left";if(hoverIdx!==null&&hoverIdx>=0&&hoverIdx<series.length){const p=series[hoverIdx],xx=x(p,hoverIdx),yy=y(p);ctx.strokeStyle="rgba(15,23,42,.45)";ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(xx,pad.t);ctx.lineTo(xx,h-pad.b);ctx.moveTo(pad.l,yy);ctx.lineTo(w-pad.r,yy);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle="#0f172a";ctx.beginPath();ctx.arc(xx,yy,4,0,Math.PI*2);ctx.fill()}canvas._chartMeta={series,pad,w,h}}
 function drawDrawdownChart(canvas,series,strategy,hoverIdx=state.hoverDraw){if(!series.length)return;const {ctx,w,h}=chartSetup(canvas),pad={l:62,r:20,t:20,b:32},vals=series.map(p=>p.dd).concat(strategy.thresholds.map(t=>-t),[0]),minY=Math.min(...vals)*1.1,maxY=.01,x=(p,i)=>pad.l+i/Math.max(1,series.length-1)*(w-pad.l-pad.r),y=p=>pad.t+(maxY-p.dd)/(maxY-minY)*(h-pad.t-pad.b);drawGrid(ctx,w,h,pad,minY,maxY,v=>(v*100).toFixed(0)+"%");strategy.thresholds.forEach(t=>{const yy=pad.t+(maxY+t)/(maxY-minY)*(h-pad.t-pad.b);ctx.strokeStyle="#ef4444";ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(pad.l,yy);ctx.lineTo(w-pad.r,yy);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle="#991b1b";ctx.fillText(`-${(t*100).toFixed(0)}%`,pad.l+8,yy-5)});drawLine(ctx,series,x,y,"#ef4444",2);ctx.fillStyle="#64748b";ctx.fillText(series[0].date,pad.l,h-10);ctx.textAlign="right";ctx.fillText(series[series.length-1].date,w-pad.r,h-10);ctx.textAlign="left";if(hoverIdx!==null&&hoverIdx>=0&&hoverIdx<series.length){const p=series[hoverIdx],xx=x(p,hoverIdx),yy=y(p);ctx.strokeStyle="rgba(15,23,42,.45)";ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(xx,pad.t);ctx.lineTo(xx,h-pad.b);ctx.moveTo(pad.l,yy);ctx.lineTo(w-pad.r,yy);ctx.stroke();ctx.setLineDash([])}canvas._chartMeta={series,pad,w,h}}
 function nearestIndex(canvas,evt){const meta=canvas._chartMeta;if(!meta)return null;const rect=canvas.getBoundingClientRect(),mx=evt.clientX-rect.left,n=meta.series.length,idx=Math.round((mx-meta.pad.l)/(meta.w-meta.pad.l-meta.pad.r)*(n-1));return Math.max(0,Math.min(n-1,idx))} function setupHover(canvasId,tipId,type){const canvas=document.getElementById(canvasId),tip=document.getElementById(tipId);canvas.addEventListener("mousemove",e=>{const idx=nearestIndex(canvas,e);if(idx===null)return;const p=canvas._chartMeta.series[idx];if(type==="value")state.hoverValue=idx;else state.hoverDraw=idx;const rect=canvas.getBoundingClientRect();tip.style.display="block";tip.style.left=Math.min(rect.width-235,Math.max(8,e.clientX-rect.left+12))+"px";tip.style.top=Math.max(8,e.clientY-rect.top+12)+"px";tip.innerHTML=type==="value"?`<strong>${p.date}</strong><br>组合市值：${fmtMoney(p.value)}<br>当日盈亏：<span class="${clsByPnL(p.dayPnl)}">${fmtMoney(p.dayPnl)}</span><br>活跃基金数：${p.active||"--"}`:`<strong>${p.date}</strong><br>监控高点：${fmtMoney(p.peak)}<br>回撤：${fmtPct(p.dd)}<br>市值：${fmtMoney(p.value)}`;const latest=state.latest;if(type==="value")drawValueChart(canvas,state.chartSeries,latest.peak,latest.strategy,idx);else drawDrawdownChart(canvas,filterSeries(state.drawdownSeries),latest.strategy,idx)});canvas.addEventListener("mouseleave",()=>{tip.style.display="none";if(type==="value")state.hoverValue=null;else state.hoverDraw=null;if(state.latest){if(type==="value")drawValueChart(canvas,state.chartSeries,state.latest.peak,state.latest.strategy);else drawDrawdownChart(canvas,filterSeries(state.drawdownSeries),state.latest.strategy)}})}
-async function refresh(){if(state.loading)return;state.loading=true;document.getElementById("refreshBtn").textContent="刷新中…";const mode=document.getElementById("modeSelect").value,sourcePref=document.getElementById("sourceSelect").value;localStorage.setItem(LS.mode,mode);localStorage.setItem(LS.source,sourcePref);localStorage.setItem(LS.strategy,document.getElementById("strategySelect").value);const alert=document.getElementById("statusAlert");alert.className="alert";alert.innerHTML="正在读取本地净值快照，如无快照再调用公开接口……";const localData=await getLocalFundData();const rows=[];for(let i=0;i<HOLDINGS.length;i++){const h=HOLDINGS[i];alert.innerHTML=`正在读取：${h.code} ${h.name}（${i+1}/${HOLDINGS.length}）${localData&&localData.loaded?"｜本地JSON已加载":"｜未发现本地JSON"}`;try{rows.push(await loadOneFund(h,mode,sourcePref,localData))}catch(e){const value=h.baselineNav*h.shares;rows.push({...h,nav:h.baselineNav,navDate:REPORT.asOf,dailyPct:NaN,value,prevValue:value,dayPnl:0,netPnl:value+h.redeemed+h.dividend-h.invested,netReturn:(value+h.redeemed+h.dividend-h.invested)/h.invested,source:"内置基准",sourceClass:"bad",history:[{date:REPORT.asOf,nav:h.baselineNav,pct:NaN}],status:"全部失败"})}}state.rows=rows;state.loading=false;document.getElementById("refreshBtn").textContent="刷新净值";renderDashboard();if(localData&&localData.loaded){const alert=document.getElementById("statusAlert");const localCount=rows.filter(r=>String(r.source||"").includes("本地JSON")).length;alert.className=localCount===rows.length?"alert safe":"alert";alert.innerHTML=`已加载本地净值快照：${localCount}/${rows.length} 只基金采用本地JSON。更新时间：${localData.updatedAt||"--"}。`}}
+function beijingExpectedTradeDate(){const now=new Date();const bj=new Date(now.getTime()+8*3600*1000);let y=bj.getUTCFullYear(),m=bj.getUTCMonth(),d=bj.getUTCDate();let dt=new Date(Date.UTC(y,m,d));while(dt.getUTCDay()===0||dt.getUTCDay()===6){dt=new Date(dt.getTime()-86400000)}return dateStrFromMs(dt.getTime())}
+async function refresh(){if(state.loading)return;state.loading=true;document.getElementById("refreshBtn").textContent="刷新中…";const mode=document.getElementById("modeSelect").value,sourcePref=document.getElementById("sourceSelect").value;localStorage.setItem(LS.mode,mode);localStorage.setItem(LS.source,sourcePref);localStorage.setItem(LS.strategy,document.getElementById("strategySelect").value);const alert=document.getElementById("statusAlert");alert.className="alert";alert.innerHTML=sourcePref==="local"?"正在读取本地净值快照……":"正在读取本地快照并按所选接口补采最新净值……";const localData=await getLocalFundData(true);const rows=[];for(let i=0;i<HOLDINGS.length;i++){const h=HOLDINGS[i];alert.innerHTML=`正在读取：${h.code} ${h.name}（${i+1}/${HOLDINGS.length}）${localData&&localData.loaded?"｜本地JSON已重新读取":"｜未发现本地JSON"}`;try{rows.push(await loadOneFund(h,mode,sourcePref,localData))}catch(e){const value=h.baselineNav*h.shares;rows.push({...h,nav:h.baselineNav,navDate:REPORT.asOf,dailyPct:NaN,value,prevValue:value,dayPnl:0,netPnl:value+h.redeemed+h.dividend-h.invested,netReturn:(value+h.redeemed+h.dividend-h.invested)/h.invested,source:"内置基准",sourceClass:"bad",history:[{date:REPORT.asOf,nav:h.baselineNav,pct:NaN}],status:"全部失败:"+(e&&e.message?e.message:e)})}}state.rows=rows;state.loading=false;document.getElementById("refreshBtn").textContent="刷新净值";renderDashboard();const expected=beijingExpectedTradeDate();const stale=rows.filter(r=>cleanDate(r.navDate)&&cleanDate(r.navDate)<expected);const counts={};rows.forEach(r=>{const k=String(r.source||"未知").replace(/\s+/g,"");counts[k]=(counts[k]||0)+1});const summary=Object.entries(counts).map(([k,v])=>`${k} ${v}只`).join("，");const localInfo=localData&&localData.loaded?`本地JSON更新时间：${localData.updatedAt||"--"}。`:"未发现本地JSON。";if(stale.length){alert.className="alert";alert.innerHTML=`${localInfo} 当前数据源：${summary}。<br><strong>仍有 ${stale.length} 只基金日期早于预期交易日 ${expected}：</strong>${stale.map(r=>r.code+"("+cleanDate(r.navDate)+")").join("、")}。这通常表示基金公司或上游接口尚未同步，或该接口当日数据延迟。`}else{alert.className="alert safe";alert.innerHTML=`${localInfo} 当前数据源：${summary}。所有基金日期均不早于预期交易日 ${expected}。`}}
 function exportCsv(){const headers=["代码","名称","份额","最新净值","日期","日涨跌%","今日盈亏","当前市值","真实投入","已赎回","分红","真实盈亏","真实收益率%","来源","接口诊断"],lines=[headers.join(",")];state.rows.forEach(r=>lines.push([r.code,r.name,r.shares,r.nav,r.navDate,isFinite(r.dailyPct)?r.dailyPct:"",isFinite(r.dayPnl)?r.dayPnl:"",r.value,r.invested,r.redeemed,r.dividend,r.netPnl,r.netReturn*100,r.source,r.status].map(v=>`"${String(v??"").replaceAll('"','""')}"`).join(",")));const blob=new Blob(["\ufeff"+lines.join("\n")],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`superfund-monitor-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(a.href)}
 function init(){document.getElementById("modeSelect").value=localStorage.getItem(LS.mode)||"official";document.getElementById("sourceSelect").value=localStorage.getItem(LS.source)||"auto";document.getElementById("strategySelect").value=localStorage.getItem(LS.strategy)||"balanced";const mp=localStorage.getItem(LS.manualPeak);if(mp)document.getElementById("manualPeakInput").value=mp;document.getElementById("customStart").value=localStorage.getItem(LS.customStart)||"";document.getElementById("customEnd").value=localStorage.getItem(LS.customEnd)||"";document.querySelectorAll("#rangeBar button[data-range]").forEach(b=>{b.classList.toggle("active",b.dataset.range===state.range);b.addEventListener("click",()=>{state.range=b.dataset.range;if(state.range==="custom"){localStorage.setItem(LS.customStart,document.getElementById("customStart").value||START_DATE);localStorage.setItem(LS.customEnd,document.getElementById("customEnd").value||"")}localStorage.setItem(LS.range,state.range);document.querySelectorAll("#rangeBar button[data-range]").forEach(x=>x.classList.toggle("active",x.dataset.range===state.range));renderDashboard()})});document.getElementById("refreshBtn").addEventListener("click",refresh);document.getElementById("exportBtn").addEventListener("click",exportCsv);document.getElementById("strategySelect").addEventListener("change",()=>{localStorage.setItem(LS.strategy,document.getElementById("strategySelect").value);renderDashboard()});document.getElementById("modeSelect").addEventListener("change",refresh);document.getElementById("sourceSelect").addEventListener("change",refresh);document.getElementById("manualPeakInput").addEventListener("change",e=>{const x=parseFloat(e.target.value);if(isFinite(x)&&x>0)localStorage.setItem(LS.manualPeak,String(x));else localStorage.removeItem(LS.manualPeak);renderDashboard()});document.getElementById("setPeakBtn").addEventListener("click",()=>{const total=state.rows.reduce((s,r)=>s+r.value,0);if(isFinite(total)&&total>0){localStorage.setItem(LS.manualPeak,String(total.toFixed(2)));document.getElementById("manualPeakInput").value=total.toFixed(2);renderDashboard()}});document.querySelectorAll("#fundTable th.sortable").forEach(th=>th.addEventListener("click",()=>{const key=th.dataset.key;if(state.sortKey===key)state.sortDir=state.sortDir==="asc"?"desc":"asc";else{state.sortKey=key;state.sortDir="desc"}renderTable(state.rows)}));setupHover("valueChart","valueTip","value");setupHover("drawdownChart","drawdownTip","drawdown");window.addEventListener("resize",()=>state.rows.length&&renderDashboard());refresh()}
 init();
