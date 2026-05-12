@@ -32,7 +32,7 @@ label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px} input,s
 <section class="section"><h2>超级基金总市值 / 止盈线</h2><div class="rangebar" id="rangeBar"><button data-range="all" class="active">全部</button><button data-range="3y">近三年</button><button data-range="1y">近一年</button><button data-range="6m">近六月</button><button data-range="3m">近三月</button><button data-range="1m">近一月</button><span class="note" style="margin:0 4px 0 10px;">自定义：</span><input type="date" id="customStart"><input type="date" id="customEnd"><button data-range="custom" id="customRangeBtn">应用</button></div><div class="chartwrap"><canvas id="valueChart"></canvas><div id="valueTip" class="tooltip"></div></div><div class="note">曲线从 2020-10-27 开始展示；移动止盈监控高点只从 2026-05-07 起算。早期历史高点仅作为背景，不参与当前止盈触发。</div></section>
 <section class="section"><h2>监控回撤曲线（2026-05-07 起算）</h2><div class="chartwrap"><canvas id="drawdownChart" class="smallcanvas"></canvas><div id="drawdownTip" class="tooltip"></div></div></section>
 <section class="section"><h2>14 只基金持仓明细</h2><div class="tablebox no-scroll"><table id="fundTable"><thead><tr><th data-key="code" class="sortable">代码</th><th data-key="name" class="sortable">名称</th><th data-key="shares" class="sortable">份额</th><th data-key="nav" class="sortable">最新净值</th><th data-key="navDate" class="sortable">净值日期/时间</th><th data-key="dailyPct" class="sortable">日涨跌</th><th data-key="dayPnl" class="sortable">今日盈亏</th><th data-key="value" class="sortable">当前市值</th><th data-key="invested" class="sortable">真实投入</th><th data-key="redeemed" class="sortable">已赎回</th><th data-key="dividend" class="sortable">分红</th><th data-key="netPnl" class="sortable">真实盈亏</th><th data-key="netReturn" class="sortable">真实收益率</th><th data-key="weight" class="sortable">权重</th><th data-key="source" class="sortable">接口状态</th></tr></thead><tbody></tbody></table></div><div class="note">真实盈亏 = 当前市值 + 已赎回 + 分红 − 真实投入。总账户口径优先锚定你提供的核算报告。</div></section>
-<section class="section"><h2>数据口径说明</h2><details open><summary>收益、投入与高点的口径</summary><p>整体收益口径来自 <code>14只基金真实收益核算报告_20260509.xlsx</code>：总投入 732.90 万、赎回 335.60 万、分红 11.52 万、2026-05-09 当前持仓 416.66 万、净盈亏 30.88 万、总收益率 4.21%。网页每天刷新后，会用最新市值相对 2026-05-09 基准市值的变化，动态更新整体盈亏。</p><p>移动止盈使用“监控高点”：默认只从 <code>2026-05-07</code> 起寻找高点。2020-10-27 起的历史曲线继续展示，但早期高点不作为当前止盈线计算依据。</p></details><details><summary>公开净值接口</summary><p>页面现在支持手动选择净值接口：自动、本地JSON、天天基金、东方财富、新浪财经、腾讯财经、内置基准。自动模式下会先读 GitHub Actions 生成的本地JSON，但仍会用前端天天基金尝试补采；如果前端拿到的日期更新，会覆盖本地旧快照。若手动选择天天/东财/新浪/腾讯，则最新净值会绕过本地JSON，避免“本地有旧数据就不再抓接口”。</p></details></section>
+<section class="section"><h2>数据口径说明</h2><details open><summary>收益、投入与高点的口径</summary><p>整体收益口径来自 <code>14只基金真实收益核算报告_20260509.xlsx</code>：总投入 732.90 万、赎回 335.60 万、分红 11.52 万、2026-05-09 当前持仓 416.66 万、净盈亏 30.88 万、总收益率 4.21%。网页每天刷新后，会用最新市值相对 2026-05-09 基准市值的变化，动态更新整体盈亏。</p><p>移动止盈使用“监控高点”：默认只从 <code>2026-05-07</code> 起寻找高点。2020-10-27 起的历史曲线继续展示，但早期高点不作为当前止盈线计算依据。</p></details><details><summary>公开净值接口</summary><p>页面现在支持手动选择净值接口：自动、本地JSON、天天基金、东方财富、新浪财经、腾讯财经、内置基准。自动模式下会先读 GitHub Actions 生成的本地JSON，并用前端天天基金尝试补采。确认净值模式下，天天基金只采用 dwjz/jzrq 正式单位净值；gsz/gztime 仅在“盘中估算优先”模式下使用，避免把15:00估算值误当成晚间正式净值。</p></details></section>
 </main>
 <script>
 const HOLDINGS = [
@@ -267,6 +267,17 @@ function localHistoryFor(localData,code){
 
 function sourceClassOf(source,status){if(source==="内置基准")return"bad";if(status&&status.includes("失败"))return"warn";return"ok"}
 function normalizeGzDate(gz){const jzrq=cleanDate(gz&&gz.jzrq||""),gzTime=prettyDateTime(gz&&gz.gztime||""),gzDate=cleanDate(gzTime);return{jzrq,gzTime,gzDate,bestGzDate:bestDate(jzrq,gzDate)}}
+function pctFromHistoryFor(date,nav){
+  const d=cleanDate(date);
+  if(!d||!isValidNav(nav)||!Array.isArray(history))return NaN;
+  let prev=null;
+  for(const p of history){
+    const pd=cleanDate(p.date);
+    if(pd&&pd<d&&isValidNav(p.nav))prev=p;
+    if(pd&&pd>=d)break;
+  }
+  return prev&&isValidNav(prev.nav)?(nav/prev.nav-1)*100:NaN;
+}
 async function loadOneFund(h,mode,sourcePref="auto",localData=null){
 let hist=null,gz=null,sina=null,tencent=null,status=[];
 const pref=sourcePref||"auto";
@@ -303,6 +314,9 @@ let lastHist=latestFromHistory(history);
 let nav=lastHist?.nav||h.baselineNav,navDate=lastHist?.date||REPORT.asOf,dailyPct=isFinite(lastHist?.pct)?lastHist.pct:NaN,source=hist?hist.source:"内置基准";
 function applyLocal(force=false){
   if(!localLatest)return false;
+  // 本地 JSON 可能是旧版本脚本写入的“估算净值”。在确认净值模式下，
+  // 自动模式不让估算快照覆盖正式净值；只有手动选择“本地JSON快照”时才强制展示。
+  if(mode!=="estimate"&&localLatest.estimated&&pref!=="local"&&!force)return false;
   if(force||source==="内置基准"||!isValidNav(nav)||cmpDate(cleanDate(localLatest.date),cleanDate(navDate))>=0){
     nav=localLatest.nav;navDate=localLatest.date||navDate;dailyPct=localLatest.pct;source=localLatest.source||"本地JSON最新净值";return true;
   }
@@ -311,18 +325,36 @@ function applyLocal(force=false){
 function applyTianTian(force=false){
   if(!gz)return false;
   const gsz=parseFloat(gz.gsz),gszzl=parseFloat(gz.gszzl),dwjz=parseFloat(gz.dwjz);
-  const {jzrq,gzTime,gzDate,bestGzDate}=normalizeGzDate(gz);
+  const {jzrq,gzTime,gzDate}=normalizeGzDate(gz);
+
+  // 关键口径：
+  // dwjz/jzrq = 正式单位净值；gsz/gztime = 盘中估算净值。
+  // “确认净值优先”模式下绝不能用 gsz 覆盖 dwjz，否则晚间会出现和天天基金 APP 正式净值不一致。
   if(mode==="estimate"&&isValidNav(gsz)){
-    nav=gsz;navDate=gzTime||gzDate||jzrq||navDate;dailyPct=isFinite(gszzl)?gszzl:dailyPct;source="天天基金估算";return true;
+    nav=gsz;
+    navDate=gzTime||gzDate||jzrq||navDate;
+    dailyPct=isFinite(gszzl)?gszzl:dailyPct;
+    source="天天基金估算";
+    return true;
   }
-  if(isValidNav(gsz)&&gzDate&&(!jzrq||gzDate>=jzrq)&&(force||source==="内置基准"||cmpDate(gzDate,cleanDate(navDate))>=0)){
-    nav=gsz;navDate=gzTime||gzDate;dailyPct=isFinite(gszzl)?gszzl:dailyPct;source="天天基金估算";return true;
+
+  // 默认/确认模式：优先正式净值。即便 gsz 日期同为今天，也只是15:00估算，不用于正式收益核算。
+  if(isValidNav(dwjz)&&jzrq&&(force||source==="内置基准"||cmpDate(jzrq,cleanDate(navDate))>=0)){
+    nav=dwjz;
+    navDate=jzrq;
+    const histPct=pctFromHistoryFor(jzrq,dwjz);
+    dailyPct=isFinite(histPct)?histPct:(isFinite(gszzl)?gszzl:dailyPct);
+    source="天天基金确认净值";
+    return true;
   }
-  if(isValidNav(dwjz)&&(force||source==="内置基准"||cmpDate(bestGzDate||jzrq,cleanDate(navDate))>=0)){
-    nav=dwjz;navDate=jzrq||gzTime||gzDate||navDate;dailyPct=isFinite(gszzl)?gszzl:dailyPct;source="天天基金确认净值";return true;
-  }
-  if(isValidNav(gsz)&&(force||source==="内置基准"||cmpDate(gzDate,cleanDate(navDate))>=0)){
-    nav=gsz;navDate=gzTime||gzDate||jzrq||navDate;dailyPct=isFinite(gszzl)?gszzl:dailyPct;source="天天基金估算";return true;
+
+  // 只有在没有正式净值时，才把估算作为临时兜底，并明确标记为估算。
+  if(isValidNav(gsz)&&gzDate&&(force||source==="内置基准"||cmpDate(gzDate,cleanDate(navDate))>0)){
+    nav=gsz;
+    navDate=gzTime||gzDate||jzrq||navDate;
+    dailyPct=isFinite(gszzl)?gszzl:dailyPct;
+    source="天天基金估算";
+    return true;
   }
   return false;
 }

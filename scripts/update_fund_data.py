@@ -161,6 +161,15 @@ def latest_from_akshare(code: str) -> Tuple[Dict[str, Any], str]:
 
 
 def latest_from_fundgz(code: str) -> Tuple[Dict[str, Any], str]:
+    """
+    天天基金 fundgz 同时返回：
+    - dwjz / jzrq：正式单位净值及其日期；
+    - gsz / gztime：盘中估算净值及估算时间。
+
+    后端 JSON 用于晚间确认净值监控，必须优先使用正式净值 dwjz，
+    不能把 15:00 的估算值 gsz 当成当日正式净值，否则会和 APP 公布净值不一致。
+    估算值只在前端“盘中估算优先”模式下临时使用。
+    """
     url = f"https://fundgz.1234567.com.cn/js/{code}.js?rt={int(time.time() * 1000)}"
     r = requests.get(url, headers=HEADERS, timeout=12)
     r.raise_for_status()
@@ -175,13 +184,24 @@ def latest_from_fundgz(code: str) -> Tuple[Dict[str, Any], str]:
     gztime = str(data.get("gztime") or "")
     gzdate = clean_date(gztime)
 
-    # 夜间如果 gsz/gztime 已经滚到当天，而 jzrq 仍旧，优先保留 gsz/gztime，标记为估算/更新值。
-    if gsz is not None and gzdate and (not jzrq or gzdate >= jzrq):
-        return {"nav": gsz, "date": gzdate, "date_time": gztime, "daily_pct": gszzl, "estimated": True}, "天天基金fundgz估算"
     if dwjz is not None and jzrq:
-        return {"nav": dwjz, "date": jzrq, "date_time": jzrq, "daily_pct": gszzl, "estimated": False}, "天天基金fundgz确认净值"
+        return {
+            "nav": dwjz,
+            "date": jzrq,
+            "date_time": jzrq,
+            "daily_pct": gszzl,
+            "estimated": False,
+            "estimate_nav": gsz,
+            "estimate_date_time": gztime,
+        }, "天天基金fundgz确认净值"
     if gsz is not None and gzdate:
-        return {"nav": gsz, "date": gzdate, "date_time": gztime, "daily_pct": gszzl, "estimated": True}, "天天基金fundgz估算"
+        return {
+            "nav": gsz,
+            "date": gzdate,
+            "date_time": gztime,
+            "daily_pct": gszzl,
+            "estimated": True,
+        }, "天天基金fundgz估算"
     raise RuntimeError("fundgz no valid nav")
 
 
@@ -213,6 +233,28 @@ def merge_latest_into_history(history: List[Dict[str, Any]], latest: Dict[str, A
     out.sort(key=lambda x: x["date"])
     return out
 
+
+
+
+def recompute_daily_pct_from_history(history: List[Dict[str, Any]], latest: Dict[str, Any]) -> Optional[float]:
+    """用正式历史净值重算日涨跌，避免 fundgz 的 gszzl 仍对应估算涨跌幅。"""
+    date = clean_date(latest.get("date"))
+    nav = safe_float(latest.get("nav"))
+    if not date or nav is None or nav <= 0:
+        return safe_float(latest.get("daily_pct"))
+    valid = [x for x in history if clean_date(x.get("date")) and safe_float(x.get("nav")) is not None]
+    valid.sort(key=lambda x: clean_date(x.get("date")))
+    prev = None
+    for row in valid:
+        d = clean_date(row.get("date"))
+        if d < date:
+            prev = row
+        elif d >= date:
+            break
+    prev_nav = safe_float(prev.get("nav")) if prev else None
+    if prev_nav is not None and prev_nav > 0:
+        return (nav / prev_nav - 1) * 100
+    return safe_float(latest.get("daily_pct"))
 
 def fetch_fund(code: str) -> Tuple[List[Dict[str, Any]], Dict[str, Any], str]:
     errors: List[str] = []
@@ -246,6 +288,10 @@ def fetch_fund(code: str) -> Tuple[List[Dict[str, Any]], Dict[str, Any], str]:
 
     latest, latest_source, latest_diag = pick_best_latest(latest_candidates or [({"nav": history[-1]["nav"], "date": history[-1]["date"], "daily_pct": history[-1].get("pct"), "estimated": False}, history_source)])
     history = merge_latest_into_history(history, latest)
+    recomputed_pct = recompute_daily_pct_from_history(history, latest)
+    if recomputed_pct is not None:
+        latest["daily_pct"] = recomputed_pct
+        history = merge_latest_into_history(history, latest)
     diag = f"history={history_source}; latest_candidates={latest_diag}"
     if errors:
         diag += "; errors=" + " || ".join(errors[:6])
