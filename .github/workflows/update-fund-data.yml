@@ -3,11 +3,11 @@ name: Update fund NAV data
 on:
   workflow_dispatch:
   schedule:
-    # GitHub cron 使用 UTC；以下分别是北京时间 21:10 / 21:40 / 22:10，工作日自动补跑三次
-    - cron: "10 13 * * 1-5"
-    - cron: "40 13 * * 1-5"
-    - cron: "10 14 * * 1-5"
-
+    # 北京时间每天 20:00–21:50，每10分钟一次（UTC 12:00–13:50）
+    - cron: "*/10 12-13 * * 1-5"
+    # 北京时间 22:00 最后一次（UTC 14:00）
+    - cron: "0 14 * * 1-5"
+    
 permissions:
   contents: write
 
