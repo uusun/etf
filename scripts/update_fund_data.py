@@ -16,6 +16,7 @@ import html
 import json
 import re
 import time
+from io import StringIO
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -23,7 +24,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import pandas as pd
 import requests
 
-SCRIPT_VERSION = "v8_official_plus_sinaof_20260513"
+SCRIPT_VERSION = "v9_clean_status_f10_stringio_20260513"
 
 FUNDS = [
     {"code": "014362", "name": "睿远稳进配置两年持有混合A"},
@@ -227,16 +228,16 @@ def extract_f10_content(text: str) -> str:
         raise RuntimeError("F10 content not found")
     raw = m.group(1)
     try:
-        raw = bytes(raw, "utf-8").decode("unicode_escape")
+        raw = json.loads("\"" + raw + "\"")
     except Exception:
-        pass
+        raw = raw.replace(r"\/", "/").replace(r"\"", "\"")
     return html.unescape(raw)
 
 
 def parse_f10_content(content: str) -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
     if "<table" in content.lower():
-        tables = pd.read_html(content)
+        tables = pd.read_html(StringIO(content))
         if tables:
             return normalize_history_df(tables[0])
     for line in content.splitlines():
@@ -263,7 +264,7 @@ def f10_rows(code: str, per: int = 20000, sdate: str = START_DATE, edate: str = 
     rows = parse_f10_content(content)
     if not rows:
         # 少数情况下也可能返回完整 HTML table
-        tables = pd.read_html(r.text)
+        tables = pd.read_html(StringIO(r.text))
         if tables:
             rows = normalize_history_df(tables[0])
     if not rows:
@@ -480,9 +481,8 @@ def fetch_fund(code: str) -> Tuple[List[Dict[str, Any]], Dict[str, Any], str]:
     diag = f"script={SCRIPT_VERSION}; history={history_source}; official_candidates={latest_diag}"
     if reference_diag:
         diag += f"; reference_only={reference_diag}"
-    if errors:
-        # 控制长度，避免撑爆网页。
-        diag += "; errors=" + " || ".join(errors[:8])
+    # 成功取到正式净值时，不再把失败备用源的完整错误写进网页 JSON，避免表格被 HTML/乱码撑爆。
+    # 备用源错误只保留在 Actions 日志中排查；最终净值已由 official_candidates 决定。
     return history, {**latest, "source": latest_source}, diag
 
 
