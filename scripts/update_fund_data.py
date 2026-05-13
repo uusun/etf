@@ -24,7 +24,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import pandas as pd
 import requests
 
-SCRIPT_VERSION = "v9_clean_status_f10_stringio_20260513"
+SCRIPT_VERSION = "v10_history_guard_20260513"
 
 FUNDS = [
     {"code": "014362", "name": "睿远稳进配置两年持有混合A"},
@@ -425,6 +425,35 @@ def merge_latest_into_history(history: List[Dict[str, Any]], latest: Dict[str, A
     return out
 
 
+
+def merge_history_series(*series_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """按日期合并多条历史序列，避免某次接口只返回最近一段而覆盖完整历史。
+
+    后面的序列会覆盖同日期旧值；最终按日期升序返回。
+    """
+    by_date: Dict[str, Dict[str, Any]] = {}
+    for series in series_list:
+        if not isinstance(series, list):
+            continue
+        for row in series:
+            if not isinstance(row, dict):
+                continue
+            d = clean_date(row.get("date"))
+            nav = safe_float(row.get("nav"))
+            if not d or nav is None or nav <= 0 or d < START_DATE:
+                continue
+            by_date[d] = {"date": d, "nav": nav, "pct": safe_float(row.get("pct"))}
+    out = list(by_date.values())
+    out.sort(key=lambda x: x["date"])
+    return out
+
+def is_history_suspiciously_short(history: List[Dict[str, Any]]) -> bool:
+    if not history:
+        return True
+    # 这些基金至少都有数百个交易日历史。若只剩几十条，基本是接口/缓存问题，不应覆盖旧完整历史。
+    first = clean_date(history[0].get("date"))
+    return len(history) < 120 or (first and first > "2024-01-01")
+
 def fetch_history(code: str, errors: List[str]) -> Tuple[List[Dict[str, Any]], str]:
     for fn in (history_from_eastmoney_json, history_from_eastmoney_f10, history_from_akshare):
         try:
@@ -501,6 +530,18 @@ def main() -> None:
         print(f"Fetching {code} {name} ...")
         try:
             history, latest, diagnosis = fetch_fund(code)
+            old_hist = old_history.get(code, []) if isinstance(old_history, dict) else []
+            fetched_len = len(history)
+            old_len = len(old_hist) if isinstance(old_hist, list) else 0
+            # 防止 GitHub Actions 某次接口只抓到最近一小段历史，覆盖掉完整曲线。
+            # 只要旧历史更长，就合并保留；如果新历史异常短，也在诊断里明确提示。
+            if old_len:
+                merged = merge_history_series(old_hist, history)
+                if len(merged) > len(history):
+                    diagnosis += f"; history_guard=merged_old_history old_len={old_len} fetched_len={fetched_len} merged_len={len(merged)}"
+                history = merged
+            if is_history_suspiciously_short(history):
+                diagnosis += f"; WARNING: history seems short len={len(history)} first={history[0]['date'] if history else '--'}"
             last_date = clean_date(latest.get("date")) or history[-1]["date"]
             date_ok = last_date >= expected
             latest_items[code] = {
@@ -520,7 +561,7 @@ def main() -> None:
                 "diagnosis": diagnosis + ("" if date_ok else f"; WARNING: latest date {last_date} < expected {expected}"),
             }
             history_items[code] = history
-            print(f"  OK {last_date} {latest.get('nav')} via {latest.get('source')} date_ok={date_ok}")
+            print(f"  OK {last_date} {latest.get('nav')} via {latest.get('source')} date_ok={date_ok} history_len={len(history)} first={history[0]['date'] if history else '--'}")
             # 单独打印候选，方便排查。
             m = re.search(r"official_candidates=([^;]+)", diagnosis)
             if m:
