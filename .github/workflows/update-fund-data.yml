@@ -61,3 +61,4 @@ jobs:
             git commit -m "Update fund NAV data"
             git push
           fi
+
