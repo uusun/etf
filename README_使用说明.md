@@ -1,27 +1,30 @@
-# 超级基金止盈监控网页 v5_f10_primary
+# 超级基金净值监控稳定版 v6
 
-本版只修净值更新后端，不重构网页。
+## 本版重点
+
+- `SCRIPT_VERSION=v6_multi_source_20260513`
+- 后端最新净值候选源：东方财富 JSON API、东方财富 F10、AKShare、同花顺爱基金、天天基金 fundgz、新浪、腾讯。
+- 历史净值优先源：东方财富 JSON API；备用：东方财富 F10、AKShare。
+- 前端日常建议使用：`自动：本地JSON + 前端补采`。
+- 新浪/腾讯前端直连不稳定，已作为后端备用源纳入 Python 脚本。
 
 ## 替换文件
 
-请覆盖仓库中的：
-
-- `index.html`
-- `scripts/update_fund_data.py`
-- `.github/workflows/update-fund-data.yml`
-
-## 验证方式
-
-手动运行 GitHub Actions 后，在日志开头必须看到：
+覆盖仓库中的：
 
 ```text
-SCRIPT_VERSION=v5_f10_primary_20260513
+index.html
+scripts/update_fund_data.py
+.github/workflows/update-fund-data.yml
 ```
 
-每只基金下面会打印候选源，例如：
+然后手动运行一次 GitHub Actions：`Update fund NAV data`。
+
+## 正常日志示例
 
 ```text
-candidates: 东方财富F10最新净值:2026-05-13:1.2222 | AKShare fund_open_fund_info_em:2026-05-12:1.2209 | 天天基金fundgz确认净值:2026-05-12:1.2209
+SCRIPT_VERSION=v6_multi_source_20260513
+Fetching 014362 ...
+  OK 2026-05-13 1.2222 via 东方财富JSON最新净值 date_ok=True
+  candidates: 东方财富JSON最新净值:2026-05-13:1.2222 | 东方财富F10最新净值:2026-05-13:1.2222 | ...
 ```
-
-如果看不到 `SCRIPT_VERSION=v5_f10_primary_20260513`，说明 GitHub 实际运行的仍然是旧脚本。
