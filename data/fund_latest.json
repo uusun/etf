@@ -1,6 +1,6 @@
 {
   "script_version": "v8_official_plus_sinaof_20260513",
-  "updated_at": "2026-05-13T15:52:31+00:00",
+  "updated_at": "2026-05-13T16:02:25+00:00",
   "expected_trade_date": "2026-05-13",
   "stale_codes": [],
   "items": {
@@ -18,7 +18,7 @@
       "date_ok": true,
       "expected_trade_date": "2026-05-13",
       "script_version": "v8_official_plus_sinaof_20260513",
-      "diagnosis": "script=v8_official_plus_sinaof_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-05-13:1.2222 | AKShare fund_open_fund_info_em:2026-05-13:1.2222 | 天天基金fundgz确认净值:2026-05-12:1.2209; reference_only=天天基金fundgz估算参考:2026-05-13:1.2226(参考) | 新浪财经fu_估算参考:2026-05-13:1.2225(参考); errors=history_from_eastmoney_json: Eastmoney JSON no LSJZList || history_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_eastmoney_f10: HTTPSConnectionPool(host='fundf10.eastmoney.com', port=443): Read timed out. (read timeout=25) || latest_from_sina_official: sina of_ payload too short"
+      "diagnosis": "script=v8_official_plus_sinaof_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-05-13:1.2222 | AKShare fund_open_fund_info_em:2026-05-13:1.2222 | 天天基金fundgz确认净值:2026-05-12:1.2209; reference_only=天天基金fundgz估算参考:2026-05-13:1.2226(参考) | 新浪财经fu_估算参考:2026-05-13:1.2225(参考); errors=history_from_eastmoney_json: Eastmoney JSON no LSJZList || history_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_sina_official: sina of_ payload too short"
     },
     "001511": {
       "code": "001511",
@@ -50,7 +50,7 @@
       "date_ok": true,
       "expected_trade_date": "2026-05-13",
       "script_version": "v8_official_plus_sinaof_20260513",
-      "diagnosis": "script=v8_official_plus_sinaof_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-05-13:2.6178 | AKShare fund_open_fund_info_em:2026-05-13:2.6178 | 天天基金fundgz确认净值:2026-05-12:2.5494; reference_only=新浪财经fu_估算参考:2026-05-13:2.6029(参考); errors=history_from_eastmoney_json: Eastmoney JSON no LSJZList || history_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_sina_official: sina of_ payload too short || latest_from_fundgz_estimate_reference: HTTPSConnectionPool(host='fundgz.1234567.com.cn', port=443): Read timed out. (read timeout=12)"
+      "diagnosis": "script=v8_official_plus_sinaof_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-05-13:2.6178 | AKShare fund_open_fund_info_em:2026-05-13:2.6178 | 天天基金fundgz确认净值:2026-05-12:2.5494; reference_only=天天基金fundgz估算参考:2026-05-13:2.6122(参考) | 新浪财经fu_估算参考:2026-05-13:2.6029(参考); errors=history_from_eastmoney_json: Eastmoney JSON no LSJZList || history_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_sina_official: sina of_ payload too short"
     },
     "169101": {
       "code": "169101",
