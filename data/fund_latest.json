@@ -1,7 +1,7 @@
 {
-  "updated_at": "2026-05-13T14:58:32+00:00",
+  "script_version": "v8_official_plus_sinaof_20260513",
+  "updated_at": "2026-05-13T15:52:31+00:00",
   "expected_trade_date": "2026-05-13",
-  "script_version": "v6_multi_source_20260513",
   "stale_codes": [],
   "items": {
     "014362": {
@@ -10,14 +10,15 @@
       "nav": 1.2222,
       "date": "2026-05-13",
       "date_time": "2026-05-13",
-      "daily_pct": 0.1065,
+      "daily_pct": 0.11,
       "source": "东方财富JSON最新净值",
       "estimated": false,
+      "official": true,
       "ok": true,
       "date_ok": true,
       "expected_trade_date": "2026-05-13",
-      "script_version": "v6_multi_source_20260513",
-      "diagnosis": "script=v6_multi_source_20260513; history=东方财富F10历史净值; latest_candidates=东方财富JSON最新净值:2026-05-13:1.2222 | 东方财富F10最新净值:2026-05-13:1.2222 | AKShare fund_open_fund_info_em:2026-05-13:1.2222 | 天天基金fundgz确认净值:2026-05-12:1.2209 | 新浪财经fu_最新净值:2026-05-13:1.2225; errors=history_from_eastmoney_json: Eastmoney JSON no valid history || latest_from_10jqka: JSON/JSONP parse failed; head= || latest_from_tencent: of_tencent parsed but no valid date/nav; fu_tencent parsed but no valid date/nav"
+      "script_version": "v8_official_plus_sinaof_20260513",
+      "diagnosis": "script=v8_official_plus_sinaof_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-05-13:1.2222 | AKShare fund_open_fund_info_em:2026-05-13:1.2222 | 天天基金fundgz确认净值:2026-05-12:1.2209; reference_only=天天基金fundgz估算参考:2026-05-13:1.2226(参考) | 新浪财经fu_估算参考:2026-05-13:1.2225(参考); errors=history_from_eastmoney_json: Eastmoney JSON no LSJZList || history_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_eastmoney_f10: HTTPSConnectionPool(host='fundf10.eastmoney.com', port=443): Read timed out. (read timeout=25) || latest_from_sina_official: sina of_ payload too short"
     },
     "001511": {
       "code": "001511",
@@ -25,14 +26,15 @@
       "nav": 2.668,
       "date": "2026-05-13",
       "date_time": "2026-05-13",
-      "daily_pct": 0.414,
+      "daily_pct": 0.41,
       "source": "东方财富JSON最新净值",
       "estimated": false,
+      "official": true,
       "ok": true,
       "date_ok": true,
       "expected_trade_date": "2026-05-13",
-      "script_version": "v6_multi_source_20260513",
-      "diagnosis": "script=v6_multi_source_20260513; history=东方财富F10历史净值; latest_candidates=东方财富JSON最新净值:2026-05-13:2.668 | 东方财富F10最新净值:2026-05-13:2.668 | AKShare fund_open_fund_info_em:2026-05-13:2.668 | 天天基金fundgz确认净值:2026-05-12:2.657 | 新浪财经fu_最新净值:2026-05-13:2.6863; errors=history_from_eastmoney_json: Eastmoney JSON no valid history || latest_from_10jqka: JSON/JSONP parse failed; head= || latest_from_tencent: of_tencent parsed but no valid date/nav; fu_tencent parsed but no valid date/nav"
+      "script_version": "v8_official_plus_sinaof_20260513",
+      "diagnosis": "script=v8_official_plus_sinaof_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-05-13:2.668 | AKShare fund_open_fund_info_em:2026-05-13:2.668 | 天天基金fundgz确认净值:2026-05-12:2.657; reference_only=天天基金fundgz估算参考:2026-05-13:2.6774(参考) | 新浪财经fu_估算参考:2026-05-13:2.6863(参考); errors=history_from_eastmoney_json: Eastmoney JSON no LSJZList || history_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_sina_official: sina of_ payload too short"
     },
     "007120": {
       "code": "007120",
@@ -40,14 +42,15 @@
       "nav": 2.6178,
       "date": "2026-05-13",
       "date_time": "2026-05-13",
-      "daily_pct": 2.683,
+      "daily_pct": 2.68,
       "source": "东方财富JSON最新净值",
       "estimated": false,
+      "official": true,
       "ok": true,
       "date_ok": true,
       "expected_trade_date": "2026-05-13",
-      "script_version": "v6_multi_source_20260513",
-      "diagnosis": "script=v6_multi_source_20260513; history=东方财富F10历史净值; latest_candidates=东方财富JSON最新净值:2026-05-13:2.6178 | 东方财富F10最新净值:2026-05-13:2.6178 | AKShare fund_open_fund_info_em:2026-05-13:2.6178 | 天天基金fundgz确认净值:2026-05-12:2.5494 | 新浪财经fu_最新净值:2026-05-13:2.6029; errors=history_from_eastmoney_json: Eastmoney JSON no valid history || latest_from_10jqka: JSON/JSONP parse failed; head= || latest_from_tencent: of_tencent parsed but no valid date/nav; fu_tencent parsed but no valid date/nav"
+      "script_version": "v8_official_plus_sinaof_20260513",
+      "diagnosis": "script=v8_official_plus_sinaof_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-05-13:2.6178 | AKShare fund_open_fund_info_em:2026-05-13:2.6178 | 天天基金fundgz确认净值:2026-05-12:2.5494; reference_only=新浪财经fu_估算参考:2026-05-13:2.6029(参考); errors=history_from_eastmoney_json: Eastmoney JSON no LSJZList || history_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_sina_official: sina of_ payload too short || latest_from_fundgz_estimate_reference: HTTPSConnectionPool(host='fundgz.1234567.com.cn', port=443): Read timed out. (read timeout=12)"
     },
     "169101": {
       "code": "169101",
@@ -55,14 +58,15 @@
       "nav": 2.564,
       "date": "2026-05-13",
       "date_time": "2026-05-13",
-      "daily_pct": 3.596,
+      "daily_pct": 3.6,
       "source": "东方财富JSON最新净值",
       "estimated": false,
+      "official": true,
       "ok": true,
       "date_ok": true,
       "expected_trade_date": "2026-05-13",
-      "script_version": "v6_multi_source_20260513",
-      "diagnosis": "script=v6_multi_source_20260513; history=东方财富F10历史净值; latest_candidates=东方财富JSON最新净值:2026-05-13:2.564 | 东方财富F10最新净值:2026-05-13:2.564 | AKShare fund_open_fund_info_em:2026-05-13:2.564 | 天天基金fundgz确认净值:2026-05-12:2.475 | 新浪财经fu_最新净值:2026-05-13:2.5444; errors=history_from_eastmoney_json: Eastmoney JSON no valid history || latest_from_10jqka: JSON/JSONP parse failed; head= || latest_from_tencent: of_tencent parsed but no valid date/nav; fu_tencent parsed but no valid date/nav"
+      "script_version": "v8_official_plus_sinaof_20260513",
+      "diagnosis": "script=v8_official_plus_sinaof_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-05-13:2.564 | AKShare fund_open_fund_info_em:2026-05-13:2.564 | 天天基金fundgz确认净值:2026-05-12:2.475; reference_only=天天基金fundgz估算参考:2026-05-13:2.5443(参考) | 新浪财经fu_估算参考:2026-05-13:2.5444(参考); errors=history_from_eastmoney_json: Eastmoney JSON no LSJZList || history_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_sina_official: sina of_ payload too short"
     },
     "007119": {
       "code": "007119",
@@ -70,14 +74,15 @@
       "nav": 2.6936,
       "date": "2026-05-13",
       "date_time": "2026-05-13",
-      "daily_pct": 2.6837,
+      "daily_pct": 2.68,
       "source": "东方财富JSON最新净值",
       "estimated": false,
+      "official": true,
       "ok": true,
       "date_ok": true,
       "expected_trade_date": "2026-05-13",
-      "script_version": "v6_multi_source_20260513",
-      "diagnosis": "script=v6_multi_source_20260513; history=东方财富F10历史净值; latest_candidates=东方财富JSON最新净值:2026-05-13:2.6936 | 东方财富F10最新净值:2026-05-13:2.6936 | AKShare fund_open_fund_info_em:2026-05-13:2.6936 | 天天基金fundgz确认净值:2026-05-12:2.6232 | 新浪财经fu_最新净值:2026-05-13:2.6783; errors=history_from_eastmoney_json: Eastmoney JSON no valid history || latest_from_10jqka: JSON/JSONP parse failed; head= || latest_from_tencent: of_tencent parsed but no valid date/nav; fu_tencent parsed but no valid date/nav"
+      "script_version": "v8_official_plus_sinaof_20260513",
+      "diagnosis": "script=v8_official_plus_sinaof_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-05-13:2.6936 | AKShare fund_open_fund_info_em:2026-05-13:2.6936 | 天天基金fundgz确认净值:2026-05-12:2.6232; reference_only=天天基金fundgz估算参考:2026-05-13:2.6878(参考) | 新浪财经fu_估算参考:2026-05-13:2.6783(参考); errors=history_from_eastmoney_json: Eastmoney JSON no LSJZList || history_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_sina_official: sina of_ payload too short"
     },
     "006608": {
       "code": "006608",
@@ -85,14 +90,15 @@
       "nav": 1.567,
       "date": "2026-05-13",
       "date_time": "2026-05-13",
-      "daily_pct": 1.7995,
+      "daily_pct": 1.8,
       "source": "东方财富JSON最新净值",
       "estimated": false,
+      "official": true,
       "ok": true,
       "date_ok": true,
       "expected_trade_date": "2026-05-13",
-      "script_version": "v6_multi_source_20260513",
-      "diagnosis": "script=v6_multi_source_20260513; history=东方财富F10历史净值; latest_candidates=东方财富JSON最新净值:2026-05-13:1.567 | 东方财富F10最新净值:2026-05-13:1.567 | AKShare fund_open_fund_info_em:2026-05-13:1.567 | 天天基金fundgz确认净值:2026-05-12:1.5393 | 新浪财经fu_最新净值:2026-05-13:1.5697; errors=history_from_eastmoney_json: Eastmoney JSON no valid history || latest_from_10jqka: JSON/JSONP parse failed; head= || latest_from_tencent: of_tencent parsed but no valid date/nav; fu_tencent parsed but no valid date/nav"
+      "script_version": "v8_official_plus_sinaof_20260513",
+      "diagnosis": "script=v8_official_plus_sinaof_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-05-13:1.567 | AKShare fund_open_fund_info_em:2026-05-13:1.567 | 天天基金fundgz确认净值:2026-05-12:1.5393; reference_only=天天基金fundgz估算参考:2026-05-13:1.5596(参考) | 新浪财经fu_估算参考:2026-05-13:1.5697(参考); errors=history_from_eastmoney_json: Eastmoney JSON no LSJZList || history_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_sina_official: sina of_ payload too short"
     },
     "163417": {
       "code": "163417",
@@ -100,14 +106,15 @@
       "nav": 2.2855,
       "date": "2026-05-13",
       "date_time": "2026-05-13",
-      "daily_pct": 0.7006,
+      "daily_pct": 0.7,
       "source": "东方财富JSON最新净值",
       "estimated": false,
+      "official": true,
       "ok": true,
       "date_ok": true,
       "expected_trade_date": "2026-05-13",
-      "script_version": "v6_multi_source_20260513",
-      "diagnosis": "script=v6_multi_source_20260513; history=东方财富F10历史净值; latest_candidates=东方财富JSON最新净值:2026-05-13:2.2855 | 东方财富F10最新净值:2026-05-13:2.2855 | AKShare fund_open_fund_info_em:2026-05-13:2.2855 | 天天基金fundgz确认净值:2026-05-12:2.2696 | 新浪财经fu_最新净值:2026-05-13:2.2809; errors=history_from_eastmoney_json: Eastmoney JSON no valid history || latest_from_10jqka: JSON/JSONP parse failed; head= || latest_from_tencent: of_tencent parsed but no valid date/nav; fu_tencent parsed but no valid date/nav"
+      "script_version": "v8_official_plus_sinaof_20260513",
+      "diagnosis": "script=v8_official_plus_sinaof_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-05-13:2.2855 | AKShare fund_open_fund_info_em:2026-05-13:2.2855 | 天天基金fundgz确认净值:2026-05-12:2.2696; reference_only=天天基金fundgz估算参考:2026-05-13:2.2979(参考) | 新浪财经fu_估算参考:2026-05-13:2.2809(参考); errors=history_from_eastmoney_json: Eastmoney JSON no LSJZList || history_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_sina_official: sina of_ payload too short"
     },
     "010340": {
       "code": "010340",
@@ -115,14 +122,15 @@
       "nav": 1.073,
       "date": "2026-05-13",
       "date_time": "2026-05-13",
-      "daily_pct": 1.1215,
+      "daily_pct": 1.12,
       "source": "东方财富JSON最新净值",
       "estimated": false,
+      "official": true,
       "ok": true,
       "date_ok": true,
       "expected_trade_date": "2026-05-13",
-      "script_version": "v6_multi_source_20260513",
-      "diagnosis": "script=v6_multi_source_20260513; history=东方财富F10历史净值; latest_candidates=东方财富JSON最新净值:2026-05-13:1.073 | 东方财富F10最新净值:2026-05-13:1.073 | AKShare fund_open_fund_info_em:2026-05-13:1.073 | 天天基金fundgz确认净值:2026-05-12:1.0611 | 新浪财经fu_最新净值:2026-05-13:1.0736; errors=history_from_eastmoney_json: Eastmoney JSON no valid history || latest_from_10jqka: JSON/JSONP parse failed; head= || latest_from_tencent: of_tencent parsed but no valid date/nav; fu_tencent parsed but no valid date/nav"
+      "script_version": "v8_official_plus_sinaof_20260513",
+      "diagnosis": "script=v8_official_plus_sinaof_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-05-13:1.073 | AKShare fund_open_fund_info_em:2026-05-13:1.073 | 天天基金fundgz确认净值:2026-05-12:1.0611; reference_only=天天基金fundgz估算参考:2026-05-13:1.0744(参考) | 新浪财经fu_估算参考:2026-05-13:1.0736(参考); errors=history_from_eastmoney_json: Eastmoney JSON no LSJZList || history_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_sina_official: sina of_ payload too short"
     },
     "010273": {
       "code": "010273",
@@ -130,14 +138,15 @@
       "nav": 1.0436,
       "date": "2026-05-13",
       "date_time": "2026-05-13",
-      "daily_pct": -0.4198,
+      "daily_pct": -0.42,
       "source": "东方财富JSON最新净值",
       "estimated": false,
+      "official": true,
       "ok": true,
       "date_ok": true,
       "expected_trade_date": "2026-05-13",
-      "script_version": "v6_multi_source_20260513",
-      "diagnosis": "script=v6_multi_source_20260513; history=东方财富F10历史净值; latest_candidates=东方财富JSON最新净值:2026-05-13:1.0436 | 东方财富F10最新净值:2026-05-13:1.0436 | AKShare fund_open_fund_info_em:2026-05-13:1.0436 | 天天基金fundgz确认净值:2026-05-12:1.048 | 新浪财经fu_最新净值:2026-05-13:1.0431; errors=history_from_eastmoney_json: Eastmoney JSON no valid history || latest_from_10jqka: JSON/JSONP parse failed; head= || latest_from_tencent: of_tencent parsed but no valid date/nav; fu_tencent parsed but no valid date/nav"
+      "script_version": "v8_official_plus_sinaof_20260513",
+      "diagnosis": "script=v8_official_plus_sinaof_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-05-13:1.0436 | AKShare fund_open_fund_info_em:2026-05-13:1.0436 | 天天基金fundgz确认净值:2026-05-12:1.048; reference_only=天天基金fundgz估算参考:2026-05-13:1.0462(参考) | 新浪财经fu_估算参考:2026-05-13:1.0431(参考); errors=history_from_eastmoney_json: Eastmoney JSON no LSJZList || history_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_sina_official: sina of_ payload too short"
     },
     "010186": {
       "code": "010186",
@@ -145,14 +154,15 @@
       "nav": 0.8801,
       "date": "2026-05-13",
       "date_time": "2026-05-13",
-      "daily_pct": 1.4524,
+      "daily_pct": 1.45,
       "source": "东方财富JSON最新净值",
       "estimated": false,
+      "official": true,
       "ok": true,
       "date_ok": true,
       "expected_trade_date": "2026-05-13",
-      "script_version": "v6_multi_source_20260513",
-      "diagnosis": "script=v6_multi_source_20260513; history=东方财富F10历史净值; latest_candidates=东方财富JSON最新净值:2026-05-13:0.8801 | 东方财富F10最新净值:2026-05-13:0.8801 | AKShare fund_open_fund_info_em:2026-05-13:0.8801 | 天天基金fundgz确认净值:2026-05-12:0.8675 | 新浪财经fu_最新净值:2026-05-13:0.884; errors=history_from_eastmoney_json: Eastmoney JSON no valid history || latest_from_10jqka: JSON/JSONP parse failed; head= || latest_from_tencent: of_tencent parsed but no valid date/nav; fu_tencent parsed but no valid date/nav"
+      "script_version": "v8_official_plus_sinaof_20260513",
+      "diagnosis": "script=v8_official_plus_sinaof_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-05-13:0.8801 | AKShare fund_open_fund_info_em:2026-05-13:0.8801 | 天天基金fundgz确认净值:2026-05-12:0.8675; reference_only=天天基金fundgz估算参考:2026-05-13:0.8782(参考) | 新浪财经fu_估算参考:2026-05-13:0.884(参考); errors=history_from_eastmoney_json: Eastmoney JSON no LSJZList || history_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_sina_official: sina of_ payload too short"
     },
     "010027": {
       "code": "010027",
@@ -160,14 +170,15 @@
       "nav": 0.9091,
       "date": "2026-05-13",
       "date_time": "2026-05-13",
-      "daily_pct": 1.5754,
+      "daily_pct": 1.58,
       "source": "东方财富JSON最新净值",
       "estimated": false,
+      "official": true,
       "ok": true,
       "date_ok": true,
       "expected_trade_date": "2026-05-13",
-      "script_version": "v6_multi_source_20260513",
-      "diagnosis": "script=v6_multi_source_20260513; history=东方财富F10历史净值; latest_candidates=东方财富JSON最新净值:2026-05-13:0.9091 | 东方财富F10最新净值:2026-05-13:0.9091 | AKShare fund_open_fund_info_em:2026-05-13:0.9091 | 天天基金fundgz确认净值:2026-05-12:0.895 | 新浪财经fu_最新净值:2026-05-13:0.9087; errors=history_from_eastmoney_json: Eastmoney JSON no valid history || latest_from_10jqka: JSON/JSONP parse failed; head= || latest_from_tencent: of_tencent parsed but no valid date/nav; fu_tencent parsed but no valid date/nav"
+      "script_version": "v8_official_plus_sinaof_20260513",
+      "diagnosis": "script=v8_official_plus_sinaof_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-05-13:0.9091 | AKShare fund_open_fund_info_em:2026-05-13:0.9091 | 天天基金fundgz确认净值:2026-05-12:0.895; reference_only=天天基金fundgz估算参考:2026-05-13:0.8999(参考) | 新浪财经fu_估算参考:2026-05-13:0.9087(参考); errors=history_from_eastmoney_json: Eastmoney JSON no LSJZList || history_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_sina_official: sina of_ payload too short"
     },
     "501054": {
       "code": "501054",
@@ -175,14 +186,15 @@
       "nav": 1.6995,
       "date": "2026-05-13",
       "date_time": "2026-05-13",
-      "daily_pct": 2.3734,
+      "daily_pct": 2.37,
       "source": "东方财富JSON最新净值",
       "estimated": false,
+      "official": true,
       "ok": true,
       "date_ok": true,
       "expected_trade_date": "2026-05-13",
-      "script_version": "v6_multi_source_20260513",
-      "diagnosis": "script=v6_multi_source_20260513; history=东方财富F10历史净值; latest_candidates=东方财富JSON最新净值:2026-05-13:1.6995 | 东方财富F10最新净值:2026-05-13:1.6995 | AKShare fund_open_fund_info_em:2026-05-13:1.6995 | 天天基金fundgz确认净值:2026-05-12:1.6601 | 新浪财经fu_最新净值:2026-05-13:1.6895; errors=history_from_eastmoney_json: Eastmoney JSON no valid history || latest_from_10jqka: JSON/JSONP parse failed; head= || latest_from_tencent: of_tencent parsed but no valid date/nav; fu_tencent parsed but no valid date/nav"
+      "script_version": "v8_official_plus_sinaof_20260513",
+      "diagnosis": "script=v8_official_plus_sinaof_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-05-13:1.6995 | AKShare fund_open_fund_info_em:2026-05-13:1.6995 | 天天基金fundgz确认净值:2026-05-12:1.6601; reference_only=天天基金fundgz估算参考:2026-05-13:1.6961(参考) | 新浪财经fu_估算参考:2026-05-13:1.6895(参考); errors=history_from_eastmoney_json: Eastmoney JSON no LSJZList || history_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_sina_official: sina of_ payload too short"
     },
     "011006": {
       "code": "011006",
@@ -190,14 +202,15 @@
       "nav": 0.8214,
       "date": "2026-05-13",
       "date_time": "2026-05-13",
-      "daily_pct": 0.7111,
+      "daily_pct": 0.71,
       "source": "东方财富JSON最新净值",
       "estimated": false,
+      "official": true,
       "ok": true,
       "date_ok": true,
       "expected_trade_date": "2026-05-13",
-      "script_version": "v6_multi_source_20260513",
-      "diagnosis": "script=v6_multi_source_20260513; history=东方财富F10历史净值; latest_candidates=东方财富JSON最新净值:2026-05-13:0.8214 | 东方财富F10最新净值:2026-05-13:0.8214 | AKShare fund_open_fund_info_em:2026-05-13:0.8214 | 天天基金fundgz确认净值:2026-05-12:0.8156 | 新浪财经fu_最新净值:2026-05-13:0.8289; errors=history_from_eastmoney_json: Eastmoney JSON no valid history || latest_from_10jqka: JSON/JSONP parse failed; head= || latest_from_tencent: of_tencent parsed but no valid date/nav; fu_tencent parsed but no valid date/nav"
+      "script_version": "v8_official_plus_sinaof_20260513",
+      "diagnosis": "script=v8_official_plus_sinaof_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-05-13:0.8214 | AKShare fund_open_fund_info_em:2026-05-13:0.8214 | 天天基金fundgz确认净值:2026-05-12:0.8156; reference_only=天天基金fundgz估算参考:2026-05-13:0.8239(参考) | 新浪财经fu_估算参考:2026-05-13:0.8289(参考); errors=history_from_eastmoney_json: Eastmoney JSON no LSJZList || history_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_sina_official: sina of_ payload too short"
     },
     "501049": {
       "code": "501049",
@@ -205,14 +218,15 @@
       "nav": 0.9502,
       "date": "2026-05-13",
       "date_time": "2026-05-13",
-      "daily_pct": -0.2938,
+      "daily_pct": -0.29,
       "source": "东方财富JSON最新净值",
       "estimated": false,
+      "official": true,
       "ok": true,
       "date_ok": true,
       "expected_trade_date": "2026-05-13",
-      "script_version": "v6_multi_source_20260513",
-      "diagnosis": "script=v6_multi_source_20260513; history=东方财富F10历史净值; latest_candidates=东方财富JSON最新净值:2026-05-13:0.9502 | 东方财富F10最新净值:2026-05-13:0.9502 | AKShare fund_open_fund_info_em:2026-05-13:0.9502 | 天天基金fundgz确认净值:2026-05-12:0.953 | 新浪财经fu_最新净值:2026-05-13:0.9502; errors=history_from_eastmoney_json: Eastmoney JSON no valid history || latest_from_10jqka: JSON/JSONP parse failed; head= || latest_from_tencent: of_tencent parsed but no valid date/nav; fu_tencent parsed but no valid date/nav"
+      "script_version": "v8_official_plus_sinaof_20260513",
+      "diagnosis": "script=v8_official_plus_sinaof_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-05-13:0.9502 | AKShare fund_open_fund_info_em:2026-05-13:0.9502 | 天天基金fundgz确认净值:2026-05-12:0.953; reference_only=天天基金fundgz估算参考:2026-05-13:0.954(参考) | 新浪财经fu_估算参考:2026-05-13:0.9502(参考); errors=history_from_eastmoney_json: Eastmoney JSON no LSJZList || history_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_eastmoney_f10: [Errno 2] No such file or directory: <table class='w782 comm lsjz'><thead><tr><th class='first'>åå¼æ¥æ</th><th>åä½åå¼</th><th>ç´¯è®¡åå¼</th><th>æ¥å¢é¿ç</th><th>... || latest_from_sina_official: sina of_ payload too short"
     }
   }
 }
