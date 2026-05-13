@@ -5,9 +5,16 @@ on:
   schedule:
     # 北京时间周一到周五 21:10；GitHub cron 使用 UTC，所以这里是 13:10 UTC
     - cron: "10 13 * * 1-5"
+    # 备用补跑：如果基金公司/上游接口 21:10 尚未完全同步，21:40 和 22:10 再自动补一次
+    - cron: "40 13 * * 1-5"
+    - cron: "10 14 * * 1-5"
 
 permissions:
   contents: write
+
+concurrency:
+  group: update-fund-nav
+  cancel-in-progress: false
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
