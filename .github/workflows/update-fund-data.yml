@@ -2,14 +2,8 @@ name: Update fund NAV data
 
 on:
   workflow_dispatch:
-    inputs:
-      expected_date:
-        description: "可选：强制指定预期交易日，例如 2026-05-13；留空则按北京时间最近工作日"
-        required: false
-        default: ""
   schedule:
-    # GitHub cron 使用 UTC；北京时间 = UTC+8
-    # 21:10 / 21:40 / 22:10 北京时间，对应 13:10 / 13:40 / 14:10 UTC
+    # GitHub cron 使用 UTC；以下分别是北京时间 21:10 / 21:40 / 22:10，工作日自动补跑三次
     - cron: "10 13 * * 1-5"
     - cron: "40 13 * * 1-5"
     - cron: "10 14 * * 1-5"
@@ -23,7 +17,6 @@ concurrency:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  EXPECTED_TRADE_DATE: ${{ github.event.inputs.expected_date }}
 
 jobs:
   update-fund-data:
@@ -34,8 +27,7 @@ jobs:
 
       - name: Verify script version
         run: |
-          echo "Workflow file is running from commit $GITHUB_SHA"
-          grep -n "SCRIPT_VERSION" scripts/update_fund_data.py | head -5
+          grep -n "SCRIPT_VERSION" scripts/update_fund_data.py || true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -61,4 +53,3 @@ jobs:
             git commit -m "Update fund NAV data"
             git push
           fi
-
