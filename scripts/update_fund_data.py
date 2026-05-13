@@ -3,23 +3,29 @@
 """
 更新 14 只基金净值数据，生成给静态网页读取的 JSON 文件。
 
-设计原则：
-1. 后端负责抓净值，网页优先读本仓库 data/*.json，避免浏览器 CORS / HTTPS 混合内容问题。
-2. 每只基金同时尝试多个来源：AKShare、东方财富 F10、天天基金 fundgz。
-3. 历史净值与最新净值分开处理：历史曲线可以来自 AKShare/东财；最新净值必须按日期校验，不能因为历史接口旧就沿用旧日期。
-4. 如果最新日期落后于预期交易日，标记 date_ok=false，并把诊断写入 JSON，网页会提示哪些基金仍是旧净值。
+v5_f10_primary 核心修复：
+1. 最新正式净值以东方财富 F10DataApi 为第一主源，因为它晚上通常比 fundgz 的 dwjz 更快同步。
+2. AKShare 只作为历史/备用，不允许 AKShare 日期旧时提前定稿。
+3. 天天基金 fundgz 只取 dwjz/jzrq 作为正式净值，不把 gsz/gztime 写入正式 JSON。
+4. 每只基金在 Actions 日志中打印所有候选源，便于排错。
+5. 支持 workflow_dispatch 手工指定 EXPECTED_TRADE_DATE。
 """
 from __future__ import annotations
 
+import html as html_lib
 import json
+import os
 import re
 import time
 from datetime import datetime, timedelta, timezone
+from io import StringIO
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 import requests
+
+SCRIPT_VERSION = "v5_f10_primary_20260513"
 
 FUNDS = [
     {"code": "014362", "name": "睿远稳进配置两年持有混合A"},
@@ -42,13 +48,15 @@ DATA_DIR = Path("data")
 LATEST_PATH = DATA_DIR / "fund_latest.json"
 HISTORY_PATH = DATA_DIR / "fund_history.json"
 START_DATE = "2020-10-27"
-REQUEST_SLEEP = 0.35
+REQUEST_SLEEP = 0.25
 
-HEADERS = {
+SESSION = requests.Session()
+SESSION.headers.update({
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
     "Referer": "https://fund.eastmoney.com/",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-}
+    "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+})
 
 
 def safe_float(x: Any) -> Optional[float]:
@@ -76,9 +84,11 @@ def beijing_now() -> datetime:
 
 
 def expected_trade_date() -> str:
-    """简化版：按北京时间推算最近一个周一至周五交易日；不处理法定假期。"""
+    forced = os.environ.get("EXPECTED_TRADE_DATE", "").strip()
+    if forced:
+        return clean_date(forced)
     d = beijing_now().date()
-    while d.weekday() >= 5:  # 5=Sat, 6=Sun
+    while d.weekday() >= 5:
         d -= timedelta(days=1)
     return d.isoformat()
 
@@ -112,132 +122,168 @@ def normalize_history(df: pd.DataFrame, source: str) -> List[Dict[str, Any]]:
         if not d or nav is None or nav <= 0 or d < START_DATE:
             continue
         pct = safe_float(row.get(pct_col)) if pct_col else None
-        out.append({"date": d, "nav": nav, "pct": pct})
+        out.append({"date": d, "nav": nav, "pct": pct, "source": source})
+    by_date = {x["date"]: x for x in out}
+    out = list(by_date.values())
     out.sort(key=lambda x: x["date"])
     return out
+
+
+def parse_eastmoney_f10_rows(text: str) -> List[Dict[str, Any]]:
+    raw = text or ""
+    m = re.search(r'content\s*:\s*"(.*?)"\s*,\s*records\s*:', raw, re.S)
+    content = m.group(1) if m else raw
+    content = content.replace('\\"', '"').replace("\\'", "'")
+    content = content.replace('\\r', '\n').replace('\\n', '\n').replace('\\t', '\t')
+    content = html_lib.unescape(content)
+
+    # 有些返回是 HTML tr/td 片段
+    if "<td" in content.lower() or "<tr" in content.lower():
+        try:
+            tables = pd.read_html(StringIO(f"<table>{content}</table>"))
+            if tables:
+                rows = normalize_history(tables[0], "东方财富F10")
+                if rows:
+                    return rows
+        except Exception:
+            pass
+
+    # 有些返回被解析后是纯文本行：2026-05-13\t1.2222\t1.2622\t0.11%\t...
+    rows: List[Dict[str, Any]] = []
+    line_pattern = re.compile(
+        r"(20\d{2}[-/]\d{1,2}[-/]\d{1,2})\s+"
+        r"([0-9]+(?:\.[0-9]+)?)\s+"
+        r"([0-9]+(?:\.[0-9]+)?)?\s*"
+        r"([-+]?\d+(?:\.\d+)?)%?",
+        re.S,
+    )
+    for d, nav, _acc, pct in line_pattern.findall(content):
+        d2 = clean_date(d)
+        nav_v = safe_float(nav)
+        pct_v = safe_float(pct)
+        if d2 and nav_v is not None and nav_v > 0 and d2 >= START_DATE:
+            rows.append({"date": d2, "nav": nav_v, "pct": pct_v, "source": "东方财富F10"})
+    by_date = {x["date"]: x for x in rows}
+    rows = list(by_date.values())
+    rows.sort(key=lambda x: x["date"])
+    return rows
+
+
+def get_eastmoney_f10_text(code: str, per: int = 20, sdate: str = "", edate: str = "") -> str:
+    url = "https://fund.eastmoney.com/f10/F10DataApi.aspx"
+    params = {"type": "lsjz", "code": code, "page": "1", "per": str(per), "sdate": sdate, "edate": edate}
+    r = SESSION.get(url, params=params, timeout=20)
+    r.raise_for_status()
+    # 东方财富这个接口经常没有清晰 charset，强制用 apparent_encoding 更稳
+    if not r.encoding or r.encoding.lower() in ("iso-8859-1", "ascii"):
+        r.encoding = r.apparent_encoding or "utf-8"
+    return r.text
+
+
+def history_from_eastmoney_f10(code: str, per: int = 20000) -> Tuple[List[Dict[str, Any]], str]:
+    text = get_eastmoney_f10_text(code, per=per, sdate=START_DATE, edate="")
+    rows = parse_eastmoney_f10_rows(text)
+    if not rows:
+        # 输出前 200 字，别把整段表格塞爆日志/网页
+        raise RuntimeError("Eastmoney F10 no valid rows; head=" + re.sub(r"\s+", " ", text[:200]))
+    return rows, "东方财富F10历史净值"
+
+
+def latest_from_eastmoney_f10(code: str) -> Tuple[Dict[str, Any], str]:
+    text = get_eastmoney_f10_text(code, per=20, sdate="", edate="")
+    rows = parse_eastmoney_f10_rows(text)
+    if not rows:
+        raise RuntimeError("Eastmoney latest no valid rows; head=" + re.sub(r"\s+", " ", text[:200]))
+    last = rows[-1]
+    return {
+        "nav": last["nav"],
+        "date": last["date"],
+        "date_time": last["date"],
+        "daily_pct": last.get("pct"),
+        "estimated": False,
+    }, "东方财富F10最新净值"
 
 
 def history_from_akshare(code: str) -> Tuple[List[Dict[str, Any]], str]:
     import akshare as ak
     df = ak.fund_open_fund_info_em(symbol=code, indicator="单位净值走势")
-    out = normalize_history(df, "AKShare")
-    if not out:
+    rows = normalize_history(df, "AKShare")
+    if not rows:
         raise RuntimeError("AKShare returned no valid history")
-    return out, "AKShare fund_open_fund_info_em"
-
-
-def history_from_eastmoney_f10(code: str, per: int = 20000) -> Tuple[List[Dict[str, Any]], str]:
-    url = f"https://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&code={code}&page=1&per={per}&sdate={START_DATE}&edate="
-    r = requests.get(url, headers=HEADERS, timeout=25)
-    r.raise_for_status()
-    tables = pd.read_html(r.text)
-    if not tables:
-        raise RuntimeError("Eastmoney F10 no table")
-    out = normalize_history(tables[0], "东方财富F10")
-    if not out:
-        raise RuntimeError("Eastmoney F10 no valid history")
-    return out, "东方财富F10历史净值"
-
-
-def latest_from_eastmoney_f10(code: str) -> Tuple[Dict[str, Any], str]:
-    # 只取最近 10 条，避免大表慢；用于“最新净值补采”。
-    url = f"https://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&code={code}&page=1&per=10&sdate=&edate="
-    r = requests.get(url, headers=HEADERS, timeout=15)
-    r.raise_for_status()
-    tables = pd.read_html(r.text)
-    if not tables:
-        raise RuntimeError("Eastmoney latest no table")
-    hist = normalize_history(tables[0], "东方财富F10")
-    if not hist:
-        raise RuntimeError("Eastmoney latest no valid rows")
-    last = hist[-1]
-    return {"nav": last["nav"], "date": last["date"], "daily_pct": last.get("pct"), "estimated": False}, "东方财富F10最新净值"
+    return rows, "AKShare fund_open_fund_info_em"
 
 
 def latest_from_akshare(code: str) -> Tuple[Dict[str, Any], str]:
-    hist, src = history_from_akshare(code)
-    last = hist[-1]
-    return {"nav": last["nav"], "date": last["date"], "daily_pct": last.get("pct"), "estimated": False}, src
+    rows, src = history_from_akshare(code)
+    last = rows[-1]
+    return {
+        "nav": last["nav"],
+        "date": last["date"],
+        "date_time": last["date"],
+        "daily_pct": last.get("pct"),
+        "estimated": False,
+    }, src
 
 
 def latest_from_fundgz(code: str) -> Tuple[Dict[str, Any], str]:
-    """
-    天天基金 fundgz 同时返回：
-    - dwjz / jzrq：正式单位净值及其日期；
-    - gsz / gztime：盘中估算净值及估算时间。
-
-    后端 JSON 用于晚间确认净值监控，必须优先使用正式净值 dwjz，
-    不能把 15:00 的估算值 gsz 当成当日正式净值，否则会和 APP 公布净值不一致。
-    估算值只在前端“盘中估算优先”模式下临时使用。
-    """
-    url = f"https://fundgz.1234567.com.cn/js/{code}.js?rt={int(time.time() * 1000)}"
-    r = requests.get(url, headers=HEADERS, timeout=12)
+    url = f"https://fundgz.1234567.com.cn/js/{code}.js?rt={int(time.time()*1000)}"
+    r = SESSION.get(url, timeout=12)
     r.raise_for_status()
     m = re.search(r"jsonpgz\((.*)\)\s*;?", r.text.strip())
     if not m:
         raise RuntimeError("fundgz JSONP parse failed")
     data = json.loads(m.group(1))
     dwjz = safe_float(data.get("dwjz"))
-    gsz = safe_float(data.get("gsz"))
-    gszzl = safe_float(data.get("gszzl"))
     jzrq = clean_date(data.get("jzrq"))
-    gztime = str(data.get("gztime") or "")
-    gzdate = clean_date(gztime)
+    if dwjz is None or not jzrq:
+        raise RuntimeError("fundgz no official dwjz/jzrq")
+    return {
+        "nav": dwjz,
+        "date": jzrq,
+        "date_time": jzrq,
+        "daily_pct": safe_float(data.get("gszzl")),
+        "estimated": False,
+    }, "天天基金fundgz确认净值"
 
-    if dwjz is not None and jzrq:
-        return {
-            "nav": dwjz,
-            "date": jzrq,
-            "date_time": jzrq,
-            "daily_pct": gszzl,
-            "estimated": False,
-            "estimate_nav": gsz,
-            "estimate_date_time": gztime,
-        }, "天天基金fundgz确认净值"
-    if gsz is not None and gzdate:
-        return {
-            "nav": gsz,
-            "date": gzdate,
-            "date_time": gztime,
-            "daily_pct": gszzl,
-            "estimated": True,
-        }, "天天基金fundgz估算"
-    raise RuntimeError("fundgz no valid nav")
+
+def candidate_label(c: Dict[str, Any], src: str) -> str:
+    return f"{src}:{clean_date(c.get('date'))}:{c.get('nav')}"
 
 
 def pick_best_latest(candidates: List[Tuple[Dict[str, Any], str]]) -> Tuple[Dict[str, Any], str, str]:
     if not candidates:
         raise RuntimeError("no latest candidates")
-    # 日期越新越优先；同日期优先正式净值，其次估算；最后按来源顺序。
-    def key(item: Tuple[Dict[str, Any], str]) -> Tuple[str, int]:
-        d, _src = item
+
+    source_rank = {
+        "东方财富F10最新净值": 5,
+        "AKShare fund_open_fund_info_em": 3,
+        "天天基金fundgz确认净值": 2,
+    }
+
+    def key(item: Tuple[Dict[str, Any], str]) -> Tuple[str, int, int]:
+        d, src = item
         date = clean_date(d.get("date"))
-        estimated = bool(d.get("estimated"))
-        return (date, 0 if estimated else 1)
+        estimated = 0 if d.get("estimated") else 1
+        return (date, estimated, source_rank.get(src, 0))
+
     best = max(candidates, key=key)
-    diag = " | ".join(f"{src}:{c.get('date')}:{c.get('nav')}{'(估)' if c.get('estimated') else ''}" for c, src in candidates)
+    diag = " | ".join(candidate_label(c, src) for c, src in candidates)
     return best[0], best[1], diag
 
 
-def merge_latest_into_history(history: List[Dict[str, Any]], latest: Dict[str, Any]) -> List[Dict[str, Any]]:
-    if not latest or safe_float(latest.get("nav")) is None:
-        return history
+def merge_latest_into_history(history: List[Dict[str, Any]], latest: Dict[str, Any], latest_source: str) -> List[Dict[str, Any]]:
     date = clean_date(latest.get("date"))
-    if not date:
-        return history
     nav = safe_float(latest.get("nav"))
-    pct = safe_float(latest.get("daily_pct"))
-    by_date = {x["date"]: dict(x) for x in history if x.get("date")}
-    by_date[date] = {"date": date, "nav": nav, "pct": pct}
+    if not date or nav is None or nav <= 0:
+        return history
+    by_date = {x["date"]: dict(x) for x in history if clean_date(x.get("date"))}
+    by_date[date] = {"date": date, "nav": nav, "pct": safe_float(latest.get("daily_pct")), "source": latest_source}
     out = list(by_date.values())
     out.sort(key=lambda x: x["date"])
     return out
 
 
-
-
 def recompute_daily_pct_from_history(history: List[Dict[str, Any]], latest: Dict[str, Any]) -> Optional[float]:
-    """用正式历史净值重算日涨跌，避免 fundgz 的 gszzl 仍对应估算涨跌幅。"""
     date = clean_date(latest.get("date"))
     nav = safe_float(latest.get("nav"))
     if not date or nav is None or nav <= 0:
@@ -252,16 +298,18 @@ def recompute_daily_pct_from_history(history: List[Dict[str, Any]], latest: Dict
         elif d >= date:
             break
     prev_nav = safe_float(prev.get("nav")) if prev else None
-    if prev_nav is not None and prev_nav > 0:
-        return (nav / prev_nav - 1) * 100
+    if prev_nav and prev_nav > 0:
+        return round((nav / prev_nav - 1) * 100, 4)
     return safe_float(latest.get("daily_pct"))
+
 
 def fetch_fund(code: str) -> Tuple[List[Dict[str, Any]], Dict[str, Any], str]:
     errors: List[str] = []
+
+    # 历史曲线：东方财富 F10 优先，AKShare 备用
     history: List[Dict[str, Any]] = []
     history_source = ""
-
-    for fn in (history_from_akshare, history_from_eastmoney_f10):
+    for fn in (history_from_eastmoney_f10, history_from_akshare):
         try:
             history, history_source = fn(code)
             break
@@ -269,43 +317,53 @@ def fetch_fund(code: str) -> Tuple[List[Dict[str, Any]], Dict[str, Any], str]:
             errors.append(f"{fn.__name__}: {e}")
             time.sleep(REQUEST_SLEEP)
 
+    # 最新净值：F10 第一主源，AKShare 第二，fundgz 第三
     latest_candidates: List[Tuple[Dict[str, Any], str]] = []
-    for fn in (latest_from_akshare, latest_from_eastmoney_f10, latest_from_fundgz):
+    candidate_errors: List[str] = []
+    for fn in (latest_from_eastmoney_f10, latest_from_akshare, latest_from_fundgz):
         try:
             latest, src = fn(code)
             if safe_float(latest.get("nav")) is not None and clean_date(latest.get("date")):
                 latest_candidates.append((latest, src))
         except Exception as e:
-            errors.append(f"{fn.__name__}: {e}")
+            candidate_errors.append(f"{fn.__name__}: {e}")
         time.sleep(REQUEST_SLEEP)
 
     if not history and latest_candidates:
-        latest, src, diag = pick_best_latest(latest_candidates)
-        history = [{"date": clean_date(latest["date"]), "nav": latest["nav"], "pct": latest.get("daily_pct")}]
+        latest, src, _ = pick_best_latest(latest_candidates)
+        history = [{"date": clean_date(latest["date"]), "nav": latest["nav"], "pct": latest.get("daily_pct"), "source": src}]
         history_source = src
     elif not history:
-        raise RuntimeError("; ".join(errors) or "no history and no latest")
+        raise RuntimeError("; ".join(errors + candidate_errors) or "no history and no latest")
 
-    latest, latest_source, latest_diag = pick_best_latest(latest_candidates or [({"nav": history[-1]["nav"], "date": history[-1]["date"], "daily_pct": history[-1].get("pct"), "estimated": False}, history_source)])
-    history = merge_latest_into_history(history, latest)
+    latest, latest_source, latest_diag = pick_best_latest(latest_candidates)
+    history = merge_latest_into_history(history, latest, latest_source)
     recomputed_pct = recompute_daily_pct_from_history(history, latest)
     if recomputed_pct is not None:
         latest["daily_pct"] = recomputed_pct
-        history = merge_latest_into_history(history, latest)
-    diag = f"history={history_source}; latest_candidates={latest_diag}"
-    if errors:
-        diag += "; errors=" + " || ".join(errors[:6])
-    return history, {**latest, "source": latest_source}, diag
+        history = merge_latest_into_history(history, latest, latest_source)
+
+    diag_parts = [f"script={SCRIPT_VERSION}", f"history={history_source}", f"latest_candidates={latest_diag}"]
+    if errors or candidate_errors:
+        short = []
+        for e in (errors + candidate_errors)[:8]:
+            e = re.sub(r"\s+", " ", str(e))
+            if len(e) > 180:
+                e = e[:180] + "..."
+            short.append(e)
+        diag_parts.append("errors=" + " || ".join(short))
+    return history, {**latest, "source": latest_source}, "; ".join(diag_parts)
 
 
 def main() -> None:
+    print(f"SCRIPT_VERSION={SCRIPT_VERSION}")
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     old_latest, old_history = load_old_docs()
     latest_items: Dict[str, Any] = {}
     history_items: Dict[str, Any] = {}
     expected = expected_trade_date()
+    print(f"Expected trade date: {expected} (Beijing weekday calendar / override by EXPECTED_TRADE_DATE)")
 
-    print(f"Expected trade date: {expected} (Beijing simple weekday calendar)")
     for fund in FUNDS:
         code = fund["code"]
         name = fund["name"]
@@ -326,18 +384,21 @@ def main() -> None:
                 "ok": True,
                 "date_ok": date_ok,
                 "expected_trade_date": expected,
+                "script_version": SCRIPT_VERSION,
                 "diagnosis": diagnosis + ("" if date_ok else f"; WARNING: latest date {last_date} < expected {expected}"),
             }
             history_items[code] = history
             print(f"  OK {last_date} {latest.get('nav')} via {latest.get('source')} date_ok={date_ok}")
+            print("  candidates:", diagnosis.split("latest_candidates=")[-1].split("; errors=")[0])
         except Exception as e:
             print(f"  FAIL {code}: {e}")
             if code in old_latest:
                 old = dict(old_latest[code])
                 old_date = clean_date(old.get("date"))
-                old["diagnosis"] = f"本次更新失败，沿用旧数据：{e}"
+                old["diagnosis"] = f"script={SCRIPT_VERSION}; 本次更新失败，沿用旧数据：{e}"
                 old["date_ok"] = old_date >= expected if old_date else False
                 old["expected_trade_date"] = expected
+                old["script_version"] = SCRIPT_VERSION
                 latest_items[code] = old
             else:
                 latest_items[code] = {
@@ -350,6 +411,7 @@ def main() -> None:
                     "ok": False,
                     "date_ok": False,
                     "expected_trade_date": expected,
+                    "script_version": SCRIPT_VERSION,
                     "diagnosis": str(e),
                 }
             history_items[code] = old_history.get(code, [])
@@ -360,15 +422,18 @@ def main() -> None:
     latest_doc = {
         "updated_at": now,
         "expected_trade_date": expected,
+        "script_version": SCRIPT_VERSION,
         "stale_codes": stale,
         "items": latest_items,
     }
-    history_doc = {"updated_at": now, "expected_trade_date": expected, "items": history_items}
+    history_doc = {"updated_at": now, "expected_trade_date": expected, "script_version": SCRIPT_VERSION, "items": history_items}
     LATEST_PATH.write_text(json.dumps(latest_doc, ensure_ascii=False, indent=2), encoding="utf-8")
     HISTORY_PATH.write_text(json.dumps(history_doc, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     print(f"Wrote {LATEST_PATH} and {HISTORY_PATH}")
     if stale:
         print("WARNING stale latest date codes:", ", ".join(stale))
+    else:
+        print("All latest dates are fresh.")
 
 
 if __name__ == "__main__":
