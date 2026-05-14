@@ -3,10 +3,9 @@ name: Update fund NAV data
 on:
   workflow_dispatch:
   schedule:
-    # 北京时间每天 20:00–21:50，每10分钟一次（UTC 12:00–13:50）
-    - cron: "*/10 12-13 * * 1-5"
-    # 北京时间 22:00 最后一次（UTC 14:00）
-    - cron: "0 14 * * 1-5"
+    # 北京时间 20:00–21:30，每5分钟一次（UTC 12:00–13:30）
+    - cron: "*/5 12 * * 1-5"
+    - cron: "0,5,10,15,20,25,30 13 * * 1-5"
     
 permissions:
   contents: write
