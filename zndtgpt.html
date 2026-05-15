@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>标普500 / 纳指100 智能定投执行器</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel2: #172033;
+      --card: #ffffff;
+      --muted: #64748b;
+      --text: #0f172a;
+      --text2: #334155;
+      --line: #e5e7eb;
+      --blue: #2563eb;
+      --green: #16a34a;
+      --red: #dc2626;
+      --amber: #d97706;
+      --purple: #7c3aed;
+      --soft-blue: #eff6ff;
+      --soft-green: #ecfdf5;
+      --soft-red: #fef2f2;
+      --soft-amber: #fffbeb;
+      --soft-purple: #f5f3ff;
+      --shadow: 0 18px 45px rgba(15, 23, 42, .12);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #0f172a 0%, #172033 260px, #f8fafc 260px, #f8fafc 100%);
+      line-height: 1.55;
+    }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 18px 64px; }
+    header { color: #fff; padding: 18px 0 28px; }
+    header h1 { margin: 0 0 8px; font-size: clamp(26px, 4vw, 42px); letter-spacing: -0.04em; }
+    header p { margin: 0; color: #cbd5e1; max-width: 900px; font-size: 16px; }
+    .toolbar {
+      display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px;
+      align-items: center;
+    }
+    button, .button {
+      border: 0; border-radius: 999px; padding: 10px 16px;
+      font-weight: 700; cursor: pointer; font-size: 14px;
+      background: var(--blue); color: white; box-shadow: 0 8px 20px rgba(37,99,235,.25);
+    }
+    button.secondary { background: #334155; box-shadow: none; }
+    button.ghost { background: #fff; color: #0f172a; box-shadow: none; }
+    button.warn { background: var(--amber); }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+    .card {
+      background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 18px;
+    }
+    .span-12 { grid-column: span 12; }
+    .span-8 { grid-column: span 8; }
+    .span-6 { grid-column: span 6; }
+    .span-4 { grid-column: span 4; }
+    .span-3 { grid-column: span 3; }
+    @media (max-width: 900px) { .span-8,.span-6,.span-4,.span-3 { grid-column: span 12; } }
+    h2 { margin: 0 0 12px; font-size: 20px; letter-spacing: -0.02em; }
+    h3 { margin: 18px 0 8px; font-size: 16px; }
+    .sub { color: var(--muted); font-size: 13px; margin-top: -4px; }
+    .metric {
+      display: flex; flex-direction: column; gap: 4px; padding: 14px;
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px;
+      min-height: 100px;
+    }
+    .metric .label { color: var(--muted); font-size: 13px; }
+    .metric .value { font-size: 28px; font-weight: 850; letter-spacing: -0.04em; }
+    .metric .note { color: var(--muted); font-size: 12px; }
+    .blue { color: var(--blue); } .green { color: var(--green); } .red { color: var(--red); } .amber { color: var(--amber); } .purple { color: var(--purple); }
+    .pill { display: inline-flex; align-items: center; border-radius: 999px; padding: 4px 9px; font-weight: 700; font-size: 12px; }
+    .pill.green { background: var(--soft-green); color: var(--green); }
+    .pill.red { background: var(--soft-red); color: var(--red); }
+    .pill.blue { background: var(--soft-blue); color: var(--blue); }
+    .pill.amber { background: var(--soft-amber); color: var(--amber); }
+    .pill.purple { background: var(--soft-purple); color: var(--purple); }
+    .formgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    @media (max-width: 900px) { .formgrid { grid-template-columns: 1fr; } }
+    label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 5px; font-weight: 700; }
+    input, select, textarea {
+      width: 100%; border: 1px solid #cbd5e1; border-radius: 12px; padding: 10px 11px;
+      font: inherit; background: #fff; color: var(--text); outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { border-bottom: 1px solid #e5e7eb; padding: 10px 8px; text-align: right; vertical-align: middle; }
+    th:first-child, td:first-child { text-align: left; }
+    th { color: #475569; background: #f8fafc; font-weight: 800; }
+    tbody tr:hover { background: #f8fafc; }
+    .resultBox {
+      border-radius: 18px; padding: 18px; border: 1px solid #bfdbfe; background: linear-gradient(180deg,#eff6ff,#fff);
+    }
+    .resultTitle { font-size: 15px; color: #1e40af; font-weight: 900; margin-bottom: 4px; }
+    .bigMoney { font-size: clamp(34px, 7vw, 64px); font-weight: 950; letter-spacing: -0.06em; line-height: 1; }
+    .split { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; }
+    @media (max-width: 700px) { .split { grid-template-columns: 1fr; } }
+    .decision {
+      padding: 14px; border-radius: 14px; background: #fff; border: 1px solid #e2e8f0;
+    }
+    .decision .name { color: var(--muted); font-size: 13px; }
+    .decision .amt { font-size: 28px; font-weight: 900; letter-spacing: -0.04em; }
+    .decision .why { font-size: 13px; color: var(--text2); }
+    .callout { padding: 14px 16px; border-radius: 14px; background: #f8fafc; border: 1px solid #e2e8f0; }
+    .callout strong { color: #0f172a; }
+    .callout.warn { background: #fffbeb; border-color: #fde68a; }
+    .callout.good { background: #ecfdf5; border-color: #bbf7d0; }
+    .callout.bad { background: #fef2f2; border-color: #fecaca; }
+    .log {
+      min-height: 86px; max-height: 180px; overflow: auto; white-space: pre-wrap;
+      background: #0b1020; color: #cbd5e1; border-radius: 14px; padding: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px;
+    }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 2px 5px; border-radius: 6px; }
+    .footer { color: #64748b; font-size: 12px; margin-top: 28px; }
+    details { border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 14px; background: #fff; }
+    details + details { margin-top: 10px; }
+    summary { cursor: pointer; font-weight: 850; }
+    code { background: #f1f5f9; padding: 2px 5px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>标普500 / 纳指100 智能定投执行器</h1>
+      <p>这是为“目标本金约束 + 价值平均思想 + QDII 场内溢价过滤”设计的日常执行网页。核心目的不是追求理论年化最高，而是在标普最终投入 162 万、纳指最终投入 133 万的约束下，提高每一笔新增资金的买入效率。</p>
+      <div class="toolbar">
+        <button id="refreshBtn">刷新数据并计算</button>
+        <button class="ghost" id="calcBtn">只按手动输入计算</button>
+        <button class="secondary" id="saveBtn">保存参数到本机</button>
+        <button class="secondary" id="resetBtn">恢复默认参数</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="card span-12">
+        <h2>今日执行结论</h2>
+        <div class="resultBox">
+          <div class="resultTitle">今日建议总买入</div>
+          <div class="bigMoney" id="totalBuy">--</div>
+          <div class="muted small" id="todayReason">先刷新数据，或手动填入指数涨跌与场内溢价。</div>
+          <div class="split">
+            <div class="decision">
+              <div class="name">纳指100｜场外</div>
+              <div class="amt purple" id="ndxFundBuy">--</div>
+              <div class="why" id="ndxFundWhy">--</div>
+            </div>
+            <div class="decision">
+              <div class="name">纳指100｜场内ETF</div>
+              <div class="amt purple" id="ndxEtfBuy">--</div>
+              <div class="why" id="ndxEtfWhy">--</div>
+            </div>
+            <div class="decision">
+              <div class="name">标普500｜场外</div>
+              <div class="amt blue" id="spxFundBuy">--</div>
+              <div class="why" id="spxFundWhy">--</div>
+            </div>
+            <div class="decision">
+              <div class="name">标普500｜场内ETF</div>
+              <div class="amt blue" id="spxEtfBuy">--</div>
+              <div class="why" id="spxEtfWhy">--</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card span-8">
+        <h2>一、每日输入区</h2>
+        <p class="sub">网页会尝试自动抓取指数涨跌与ETF价格/估值；失败时直接手动填入即可。</p>
+        <div class="formgrid">
+          <div>
+            <label>标普500隔夜涨跌%</label>
+            <input id="spxPct" type="number" step="0.01" placeholder="例如 -1.25" />
+          </div>
+          <div>
+            <label>纳指100隔夜涨跌%</label>
+            <input id="ndxPct" type="number" step="0.01" placeholder="例如 -2.10" />
+          </div>
+          <div>
+            <label>标普场内最低溢价%</label>
+            <input id="spxPrem" type="number" step="0.01" placeholder="例如 1.20" />
+          </div>
+          <div>
+            <label>纳指场内最低溢价%</label>
+            <input id="ndxPrem" type="number" step="0.01" placeholder="例如 1.40" />
+          </div>
+        </div>
+        <div style="height:12px"></div>
+        <div class="formgrid">
+          <div>
+            <label>标普最低溢价ETF</label>
+            <input id="spxBest" placeholder="自动或手动填写" />
+          </div>
+          <div>
+            <label>纳指最低溢价ETF</label>
+            <input id="ndxBest" placeholder="自动或手动填写" />
+          </div>
+          <div>
+            <label>标普折后便宜度%</label>
+            <input id="spxCheap" type="number" step="0.01" readonly />
+          </div>
+          <div>
+            <label>纳指折后便宜度%</label>
+            <input id="ndxCheap" type="number" step="0.01" readonly />
+          </div>
+        </div>
+      </section>
+
+      <section class="card span-4">
+        <h2>状态摘要</h2>
+        <div class="metric">
+          <div class="label">标普新增本金缺口</div>
+          <div class="value blue" id="spxGap">--</div>
+          <div class="note">目标成本 - 当前成本</div>
+        </div>
+        <div style="height:10px"></div>
+        <div class="metric">
+          <div class="label">纳指新增本金缺口</div>
+          <div class="value purple" id="ndxGap">--</div>
+          <div class="note">目标成本 - 当前成本</div>
+        </div>
+        <div style="height:10px"></div>
+        <div class="callout" id="dataStatus">数据状态：等待刷新。</div>
+      </section>
+
+      <section class="card span-12">
+        <h2>二、核心参数</h2>
+        <div class="formgrid">
+          <div>
+            <label>标普当前成本</label>
+            <input id="spxCurrentCost" type="number" step="100" />
+          </div>
+          <div>
+            <label>标普目标成本</label>
+            <input id="spxTargetCost" type="number" step="100" />
+          </div>
+          <div>
+            <label>纳指当前成本</label>
+            <input id="ndxCurrentCost" type="number" step="100" />
+          </div>
+          <div>
+            <label>纳指目标成本</label>
+            <input id="ndxTargetCost" type="number" step="100" />
+          </div>
+          <div>
+            <label>标普场外固定买入</label>
+            <input id="spxBase" type="number" step="100" />
+          </div>
+          <div>
+            <label>纳指大涨日买入</label>
+            <input id="ndxUpBuy" type="number" step="100" />
+          </div>
+          <div>
+            <label>纳指正常日买入</label>
+            <input id="ndxNormalBuy" type="number" step="100" />
+          </div>
+          <div>
+            <label>纳指小跌日买入</label>
+            <input id="ndxDipBuy" type="number" step="100" />
+          </div>
+          <div>
+            <label>纳指大跌日买入</label>
+            <input id="ndxCrashBuy" type="number" step="100" />
+          </div>
+          <div>
+            <label>场内溢价硬上限%</label>
+            <input id="premiumCap" type="number" step="0.1" />
+          </div>
+          <div>
+            <label>Twelve Data API Key（可选）</label>
+            <input id="twelveKey" type="password" placeholder="不填则用免密接口/手动" />
+          </div>
+          <div>
+            <label>指数数据源</label>
+            <select id="dataProvider">
+              <option value="auto">自动：Yahoo → Stooq → Twelve可选</option>
+              <option value="yahoo">Yahoo Chart免密</option>
+              <option value="stooq">Stooq CSV免密</option>
+              <option value="twelve">Twelve Data需密钥</option>
+              <option value="manual">纯手动</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="card span-6">
+        <h2>三、标普场内ETF监控</h2>
+        <p class="sub">价格尝试取东方财富，估值尝试取天天基金 gsz；二者任一失败时，可手动填写溢价。</p>
+        <div style="overflow:auto">
+          <table id="spxEtfTable">
+            <thead><tr><th>代码</th><th>名称</th><th>现价</th><th>估值</th><th>溢价%</th><th>状态</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card span-6">
+        <h2>四、纳指场内ETF监控</h2>
+        <p class="sub">纳指场内经常在美股下跌日高溢价，默认只在跌超 -2% 且溢价≤1.5%时考虑额外买入。</p>
+        <div style="overflow:auto">
+          <table id="ndxEtfTable">
+            <thead><tr><th>代码</th><th>名称</th><th>现价</th><th>估值</th><th>溢价%</th><th>状态</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card span-12">
+        <h2>五、策略理论与执行规则</h2>
+        <details open>
+          <summary>1）为什么不是纯价值平均法？</summary>
+          <p>纯价值平均法追求“每一期组合市值沿着目标曲线增长”。在指数上涨较快时，它会自动减少买入，甚至长期不投。这会让年化收益率好看，但实际投入本金过少，绝对收益不够。这里采用的是<strong>目标本金版价值平均法</strong>：先保证标普与纳指最终本金目标能推进，再在下跌与低溢价时提高投入效率。</p>
+        </details>
+        <details open>
+          <summary>2）纳指为什么用 2500 / 5000 / 7000 / 8000？</summary>
+          <p>纳指波动大、回撤后的中期修复弹性更强，所以采用四档场外申购：大涨日少买、正常日按基准买、小跌日加码、大跌日打满额度。和 2000 / 4000 / 6000 / 8000 相比，2500 / 5000 / 7000 / 8000 的历史日均投入更接近 5000 元，有利于在约 200 个交易日附近完成纳指新增本金目标，而不是把进度拖慢。</p>
+          <table>
+            <thead><tr><th>纳指隔夜涨跌</th><th>场外申购</th><th>含义</th></tr></thead>
+            <tbody>
+              <tr><td>≥ +1.5%</td><td>2500</td><td>大涨日少买，但不断供</td></tr>
+              <tr><td>-1% 到 +1.5%</td><td>5000</td><td>正常推进</td></tr>
+              <tr><td>-2% 到 -1%</td><td>7000</td><td>有效回调，加一档</td></tr>
+              <tr><td>≤ -2%</td><td>8000</td><td>大跌日，场外额度打满</td></tr>
+            </tbody>
+          </table>
+        </details>
+        <details open>
+          <summary>3）标普为什么不是等大跌再买？</summary>
+          <p>标普大跌日频率远低于纳指。如果正常日投得太少，可能长期等不到足够多的大跌日，导致目标本金推进过慢。所以标普采取<strong>场外每天 2000 固定买</strong>，场内只在“跌幅抵消溢价后仍然便宜”时补充。</p>
+        </details>
+        <details open>
+          <summary>4）场内ETF的核心判断：折后便宜度</summary>
+          <p>场内 QDII ETF 的风险不只是指数涨跌，还有溢价。美股跌了，但如果国内 ETF 溢价更高，实际并不便宜。因此使用：</p>
+          <p><code>折后便宜度 = 1 - (1 + 指数隔夜涨跌幅) × (1 + 场内ETF溢价)</code></p>
+          <p>当折后便宜度 &gt; 0，说明指数跌幅至少抵消了场内溢价；如果折后便宜度 ≤ 0，原则上不买场内，只走场外。</p>
+        </details>
+        <details open>
+          <summary>5）最终执行口令</summary>
+          <div class="callout good">
+            <strong>纳指：</strong>按 2500 / 5000 / 7000 / 8000 四档买场外；只有纳指跌超 -2%、场内溢价≤1.5%、折后便宜度&gt;0 时，才额外买场内。<br>
+            <strong>标普：</strong>场外每天 2000；场内只在标普跌超 -1%、溢价≤3%、折后便宜度&gt;0 时加码。
+          </div>
+        </details>
+      </section>
+
+      <section class="card span-12">
+        <h2>六、数据接口说明</h2>
+        <div class="callout warn">
+          <strong>接口选择：</strong>指数涨跌优先使用 Yahoo Chart / Stooq 这类免密接口；Twelve Data 作为可选密钥接口；Pocket Portfolio 本页不作为主接口，因为测试 SPX 时返回的是“SPX Inc.”且无历史数据。ETF 场内价格尝试东方财富，基金估值尝试天天基金。所有公开接口都可能失效，所以保留手动输入兜底。
+        </div>
+        <div style="height:12px"></div>
+        <div class="log" id="logBox">日志等待刷新。</div>
+      </section>
+    </main>
+
+    <div class="footer">
+      本页只用于个人执行纪律和数据辅助，不构成投资建议。公开接口并非正式授权行情源，实盘以基金公司公告、交易软件、东方财富/天天基金等页面显示为准。
+    </div>
+  </div>
+
+<script>
+'use strict';
+
+const DEFAULTS = {
+  spxCurrentCost: 951600,
+  spxTargetCost: 1620000,
+  ndxCurrentCost: 285500,
+  ndxTargetCost: 1330000,
+  spxBase: 2000,
+  ndxUpBuy: 2500,
+  ndxNormalBuy: 5000,
+  ndxDipBuy: 7000,
+  ndxCrashBuy: 8000,
+  premiumCap: 3,
+  dataProvider: 'auto',
+  twelveKey: '',
+  spxPct: '',
+  ndxPct: '',
+  spxPrem: '',
+  ndxPrem: '',
+  spxBest: '',
+  ndxBest: ''
+};
+
+const ETF_LIST = {
+  spx: [
+    { code: '513650', secid: '1.513650', name: '南方标普500ETF' },
+    { code: '513500', secid: '1.513500', name: '博时标普500ETF' },
+    { code: '159612', secid: '0.159612', name: '国泰标普500ETF' },
+    { code: '159655', secid: '0.159655', name: '标普500相关ETF' }
+  ],
+  ndx: [
+    { code: '159941', secid: '0.159941', name: '广发纳指ETF' },
+    { code: '159659', secid: '0.159659', name: '纳指100相关ETF' },
+    { code: '513100', secid: '1.513100', name: '纳指ETF' },
+    { code: '159501', secid: '0.159501', name: '纳指100相关ETF' }
+  ]
+};
+
+function $(id) { return document.getElementById(id); }
+function nval(id, fallback = 0) {
+  const x = parseFloat($(id).value);
+  return Number.isFinite(x) ? x : fallback;
+}
+function setVal(id, v) { $(id).value = v ?? ''; }
+function fmtMoney(x) {
+  if (!Number.isFinite(x)) return '--';
+  return new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'CNY', maximumFractionDigits: 0 }).format(x).replace('CN¥','¥');
+}
+function fmtNum(x, digits=2) { return Number.isFinite(x) ? x.toFixed(digits) : '--'; }
+function pctClass(x) { return x < 0 ? 'green' : (x > 0 ? 'red' : 'blue'); }
+function log(msg) {
+  const box = $('logBox');
+  const ts = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+  box.textContent = `[${ts}] ${msg}\n` + box.textContent;
+}
+
+function loadSettings() {
+  const raw = localStorage.getItem('smartDcaSettingsV2');
+  const cfg = raw ? { ...DEFAULTS, ...JSON.parse(raw) } : DEFAULTS;
+  for (const [k,v] of Object.entries(cfg)) if ($(k)) setVal(k, v);
+}
+function saveSettings() {
+  const cfg = {};
+  Object.keys(DEFAULTS).forEach(k => { if ($(k)) cfg[k] = $(k).value; });
+  localStorage.setItem('smartDcaSettingsV2', JSON.stringify(cfg));
+  log('参数已保存到本机 localStorage。');
+}
+function resetSettings() {
+  localStorage.removeItem('smartDcaSettingsV2');
+  for (const [k,v] of Object.entries(DEFAULTS)) if ($(k)) setVal(k, v);
+  log('已恢复默认参数。');
+  calculate();
+}
+
+function updateGaps() {
+  const spxGap = nval('spxTargetCost') - nval('spxCurrentCost');
+  const ndxGap = nval('ndxTargetCost') - nval('ndxCurrentCost');
+  $('spxGap').textContent = fmtMoney(spxGap);
+  $('ndxGap').textContent = fmtMoney(ndxGap);
+}
+
+function cheapness(indexPct, premiumPct) {
+  if (!Number.isFinite(indexPct) || !Number.isFinite(premiumPct)) return NaN;
+  return (1 - (1 + indexPct/100) * (1 + premiumPct/100)) * 100;
+}
+
+function decideNdxFund(pct) {
+  const up = nval('ndxUpBuy', 2500);
+  const normal = nval('ndxNormalBuy', 5000);
+  const dip = nval('ndxDipBuy', 7000);
+  const crash = nval('ndxCrashBuy', 8000);
+  if (!Number.isFinite(pct)) return { amount: 0, why: '未输入纳指涨跌，无法判断。' };
+  if (pct >= 1.5) return { amount: up, why: '纳指大涨≥+1.5%，少买但不断供。' };
+  if (pct >= -1) return { amount: normal, why: '纳指处于正常区间，按基准推进。' };
+  if (pct >= -2) return { amount: dip, why: '纳指回调 -1% 到 -2%，提高到小跌档。' };
+  return { amount: crash, why: '纳指跌≤-2%，场外额度打满。' };
+}
+
+function decideNdxEtf(pct, premium, cheap) {
+  if (!Number.isFinite(pct) || !Number.isFinite(premium) || !Number.isFinite(cheap)) return { amount: 0, why: '缺少纳指溢价或涨跌数据，默认不买场内。' };
+  if (pct <= -2 && premium <= 1.5 && cheap > 0) {
+    const amt = cheap >= 1.5 ? 5000 : 3000;
+    return { amount: amt, why: `纳指跌≤-2%、溢价≤1.5%、折后便宜度${fmtNum(cheap)}%，可额外买场内。` };
+  }
+  return { amount: 0, why: '纳指场内条件未满足：只买场外，不追高溢价。' };
+}
+
+function decideSpx(pct, premium, cheap) {
+  const base = nval('spxBase', 2000);
+  const cap = nval('premiumCap', 3);
+  let etf = 0;
+  let why = '标普未触发场内加码。';
+  if (Number.isFinite(pct) && Number.isFinite(premium) && Number.isFinite(cheap)) {
+    if (premium > cap) {
+      why = `场内溢价${fmtNum(premium)}%超过硬上限${cap}%，只买场外。`;
+    } else if (pct <= -3 && cheap > 0) {
+      etf = 15000; why = `标普跌≤-3%，且折后便宜度${fmtNum(cheap)}%>0，场内加大档。`;
+    } else if (pct <= -2 && cheap > 0) {
+      etf = 8000; why = `标普跌 -2% 到 -3%，且折后便宜度${fmtNum(cheap)}%>0，场内加码。`;
+    } else if (pct <= -1 && cheap > 0) {
+      etf = 3000; why = `标普跌 -1% 到 -2%，且折后便宜度${fmtNum(cheap)}%>0，场内小幅加码。`;
+    } else if (pct <= -1 && cheap <= 0) {
+      why = `标普虽然下跌，但溢价抵消跌幅，折后便宜度${fmtNum(cheap)}%≤0，不买场内。`;
+    }
+  } else {
+    why = '缺少标普涨跌或场内溢价数据，默认只买场外。';
+  }
+  return { fund: base, etf, fundWhy: `标普场外按资金目标固定推进：${fmtMoney(base)}。`, etfWhy: why };
+}
+
+function calculate() {
+  updateGaps();
+  const spxPct = nval('spxPct', NaN);
+  const ndxPct = nval('ndxPct', NaN);
+  const spxPrem = nval('spxPrem', NaN);
+  const ndxPrem = nval('ndxPrem', NaN);
+  const spxCheap = cheapness(spxPct, spxPrem);
+  const ndxCheap = cheapness(ndxPct, ndxPrem);
+  setVal('spxCheap', Number.isFinite(spxCheap) ? fmtNum(spxCheap) : '');
+  setVal('ndxCheap', Number.isFinite(ndxCheap) ? fmtNum(ndxCheap) : '');
+
+  const ndxFund = decideNdxFund(ndxPct);
+  const ndxEtf = decideNdxEtf(ndxPct, ndxPrem, ndxCheap);
+  const spx = decideSpx(spxPct, spxPrem, spxCheap);
+  const total = ndxFund.amount + ndxEtf.amount + spx.fund + spx.etf;
+
+  $('ndxFundBuy').textContent = fmtMoney(ndxFund.amount);
+  $('ndxFundWhy').textContent = ndxFund.why;
+  $('ndxEtfBuy').textContent = fmtMoney(ndxEtf.amount);
+  $('ndxEtfWhy').textContent = ndxEtf.why;
+  $('spxFundBuy').textContent = fmtMoney(spx.fund);
+  $('spxFundWhy').textContent = spx.fundWhy;
+  $('spxEtfBuy').textContent = fmtMoney(spx.etf);
+  $('spxEtfWhy').textContent = spx.etfWhy;
+  $('totalBuy').textContent = fmtMoney(total);
+
+  const bits = [];
+  if (Number.isFinite(spxPct)) bits.push(`标普${spxPct >= 0 ? '+' : ''}${fmtNum(spxPct)}%`);
+  if (Number.isFinite(ndxPct)) bits.push(`纳指${ndxPct >= 0 ? '+' : ''}${fmtNum(ndxPct)}%`);
+  if (Number.isFinite(spxPrem)) bits.push(`标普最低溢价${fmtNum(spxPrem)}%`);
+  if (Number.isFinite(ndxPrem)) bits.push(`纳指最低溢价${fmtNum(ndxPrem)}%`);
+  $('todayReason').textContent = bits.length ? bits.join('；') : '未输入完整数据，结果以默认保守规则计算。';
+}
+
+async function fetchYahooPct(symbol) {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=7d&interval=1d`;
+  const r = await fetch(url, { cache: 'no-store' });
+  if (!r.ok) throw new Error(`Yahoo HTTP ${r.status}`);
+  const j = await r.json();
+  const closes = j.chart?.result?.[0]?.indicators?.quote?.[0]?.close || [];
+  const valid = closes.filter(x => Number.isFinite(x));
+  if (valid.length < 2) throw new Error('Yahoo有效收盘价不足');
+  const last = valid[valid.length - 1], prev = valid[valid.length - 2];
+  return (last / prev - 1) * 100;
+}
+
+async function fetchStooqPct(symbol) {
+  const direct = `https://stooq.com/q/d/l/?s=${encodeURIComponent(symbol)}&i=d`;
+  const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(direct)}`;
+  const r = await fetch(url, { cache: 'no-store' });
+  if (!r.ok) throw new Error(`Stooq HTTP ${r.status}`);
+  const text = await r.text();
+  const lines = text.trim().split(/\r?\n/).slice(1).filter(Boolean);
+  if (lines.length < 2) throw new Error('Stooq有效行不足');
+  const last = parseFloat(lines[lines.length - 1].split(',')[4]);
+  const prev = parseFloat(lines[lines.length - 2].split(',')[4]);
+  if (!Number.isFinite(last) || !Number.isFinite(prev)) throw new Error('Stooq收盘价解析失败');
+  return (last / prev - 1) * 100;
+}
+
+async function fetchTwelvePct(symbol, key) {
+  if (!key) throw new Error('未填写Twelve Data API Key');
+  const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=1day&outputsize=5&apikey=${encodeURIComponent(key)}`;
+  const r = await fetch(url, { cache: 'no-store' });
+  if (!r.ok) throw new Error(`Twelve HTTP ${r.status}`);
+  const j = await r.json();
+  if (!j.values || j.values.length < 2) throw new Error(j.message || 'Twelve有效数据不足');
+  const last = parseFloat(j.values[0].close);
+  const prev = parseFloat(j.values[1].close);
+  return (last / prev - 1) * 100;
+}
+
+async function fetchIndexPct(which) {
+  const provider = $('dataProvider').value;
+  const key = $('twelveKey').value.trim();
+  const yahooSym = which === 'spx' ? '^GSPC' : '^NDX';
+  const stooqSym = which === 'spx' ? '^spx' : '^ndx';
+  const twelveSym = which === 'spx' ? 'SPX' : 'NDX';
+
+  if (provider === 'manual') throw new Error('手动模式');
+  if (provider === 'yahoo') return await fetchYahooPct(yahooSym);
+  if (provider === 'stooq') return await fetchStooqPct(stooqSym);
+  if (provider === 'twelve') return await fetchTwelvePct(twelveSym, key);
+
+  try { return await fetchYahooPct(yahooSym); }
+  catch (e1) { log(`${which.toUpperCase()} Yahoo失败：${e1.message}`); }
+  try { return await fetchStooqPct(stooqSym); }
+  catch (e2) { log(`${which.toUpperCase()} Stooq失败：${e2.message}`); }
+  if (key) {
+    try { return await fetchTwelvePct(twelveSym, key); }
+    catch (e3) { log(`${which.toUpperCase()} Twelve失败：${e3.message}`); }
+  }
+  throw new Error(`${which.toUpperCase()} 指数数据自动抓取失败`);
+}
+
+function jsonp(url, callbackName = null, timeoutMs = 8000) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    let done = false;
+    const timer = setTimeout(() => cleanup(new Error('JSONP超时')), timeoutMs);
+    function cleanup(err, data) {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      script.remove();
+      if (callbackName) delete window[callbackName];
+      err ? reject(err) : resolve(data);
+    }
+    if (callbackName) window[callbackName] = data => cleanup(null, data);
+    script.onerror = () => cleanup(new Error('JSONP加载失败'));
+    script.src = url;
+    document.body.appendChild(script);
+  });
+}
+
+async function fetchEastMoneyQuote(secid) {
+  const cb = `em_cb_${Date.now()}_${Math.floor(Math.random()*99999)}`;
+  const fields = 'f43,f57,f58,f59,f60,f169,f170';
+  const url = `https://push2.eastmoney.com/api/qt/stock/get?secid=${encodeURIComponent(secid)}&fields=${fields}&ut=fa5fd1943c7b386f172d6893dbfba10b&cb=${cb}`;
+  const data = await jsonp(url, cb);
+  const d = data?.data;
+  if (!d || d.f43 === '-' || d.f43 == null) throw new Error('东方财富无价格');
+  const decimals = Number.isFinite(d.f59) ? d.f59 : 3;
+  let price = parseFloat(d.f43);
+  if (price > 100) price = price / Math.pow(10, decimals);
+  return { price, name: d.f58 || '', code: d.f57 || '' };
+}
+
+async function fetchFundGz(code) {
+  const old = window.jsonpgz;
+  return new Promise((resolve, reject) => {
+    let done = false;
+    const script = document.createElement('script');
+    const timer = setTimeout(() => cleanup(new Error('天天基金估值超时')), 8000);
+    function cleanup(err, data) {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      script.remove();
+      window.jsonpgz = old;
+      err ? reject(err) : resolve(data);
+    }
+    window.jsonpgz = data => cleanup(null, data);
+    script.onerror = () => cleanup(new Error('天天基金估值加载失败'));
+    script.src = `https://fundgz.1234567.com.cn/js/${encodeURIComponent(code)}.js?rt=${Date.now()}`;
+    document.body.appendChild(script);
+  });
+}
+
+async function fetchEtfRow(item) {
+  const row = { ...item, price: NaN, est: NaN, premium: NaN, ok: false, status: '' };
+  try {
+    const q = await fetchEastMoneyQuote(item.secid);
+    row.price = q.price;
+  } catch (e) {
+    row.status += `价格失败：${e.message}；`;
+  }
+  try {
+    const gz = await fetchFundGz(item.code);
+    row.est = parseFloat(gz?.gsz);
+  } catch (e) {
+    row.status += `估值失败：${e.message}；`;
+  }
+  if (Number.isFinite(row.price) && Number.isFinite(row.est) && row.est > 0) {
+    row.premium = (row.price / row.est - 1) * 100;
+    row.ok = true;
+    row.status = 'OK';
+  } else if (!row.status) {
+    row.status = '数据不足';
+  }
+  return row;
+}
+
+function renderEtfTable(kind, rows) {
+  const tbody = $(`${kind}EtfTable`).querySelector('tbody');
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    const cls = Number.isFinite(r.premium) ? pctClass(r.premium) : '';
+    tr.innerHTML = `
+      <td>${r.code}</td>
+      <td>${r.name}</td>
+      <td>${fmtNum(r.price, 4)}</td>
+      <td>${fmtNum(r.est, 4)}</td>
+      <td class="${cls}">${fmtNum(r.premium, 2)}</td>
+      <td><span class="pill ${r.ok ? 'green' : 'amber'}">${r.status}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+async function refreshEtfs(kind) {
+  const rows = [];
+  for (const item of ETF_LIST[kind]) {
+    try { rows.push(await fetchEtfRow(item)); }
+    catch (e) { rows.push({ ...item, price: NaN, est: NaN, premium: NaN, ok: false, status: e.message }); }
+  }
+  renderEtfTable(kind, rows);
+  const valid = rows.filter(r => Number.isFinite(r.premium));
+  if (valid.length) {
+    valid.sort((a,b) => a.premium - b.premium);
+    const best = valid[0];
+    setVal(kind === 'spx' ? 'spxPrem' : 'ndxPrem', fmtNum(best.premium, 2));
+    setVal(kind === 'spx' ? 'spxBest' : 'ndxBest', `${best.code} ${best.name}`);
+    log(`${kind.toUpperCase()} 最低溢价：${best.code} ${fmtNum(best.premium,2)}%`);
+  } else {
+    log(`${kind.toUpperCase()} ETF溢价自动获取失败，请手动填写。`);
+  }
+}
+
+async function refreshAll() {
+  $('refreshBtn').disabled = true;
+  $('dataStatus').textContent = '数据状态：正在刷新公开接口……';
+  $('dataStatus').className = 'callout warn';
+  log('开始刷新指数与ETF数据。');
+  try {
+    try {
+      const spx = await fetchIndexPct('spx');
+      setVal('spxPct', fmtNum(spx, 2));
+      log(`标普500指数涨跌获取成功：${fmtNum(spx,2)}%`);
+    } catch (e) { log(e.message); }
+    try {
+      const ndx = await fetchIndexPct('ndx');
+      setVal('ndxPct', fmtNum(ndx, 2));
+      log(`纳指100指数涨跌获取成功：${fmtNum(ndx,2)}%`);
+    } catch (e) { log(e.message); }
+    await Promise.allSettled([refreshEtfs('spx'), refreshEtfs('ndx')]);
+    calculate();
+    $('dataStatus').textContent = '数据状态：刷新完成。若某项为空，请手动填写后点“只按手动输入计算”。';
+    $('dataStatus').className = 'callout good';
+  } catch (e) {
+    log(`刷新异常：${e.message}`);
+    $('dataStatus').textContent = '数据状态：部分接口失败，请使用手动输入兜底。';
+    $('dataStatus').className = 'callout bad';
+  } finally {
+    $('refreshBtn').disabled = false;
+  }
+}
+
+function bind() {
+  $('refreshBtn').addEventListener('click', refreshAll);
+  $('calcBtn').addEventListener('click', () => { calculate(); log('已按当前输入重新计算。'); });
+  $('saveBtn').addEventListener('click', saveSettings);
+  $('resetBtn').addEventListener('click', resetSettings);
+  document.querySelectorAll('input,select').forEach(el => {
+    el.addEventListener('change', () => { if (el.id !== 'twelveKey') calculate(); });
+  });
+}
+
+loadSettings();
+bind();
+updateGaps();
+calculate();
+</script>
+</body>
+</html>
