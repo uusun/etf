@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>标普500 / 纳指100 智能定投执行器 v4</title>
+  <style>
+    :root {
+      --bg: #0f172a; --panel: #111827; --card: #fff; --muted: #64748b; --text: #0f172a; --text2: #334155;
+      --line: #e5e7eb; --blue: #2563eb; --green: #16a34a; --red: #dc2626; --amber: #d97706; --purple: #7c3aed;
+      --soft-blue: #eff6ff; --soft-green: #ecfdf5; --soft-red: #fef2f2; --soft-amber: #fffbeb; --soft-purple: #f5f3ff;
+      --shadow: 0 18px 45px rgba(15,23,42,.12); --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; color: var(--text); background: linear-gradient(180deg,#0f172a 0%,#172033 270px,#f8fafc 270px,#f8fafc 100%); line-height: 1.55; }
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 28px 18px 64px; }
+    header { color: #fff; padding: 18px 0 28px; }
+    header h1 { margin: 0 0 8px; font-size: clamp(26px,4vw,42px); letter-spacing: -.04em; }
+    header p { margin: 0; color: #cbd5e1; max-width: 1000px; font-size: 16px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; align-items: center; }
+    button { border: 0; border-radius: 999px; padding: 10px 16px; font-weight: 800; cursor: pointer; font-size: 14px; background: var(--blue); color: #fff; box-shadow: 0 8px 20px rgba(37,99,235,.25); }
+    button.secondary { background: #334155; box-shadow: none; } button.ghost { background: #fff; color: #0f172a; box-shadow: none; } button.warn { background: var(--amber); }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    .grid { display: grid; grid-template-columns: repeat(12,1fr); gap: 16px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
+    .span-12 { grid-column: span 12; } .span-8 { grid-column: span 8; } .span-6 { grid-column: span 6; } .span-4 { grid-column: span 4; } .span-3 { grid-column: span 3; }
+    @media (max-width: 900px) { .span-8,.span-6,.span-4,.span-3 { grid-column: span 12; } }
+    h2 { margin: 0 0 12px; font-size: 20px; letter-spacing: -.02em; } h3 { margin: 18px 0 8px; font-size: 16px; }
+    .sub { color: var(--muted); font-size: 13px; margin-top: -4px; }
+    .metric { display: flex; flex-direction: column; gap: 4px; padding: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; min-height: 100px; }
+    .metric .label { color: var(--muted); font-size: 13px; } .metric .value { font-size: 28px; font-weight: 850; letter-spacing: -.04em; } .metric .note { color: var(--muted); font-size: 12px; }
+    .blue { color: var(--blue); } .green { color: var(--green); } .red { color: var(--red); } .amber { color: var(--amber); } .purple { color: var(--purple); }
+    .pill { display: inline-flex; align-items: center; border-radius: 999px; padding: 4px 9px; font-weight: 800; font-size: 12px; white-space: nowrap; }
+    .pill.green { background: var(--soft-green); color: var(--green); } .pill.red { background: var(--soft-red); color: var(--red); } .pill.blue { background: var(--soft-blue); color: var(--blue); } .pill.amber { background: var(--soft-amber); color: var(--amber); } .pill.purple { background: var(--soft-purple); color: var(--purple); }
+    .formgrid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+    @media (max-width: 900px) { .formgrid { grid-template-columns: 1fr; } }
+    label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 5px; font-weight: 800; }
+    input, select, textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 12px; padding: 10px 11px; font: inherit; background: #fff; color: var(--text); outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 760px; }
+    th, td { border-bottom: 1px solid #e5e7eb; padding: 9px 8px; text-align: right; vertical-align: middle; white-space: nowrap; }
+    th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
+    th { color: #475569; background: #f8fafc; font-weight: 850; font-size: 12px; }
+    tbody tr:hover { background: #f8fafc; } .tablewrap { overflow: auto; border: 1px solid #e5e7eb; border-radius: 14px; }
+    .resultBox { border-radius: 18px; padding: 18px; border: 1px solid #bfdbfe; background: linear-gradient(180deg,#eff6ff,#fff); }
+    .resultTitle { font-size: 15px; color: #1e40af; font-weight: 950; margin-bottom: 4px; }
+    .bigMoney { font-size: clamp(34px,7vw,64px); font-weight: 950; letter-spacing: -.06em; line-height: 1; }
+    .split { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-top: 12px; }
+    @media (max-width: 1000px) { .split { grid-template-columns: repeat(2,1fr); } } @media (max-width: 640px) { .split { grid-template-columns: 1fr; } }
+    .decision { padding: 14px; border-radius: 14px; background: #fff; border: 1px solid #e2e8f0; }
+    .decision .name { color: var(--muted); font-size: 13px; } .decision .amt { font-size: 28px; font-weight: 900; letter-spacing: -.04em; } .decision .why { font-size: 13px; color: var(--text2); }
+    .callout { padding: 14px 16px; border-radius: 14px; background: #f8fafc; border: 1px solid #e2e8f0; } .callout strong { color: #0f172a; }
+    .callout.warn { background: #fffbeb; border-color: #fde68a; } .callout.good { background: #ecfdf5; border-color: #bbf7d0; } .callout.bad { background: #fef2f2; border-color: #fecaca; }
+    .log { min-height: 96px; max-height: 220px; overflow: auto; white-space: pre-wrap; background: #0b1020; color: #cbd5e1; border-radius: 14px; padding: 12px; font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size: 12px; }
+    .muted { color: var(--muted); } .small { font-size: 12px; }
+    .footer { color: #64748b; font-size: 12px; margin-top: 28px; }
+    details { border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 14px; background: #fff; } details + details { margin-top: 10px; }
+    summary { cursor: pointer; font-weight: 900; } code { background: #f1f5f9; padding: 2px 5px; border-radius: 6px; }
+    .sourceTag { color: var(--muted); font-size: 12px; }
+    .hi { background: #fef2f2; color: #991b1b; } .mid { background: #fffbeb; color: #92400e; } .low { background: #f0fdf4; color: #166534; }
+
+    .progressGrid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin: 12px 0; }
+    @media (max-width: 1000px) { .progressGrid { grid-template-columns: repeat(2,1fr); } } @media (max-width: 640px) { .progressGrid { grid-template-columns: 1fr; } }
+    .progressCard { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; }
+    .progressCard .k { color: var(--muted); font-size: 12px; font-weight: 850; }
+    .progressCard .v { font-size: 24px; font-weight: 950; letter-spacing: -.04em; margin-top: 3px; }
+    .progressCard .s { color: var(--muted); font-size: 12px; margin-top: 3px; }
+    .barTrack { height: 9px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-top: 8px; }
+    .barFill { height: 100%; width: 0%; background: linear-gradient(90deg,#2563eb,#7c3aed); border-radius: 999px; transition: width .25s ease; }
+    .recordActions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0; }
+    .recordActions button { box-shadow: none; }
+    .checkline { display: flex; align-items: center; gap: 8px; color: var(--text2); font-size: 13px; font-weight: 800; }
+    .checkline input { width: auto; box-shadow: none; }
+    .tablewrap.historyTable table { min-width: 1360px; }
+    .dangerLink { color: var(--red); cursor: pointer; font-weight: 900; }
+    .mono { font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>标普500 / 纳指100 智能定投执行器 v4</h1>
+      <p>保留四档智能定投框架：纳指 2500 / 5000 / 7000 / 8000，且当纳指跌幅 ≤ -2% 时，额外给出 4000 元场内 ETF 候选买入；候选买入必须通过“溢价 + 折后便宜度”过滤。ETF 溢价参考 Palmmicro / HaoETF 口径，指数涨跌主接口改为东方财富全球指数（AKShare 同源），Twelve Data 作为备用。</p>
+      <div class="toolbar">
+        <button id="refreshBtn">刷新数据并计算</button>
+        <button class="ghost" id="calcBtn">只按手动输入计算</button>
+        <button class="secondary" id="saveBtn">保存参数到本机</button>
+        <button class="secondary" id="resetBtn">恢复默认参数</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="card span-12">
+        <h2>今日执行结论</h2>
+        <div class="resultBox">
+          <div class="resultTitle">今日建议总买入</div>
+          <div class="bigMoney" id="totalBuy">--</div>
+          <div class="muted small" id="todayReason">先刷新数据，或手动填入指数涨跌与场内溢价。</div>
+          <div class="split">
+            <div class="decision"><div class="name">纳指100｜场外</div><div class="amt purple" id="ndxFundBuy">--</div><div class="why" id="ndxFundWhy">--</div></div>
+            <div class="decision"><div class="name">纳指100｜场内ETF候选</div><div class="amt purple" id="ndxEtfBuy">--</div><div class="why" id="ndxEtfWhy">--</div></div>
+            <div class="decision"><div class="name">标普500｜场外</div><div class="amt blue" id="spxFundBuy">--</div><div class="why" id="spxFundWhy">--</div></div>
+            <div class="decision"><div class="name">标普500｜场内ETF候选</div><div class="amt blue" id="spxEtfBuy">--</div><div class="why" id="spxEtfWhy">--</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card span-12">
+        <h2>二、执行记录与仓位进度</h2>
+        <p class="sub">记录保存在本机浏览器 localStorage，不需要后端。建议每天实际买完后保存一条；保存时可自动把实际投入累加到“当前成本”，用于计算剩余仓位和理论交易日。</p>
+        <div class="progressGrid">
+          <div class="progressCard"><div class="k">标普目标进度</div><div class="v blue" id="spxProgressText">--</div><div class="s" id="spxProgressSub">--</div><div class="barTrack"><div class="barFill" id="spxProgressBar"></div></div></div>
+          <div class="progressCard"><div class="k">纳指目标进度</div><div class="v purple" id="ndxProgressText">--</div><div class="s" id="ndxProgressSub">--</div><div class="barTrack"><div class="barFill" id="ndxProgressBar"></div></div></div>
+          <div class="progressCard"><div class="k">历史累计实投</div><div class="v" id="histTotalInvested">--</div><div class="s" id="histSplitInvested">--</div></div>
+          <div class="progressCard"><div class="k">理论剩余交易日</div><div class="v amber" id="daysRemainText">--</div><div class="s" id="daysRemainSub">按今日建议/近20条实际均值双口径</div></div>
+        </div>
+        <div class="formgrid">
+          <div><label>记录日期</label><input id="recordDate" type="date" /></div>
+          <div><label>标普场外实际买入</label><input id="recordSpxFundActual" type="number" step="100" /></div>
+          <div><label>标普场内实际买入</label><input id="recordSpxEtfActual" type="number" step="100" /></div>
+          <div><label>纳指场外实际买入</label><input id="recordNdxFundActual" type="number" step="100" /></div>
+          <div><label>纳指场内实际买入</label><input id="recordNdxEtfActual" type="number" step="100" /></div>
+          <div style="grid-column: span 3;"><label>备注</label><input id="recordNote" placeholder="例如：场内溢价过高，只买场外；或实际成交ETF代码" /></div>
+        </div>
+        <div class="recordActions">
+          <button id="fillRecordBtn" class="ghost">用今日建议填入实际金额</button>
+          <button id="recordBtn">保存今日执行记录</button>
+          <label class="checkline"><input id="applyToCost" type="checkbox" checked />保存后自动累加到当前成本</label>
+          <button id="exportCsvBtn" class="secondary">导出CSV</button>
+          <button id="exportJsonBtn" class="secondary">导出JSON</button>
+          <button id="importJsonBtn" class="secondary">导入JSON</button>
+          <button id="clearHistoryBtn" class="warn">清空记录</button>
+          <input id="importJsonFile" type="file" accept="application/json,.json" style="display:none" />
+        </div>
+        <div class="callout warn"><strong>口径提醒：</strong>如果保存记录时勾选“自动累加到当前成本”，剩余缺口会自动减少；如果你后续手动修改了当前成本，请注意不要和历史记录重复计入。最稳妥的做法是：实际买完后点保存，让网页自动更新当前成本。</div>
+        <div style="height:12px"></div>
+        <div class="tablewrap historyTable"><table id="historyTable"><thead><tr><th>日期</th><th>时间</th><th>标普涨跌</th><th>纳指涨跌</th><th>标普溢价/便宜度</th><th>纳指溢价/便宜度</th><th>标普建议/实际</th><th>纳指建议/实际</th><th>总实际</th><th>保存后剩余缺口</th><th>备注</th><th>操作</th></tr></thead><tbody></tbody></table></div>
+      </section>
+
+      <section class="card span-8">
+        <h2>三、每日输入区</h2>
+        <p class="sub">自动抓取失败时，直接手动填入即可。涨跌颜色按 A 股习惯：红涨绿跌。</p>
+        <div class="formgrid">
+          <div><label>标普500隔夜涨跌%</label><input id="spxPct" type="number" step="0.01" placeholder="例如 -1.25" /></div>
+          <div><label>纳指100隔夜涨跌%</label><input id="ndxPct" type="number" step="0.01" placeholder="例如 -2.10" /></div>
+          <div><label>标普场内最低溢价%</label><input id="spxPrem" type="number" step="0.01" placeholder="例如 1.20" /></div>
+          <div><label>纳指场内最低溢价%</label><input id="ndxPrem" type="number" step="0.01" placeholder="例如 1.40" /></div>
+        </div>
+        <div style="height:12px"></div>
+        <div class="formgrid">
+          <div><label>标普最低溢价ETF</label><input id="spxBest" placeholder="自动或手动填写" /></div>
+          <div><label>纳指最低溢价ETF</label><input id="ndxBest" placeholder="自动或手动填写" /></div>
+          <div><label>标普折后便宜度%</label><input id="spxCheap" type="number" step="0.01" readonly /></div>
+          <div><label>纳指折后便宜度%</label><input id="ndxCheap" type="number" step="0.01" readonly /></div>
+        </div>
+      </section>
+
+      <section class="card span-4">
+        <h2>状态摘要</h2>
+        <div class="metric"><div class="label">标普新增本金缺口</div><div class="value blue" id="spxGap">--</div><div class="note">目标成本 - 当前成本</div></div>
+        <div style="height:10px"></div>
+        <div class="metric"><div class="label">纳指新增本金缺口</div><div class="value purple" id="ndxGap">--</div><div class="note">目标成本 - 当前成本</div></div>
+        <div style="height:10px"></div>
+        <div class="callout" id="dataStatus">数据状态：等待刷新。</div>
+      </section>
+
+      <section class="card span-12">
+        <h2>四、核心参数</h2>
+        <div class="formgrid">
+          <div><label>标普当前成本</label><input id="spxCurrentCost" type="number" step="100" /></div>
+          <div><label>标普目标成本</label><input id="spxTargetCost" type="number" step="100" /></div>
+          <div><label>纳指当前成本</label><input id="ndxCurrentCost" type="number" step="100" /></div>
+          <div><label>纳指目标成本</label><input id="ndxTargetCost" type="number" step="100" /></div>
+          <div><label>标普场外固定买入</label><input id="spxBase" type="number" step="100" /></div>
+          <div><label>纳指大涨日买入 ≥ +1.5%</label><input id="ndxUpBuy" type="number" step="100" /></div>
+          <div><label>纳指正常日买入</label><input id="ndxNormalBuy" type="number" step="100" /></div>
+          <div><label>纳指小跌日买入</label><input id="ndxDipBuy" type="number" step="100" /></div>
+          <div><label>纳指大跌日场外 ≤ -2%</label><input id="ndxCrashBuy" type="number" step="100" /></div>
+          <div><label>纳指大跌日场内候选</label><input id="ndxCrashEtfBuy" type="number" step="100" /></div>
+          <div><label>纳指场内溢价硬上限%</label><input id="ndxPremiumCap" type="number" step="0.1" /></div>
+          <div><label>标普场内溢价硬上限%</label><input id="spxPremiumCap" type="number" step="0.1" /></div>
+          <div><label>Twelve Data API Key（备用）</label><input id="twelveKey" type="password" /></div>
+          <div><label>标普 Twelve Symbol（备用）</label><input id="spxSymbol" /></div>
+          <div><label>纳指 Twelve Symbol（备用）</label><input id="ndxSymbol" /></div>
+          <div><label>指数数据源</label><select id="dataProvider"><option value="auto">自动：东财全球指数 → Twelve代理 → Yahoo代理</option><option value="em_global">东方财富全球指数（推荐）</option><option value="twelve_proxy">Twelve Data 代理备用</option><option value="manual">纯手动</option></select></div>
+        </div>
+      </section>
+
+      <section class="card span-6">
+        <h2>五、标普场内ETF监控</h2>
+        <p class="sub">优先取 Palmmicro 实时EST溢价；若缺失，再看 Palmmicro参考EST、HaoETF实时/最新估值。</p>
+        <div class="tablewrap"><table id="spxEtfTable"><thead><tr><th>代码</th><th>名称</th><th>现价</th><th>涨跌%</th><th>PM实时溢价</th><th>PM参考溢价</th><th>Hao实时溢价</th><th>采用溢价</th><th>来源</th></tr></thead><tbody></tbody></table></div>
+      </section>
+      <section class="card span-6">
+        <h2>六、纳指场内ETF监控</h2>
+        <p class="sub">纳指场内大跌日常有高溢价。只有跌幅≤-2%、溢价≤1.5%、折后便宜度&gt;0，才触发额外 4000 候选买入。</p>
+        <div class="tablewrap"><table id="ndxEtfTable"><thead><tr><th>代码</th><th>名称</th><th>现价</th><th>涨跌%</th><th>PM实时溢价</th><th>PM参考溢价</th><th>Hao实时溢价</th><th>采用溢价</th><th>来源</th></tr></thead><tbody></tbody></table></div>
+      </section>
+
+      <section class="card span-12">
+        <h2>七、策略理论与执行规则</h2>
+        <details open><summary>1）为什么不是纯价值平均法？</summary><p>纯价值平均法会在指数上涨较快时自动减少买入甚至长期不投，使年化收益率好看，但实际本金投入不足。这里采用的是<strong>目标本金版价值平均法</strong>：先保证标普与纳指目标本金推进，再通过下跌加码和场内溢价过滤提高新增资金买入效率。</p></details>
+        <details open><summary>2）纳指四档规则：保持原四档，但大跌日增加场内候选</summary><table><thead><tr><th>纳指隔夜涨跌</th><th>场外申购</th><th>场内ETF候选</th><th>执行说明</th></tr></thead><tbody><tr><td>≥ +1.5%</td><td>2500</td><td>0</td><td>大涨日少买，但不断供</td></tr><tr><td>-1% 到 +1.5%</td><td>5000</td><td>0</td><td>正常推进</td></tr><tr><td>-2% 到 -1%</td><td>7000</td><td>0</td><td>有效回调，加一档</td></tr><tr><td>≤ -2%</td><td>8000</td><td>4000 候选</td><td>场外打满；场内必须满足溢价≤1.5%且折后便宜度&gt;0</td></tr></tbody></table></details>
+        <details open><summary>3）标普规则：场外固定，场内只看便宜度</summary><p>标普大跌日频率远低于纳指，如果正常日投得太少，会导致目标本金推进过慢。所以标普采取<strong>场外每天 2000 固定买</strong>；场内只在标普跌超 -1%、溢价未超硬上限、折后便宜度&gt;0 时补充。</p></details>
+        <details open><summary>4）场内ETF核心公式：折后便宜度</summary><p><code>折后便宜度 = 1 - (1 + 指数隔夜涨跌幅) × (1 + 场内ETF溢价)</code></p><p>当折后便宜度 &gt; 0，说明指数跌幅至少抵消了场内ETF溢价；如果折后便宜度 ≤ 0，原则上不买场内，只走场外。</p></details>
+        <details open><summary>5）ETF溢价数据口径</summary><div class="callout warn"><strong>优先级：</strong>Palmmicro 实时EST溢价 → Palmmicro 参考EST溢价 → HaoETF 实时溢价 → HaoETF 最新溢价 → Palmmicro 官方EST溢价。价格优先用腾讯行情，缺失时用 HaoETF 快照兜底。公开接口都可能变更，所以表格显示“采用溢价”和“来源”，便于你发现异常。</div></details>
+        <details open><summary>6）为什么改用东方财富全球指数？</summary><p>Twelve Data 在纯静态网页里容易失败，主要不是计算逻辑问题，而是浏览器跨域限制、指数符号权限和免费接口权限共同导致。AKShare 的全球指数实时接口本身就是从东方财富全球指数行情页提取数据，样例中明确包含 <code>SPX</code> 标普500 与 <code>NDX</code> 纳斯达克指数，所以本页把它作为主接口。Twelve Data 保留为代理备用；如果代理或额度失败，仍可手动填写。</p></details>
+      </section>
+
+      <section class="card span-12">
+        <h2>八、数据接口与日志</h2>
+        <div class="callout warn"><strong>指数接口说明：</strong>本版把指数涨跌主接口切到东方财富全球指数（AKShare 的 <code>index_global_spot_em</code> 同源接口），直接取 <code>SPX</code> 与 <code>NDX</code> 的涨跌幅；Twelve Data 改为备用，并通过 CORS 代理访问。Yahoo 只作为最后兜底，因为纯前端常遇到跨域或风控失败。</div>
+        <div style="height:12px"></div>
+        <div class="callout warn"><strong>静态网页密钥风险：</strong>GitHub Pages 是纯前端，Twelve Data API Key 会出现在网页源码里。个人自用问题不大，但如果仓库公开，任何人都能看到并消耗额度；更安全做法是后续改成 Cloudflare Workers / GitHub Actions 代理。</div>
+        <div style="height:12px"></div>
+        <div class="log" id="logBox">日志等待刷新。</div>
+      </section>
+    </main>
+    <div class="footer">本页只用于个人执行纪律和数据辅助，不构成投资建议。公开接口并非正式授权行情源，实盘以基金公司公告和交易软件显示为准。</div>
+  </div>
+
+<script>
+'use strict';
+
+const DEFAULTS = {
+  spxCurrentCost: 951600, spxTargetCost: 1620000, ndxCurrentCost: 285500, ndxTargetCost: 1330000,
+  spxBase: 2000,
+  ndxUpBuy: 2500, ndxNormalBuy: 5000, ndxDipBuy: 7000, ndxCrashBuy: 8000, ndxCrashEtfBuy: 4000,
+  ndxPremiumCap: 1.5, spxPremiumCap: 3,
+  twelveKey: 'f757dfcd7727429eae3cc465778b07a6',
+  spxSymbol: 'SPX', ndxSymbol: 'NDX', dataProvider: 'auto',
+  spxPct: '', ndxPct: '', spxPrem: '', ndxPrem: '', spxBest: '', ndxBest: ''
+};
+
+const ETF_DB = {
+  ndx: [
+    ['159941','广发纳指100ETF'], ['513300','华夏纳指100ETF'], ['513100','国泰纳指100ETF'], ['159501','嘉实纳指100ETF'],
+    ['159632','华安纳斯达克ETF'], ['513390','博时纳指100ETF'], ['159660','汇添富纳指100ETF'], ['159659','招商纳斯达克100ETF'],
+    ['513110','华泰柏瑞纳指ETF'], ['159696','易方达纳指100ETF'], ['159513','大成纳斯达克100ETF'], ['513870','富国纳指100ETF']
+  ],
+  spx: [
+    ['513500','博时标普500ETF'], ['513650','南方标普500ETF'], ['159612','国泰标普500ETF'], ['159655','华夏标普500ETF']
+  ]
+};
+const ALL_ETFS = [...ETF_DB.ndx, ...ETF_DB.spx];
+const HISTORY_KEY = 'smartDcaExecutionHistoryV4';
+let lastDecision = null;
+
+function $(id){ return document.getElementById(id); }
+function nval(id, fallback = 0){ const x = parseFloat($(id).value); return Number.isFinite(x) ? x : fallback; }
+function setVal(id, v){ if($(id)) $(id).value = v ?? ''; }
+function fmtMoney(x){ if(!Number.isFinite(x)) return '--'; return new Intl.NumberFormat('zh-CN',{style:'currency',currency:'CNY',maximumFractionDigits:0}).format(x).replace('CN¥','¥'); }
+function fmtMoneyCompact(x){ if(!Number.isFinite(x)) return '--'; return (x/10000).toFixed(2) + '万'; }
+function ymd(d=new Date()){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function hms(d=new Date()){ return d.toLocaleTimeString('zh-CN',{hour12:false}); }
+function clampPct(x){ return Math.max(0, Math.min(100, x)); }
+function tradingDateAfter(days){
+  if(!Number.isFinite(days) || days < 0) return '--';
+  let left=Math.ceil(days), d=new Date();
+  while(left>0){ d.setDate(d.getDate()+1); const w=d.getDay(); if(w!==0 && w!==6) left--; }
+  return ymd(d);
+}
+
+function fmtNum(x,d=2){ return Number.isFinite(x) ? x.toFixed(d) : '--'; }
+function fmtPct(x,d=2){ if(!Number.isFinite(x)) return '--'; return (x>=0?'+':'') + x.toFixed(d) + '%'; }
+function pctClass(x){ return !Number.isFinite(x) ? '' : x < 0 ? 'green' : (x > 0 ? 'red' : 'blue'); }
+function premiumClass(x){ if(!Number.isFinite(x)) return 'pill amber'; if(x > 3) return 'pill red'; if(x >= 1) return 'pill amber'; if(x < -1) return 'pill green'; return 'pill blue'; }
+function exchangePrefix(code){ return code[0] === '5' ? 'sh' : 'sz'; }
+function log(msg){ const box=$('logBox'); const ts=new Date().toLocaleTimeString('zh-CN',{hour12:false}); box.textContent=`[${ts}] ${msg}\n`+box.textContent; }
+function loadSettings(){ const raw=localStorage.getItem('smartDcaSettingsV4'); const cfg=raw?{...DEFAULTS,...JSON.parse(raw)}:DEFAULTS; for(const [k,v] of Object.entries(cfg)) if($(k)) setVal(k,v); }
+function saveSettings(){ const cfg={}; Object.keys(DEFAULTS).forEach(k=>{ if($(k)) cfg[k]=$(k).value; }); localStorage.setItem('smartDcaSettingsV4',JSON.stringify(cfg)); log('参数已保存到本机 localStorage。'); }
+function resetSettings(){ localStorage.removeItem('smartDcaSettingsV4'); for(const [k,v] of Object.entries(DEFAULTS)) if($(k)) setVal(k,v); log('已恢复默认参数。'); calculate(); }
+function updateGaps(){ $('spxGap').textContent=fmtMoney(nval('spxTargetCost')-nval('spxCurrentCost')); $('ndxGap').textContent=fmtMoney(nval('ndxTargetCost')-nval('ndxCurrentCost')); }
+function cheapness(indexPct,premiumPct){ if(!Number.isFinite(indexPct)||!Number.isFinite(premiumPct)) return NaN; return (1 - (1 + indexPct/100) * (1 + premiumPct/100)) * 100; }
+
+function decideNdxFund(pct){
+  const up=nval('ndxUpBuy',2500), normal=nval('ndxNormalBuy',5000), dip=nval('ndxDipBuy',7000), crash=nval('ndxCrashBuy',8000);
+  if(!Number.isFinite(pct)) return {amount:0, why:'未输入纳指涨跌，无法判断。'};
+  if(pct >= 1.5) return {amount:up, why:'纳指大涨≥+1.5%，少买但不断供。'};
+  if(pct >= -1) return {amount:normal, why:'纳指处于正常区间，按基准推进。'};
+  if(pct >= -2) return {amount:dip, why:'纳指回调 -1% 到 -2%，提高到小跌档。'};
+  return {amount:crash, why:'纳指跌≤-2%，场外额度打满。'};
+}
+function decideNdxEtf(pct,premium,cheap){
+  const cap=nval('ndxPremiumCap',1.5), amt=nval('ndxCrashEtfBuy',4000);
+  if(!Number.isFinite(pct)||!Number.isFinite(premium)||!Number.isFinite(cheap)) return {amount:0, why:'缺少纳指溢价或涨跌数据，默认不买场内。'};
+  if(pct <= -2 && premium <= cap && cheap > 0) return {amount:amt, why:`纳指跌≤-2%、溢价${fmtNum(premium)}%≤${cap}%、折后便宜度${fmtNum(cheap)}%>0，触发场内候选${fmtMoney(amt)}。`};
+  if(pct <= -2 && premium > cap) return {amount:0, why:`纳指跌幅满足，但场内溢价${fmtNum(premium)}%>${cap}%，不买场内。`};
+  if(pct <= -2 && cheap <= 0) return {amount:0, why:`纳指跌幅满足，但折后便宜度${fmtNum(cheap)}%≤0，不买场内。`};
+  return {amount:0, why:'纳指未进入≤-2%大跌档，场内候选为0。'};
+}
+function decideSpx(pct,premium,cheap){
+  const base=nval('spxBase',2000), cap=nval('spxPremiumCap',3); let etf=0, why='标普未触发场内加码。';
+  if(Number.isFinite(pct)&&Number.isFinite(premium)&&Number.isFinite(cheap)){
+    if(premium > cap) why=`场内溢价${fmtNum(premium)}%超过硬上限${cap}%，只买场外。`;
+    else if(pct <= -3 && cheap > 0){ etf=15000; why=`标普跌≤-3%，且折后便宜度${fmtNum(cheap)}%>0，场内加大档。`; }
+    else if(pct <= -2 && cheap > 0){ etf=8000; why=`标普跌 -2% 到 -3%，且折后便宜度${fmtNum(cheap)}%>0，场内加码。`; }
+    else if(pct <= -1 && cheap > 0){ etf=3000; why=`标普跌 -1% 到 -2%，且折后便宜度${fmtNum(cheap)}%>0，场内小幅加码。`; }
+    else if(pct <= -1 && cheap <= 0) why=`标普虽然下跌，但溢价抵消跌幅，折后便宜度${fmtNum(cheap)}%≤0，不买场内。`;
+  } else why='缺少标普涨跌或场内溢价数据，默认只买场外。';
+  return {fund:base, etf, fundWhy:`标普场外按资金目标固定推进：${fmtMoney(base)}。`, etfWhy:why};
+}
+function calculate(){
+  updateGaps();
+  const spxPct=nval('spxPct',NaN), ndxPct=nval('ndxPct',NaN), spxPrem=nval('spxPrem',NaN), ndxPrem=nval('ndxPrem',NaN);
+  const spxCheap=cheapness(spxPct,spxPrem), ndxCheap=cheapness(ndxPct,ndxPrem);
+  setVal('spxCheap', Number.isFinite(spxCheap)?fmtNum(spxCheap):''); setVal('ndxCheap', Number.isFinite(ndxCheap)?fmtNum(ndxCheap):'');
+  const ndxFund=decideNdxFund(ndxPct), ndxEtf=decideNdxEtf(ndxPct,ndxPrem,ndxCheap), spx=decideSpx(spxPct,spxPrem,spxCheap);
+  const total=ndxFund.amount+ndxEtf.amount+spx.fund+spx.etf;
+  lastDecision = { time:new Date().toISOString(), spxPct, ndxPct, spxPrem, ndxPrem, spxCheap, ndxCheap,
+    spxBest:$('spxBest')?.value || '', ndxBest:$('ndxBest')?.value || '',
+    suggested:{spxFund:spx.fund, spxEtf:spx.etf, ndxFund:ndxFund.amount, ndxEtf:ndxEtf.amount, total},
+    why:{spxFund:spx.fundWhy, spxEtf:spx.etfWhy, ndxFund:ndxFund.why, ndxEtf:ndxEtf.why}
+  };
+  $('ndxFundBuy').textContent=fmtMoney(ndxFund.amount); $('ndxFundWhy').textContent=ndxFund.why;
+  $('ndxEtfBuy').textContent=fmtMoney(ndxEtf.amount); $('ndxEtfWhy').textContent=ndxEtf.why;
+  $('spxFundBuy').textContent=fmtMoney(spx.fund); $('spxFundWhy').textContent=spx.fundWhy;
+  $('spxEtfBuy').textContent=fmtMoney(spx.etf); $('spxEtfWhy').textContent=spx.etfWhy;
+  $('totalBuy').textContent=fmtMoney(total);
+  const bits=[]; if(Number.isFinite(spxPct)) bits.push(`标普${fmtPct(spxPct)}`); if(Number.isFinite(ndxPct)) bits.push(`纳指${fmtPct(ndxPct)}`); if(Number.isFinite(spxPrem)) bits.push(`标普最低溢价${fmtNum(spxPrem)}%`); if(Number.isFinite(ndxPrem)) bits.push(`纳指最低溢价${fmtNum(ndxPrem)}%`);
+  $('todayReason').textContent = bits.length ? bits.join('；') : '未输入完整数据，结果以默认保守规则计算。';
+  fillActualFromDecision(false);
+  renderHistory();
+}
+
+
+function loadHistory(){
+  try{ const raw=localStorage.getItem(HISTORY_KEY); const arr=raw?JSON.parse(raw):[]; return Array.isArray(arr)?arr:[]; }
+  catch(e){ log('历史记录读取失败，已按空记录处理：'+e.message); return []; }
+}
+function saveHistory(arr){ localStorage.setItem(HISTORY_KEY, JSON.stringify(arr)); }
+function getActualInputs(){
+  return {
+    spxFund:nval('recordSpxFundActual',0), spxEtf:nval('recordSpxEtfActual',0),
+    ndxFund:nval('recordNdxFundActual',0), ndxEtf:nval('recordNdxEtfActual',0)
+  };
+}
+function fillActualFromDecision(force=true){
+  if(!lastDecision) return;
+  const ids=['recordSpxFundActual','recordSpxEtfActual','recordNdxFundActual','recordNdxEtfActual'];
+  const empty=ids.every(id=>!$(id) || $(id).value==='');
+  if(!force && !empty) return;
+  setVal('recordSpxFundActual', lastDecision.suggested.spxFund || 0);
+  setVal('recordSpxEtfActual', lastDecision.suggested.spxEtf || 0);
+  setVal('recordNdxFundActual', lastDecision.suggested.ndxFund || 0);
+  setVal('recordNdxEtfActual', lastDecision.suggested.ndxEtf || 0);
+}
+function addToCurrentCost(actual){
+  const spxAdd=(actual.spxFund||0)+(actual.spxEtf||0), ndxAdd=(actual.ndxFund||0)+(actual.ndxEtf||0);
+  setVal('spxCurrentCost', Math.round(nval('spxCurrentCost',0)+spxAdd));
+  setVal('ndxCurrentCost', Math.round(nval('ndxCurrentCost',0)+ndxAdd));
+  saveSettings();
+}
+function subtractFromCurrentCost(actual){
+  const spxAdd=(actual.spxFund||0)+(actual.spxEtf||0), ndxAdd=(actual.ndxFund||0)+(actual.ndxEtf||0);
+  setVal('spxCurrentCost', Math.max(0, Math.round(nval('spxCurrentCost',0)-spxAdd)));
+  setVal('ndxCurrentCost', Math.max(0, Math.round(nval('ndxCurrentCost',0)-ndxAdd)));
+  saveSettings();
+}
+function saveExecutionRecord(){
+  calculate();
+  if(!lastDecision){ log('尚未形成今日建议，无法保存记录。'); return; }
+  fillActualFromDecision(false);
+  const actual=getActualInputs();
+  const totalActual=actual.spxFund+actual.spxEtf+actual.ndxFund+actual.ndxEtf;
+  if(totalActual<=0 && !confirm('实际买入金额为0，仍然保存这条观察记录吗？')) return;
+  const apply=!!$('applyToCost')?.checked;
+  if(apply) addToCurrentCost(actual);
+  updateGaps();
+  const rec={
+    id:String(Date.now())+'_'+Math.random().toString(36).slice(2,7),
+    date:$('recordDate')?.value || ymd(), time:hms(), iso:new Date().toISOString(),
+    spxPct:lastDecision.spxPct, ndxPct:lastDecision.ndxPct, spxPrem:lastDecision.spxPrem, ndxPrem:lastDecision.ndxPrem,
+    spxCheap:lastDecision.spxCheap, ndxCheap:lastDecision.ndxCheap, spxBest:lastDecision.spxBest, ndxBest:lastDecision.ndxBest,
+    suggested:lastDecision.suggested, actual, totalActual, applyToCost:apply,
+    remainingAfter:{ spx:Math.max(0,nval('spxTargetCost')-nval('spxCurrentCost')), ndx:Math.max(0,nval('ndxTargetCost')-nval('ndxCurrentCost')) },
+    note:$('recordNote')?.value || ''
+  };
+  const arr=loadHistory(); arr.unshift(rec); saveHistory(arr);
+  $('recordNote').value=''; renderHistory(); log(`已保存执行记录：${rec.date}，实际合计${fmtMoney(totalActual)}${apply?'，并已累加到当前成本。':'。'}`);
+}
+function historyStats(rows){
+  const actualSum=rows.reduce((a,r)=>{ const x=r.actual||{}; a.spx+=(+x.spxFund||0)+(+x.spxEtf||0); a.ndx+=(+x.ndxFund||0)+(+x.ndxEtf||0); a.total+=(+r.totalActual||0); return a; },{spx:0,ndx:0,total:0});
+  const spxRemain=Math.max(0,nval('spxTargetCost')-nval('spxCurrentCost'));
+  const ndxRemain=Math.max(0,nval('ndxTargetCost')-nval('ndxCurrentCost'));
+  const todaySpx=lastDecision?lastDecision.suggested.spxFund+lastDecision.suggested.spxEtf:0;
+  const todayNdx=lastDecision?lastDecision.suggested.ndxFund+lastDecision.suggested.ndxEtf:0;
+  const recent=rows.slice(0,20).filter(r=>(+r.totalActual||0)>0);
+  const uniqueDays=new Set(recent.map(r=>r.date)).size || recent.length || 0;
+  const recentSpx=recent.reduce((s,r)=>s+(+r.actual?.spxFund||0)+(+r.actual?.spxEtf||0),0);
+  const recentNdx=recent.reduce((s,r)=>s+(+r.actual?.ndxFund||0)+(+r.actual?.ndxEtf||0),0);
+  const avgSpx=uniqueDays?recentSpx/uniqueDays:NaN, avgNdx=uniqueDays?recentNdx/uniqueDays:NaN;
+  return {actualSum, spxRemain, ndxRemain, todaySpx, todayNdx, avgSpx, avgNdx};
+}
+function renderHistory(){
+  if(!$('historyTable')) return;
+  const rows=loadHistory(); const st=historyStats(rows);
+  const spxTarget=nval('spxTargetCost'), ndxTarget=nval('ndxTargetCost'), spxCur=nval('spxCurrentCost'), ndxCur=nval('ndxCurrentCost');
+  const spxProg=spxTarget>0?spxCur/spxTarget*100:NaN, ndxProg=ndxTarget>0?ndxCur/ndxTarget*100:NaN;
+  $('spxProgressText').textContent=Number.isFinite(spxProg)?fmtNum(spxProg,1)+'%':'--';
+  $('spxProgressSub').textContent=`${fmtMoney(spxCur)} / ${fmtMoney(spxTarget)}，剩余${fmtMoney(st.spxRemain)}`;
+  $('spxProgressBar').style.width=clampPct(spxProg||0)+'%';
+  $('ndxProgressText').textContent=Number.isFinite(ndxProg)?fmtNum(ndxProg,1)+'%':'--';
+  $('ndxProgressSub').textContent=`${fmtMoney(ndxCur)} / ${fmtMoney(ndxTarget)}，剩余${fmtMoney(st.ndxRemain)}`;
+  $('ndxProgressBar').style.width=clampPct(ndxProg||0)+'%';
+  $('histTotalInvested').textContent=fmtMoney(st.actualSum.total);
+  $('histSplitInvested').textContent=`标普${fmtMoneyCompact(st.actualSum.spx)}；纳指${fmtMoneyCompact(st.actualSum.ndx)}；记录${rows.length}条`;
+  const spxDaysToday=st.todaySpx>0?st.spxRemain/st.todaySpx:NaN, ndxDaysToday=st.todayNdx>0?st.ndxRemain/st.todayNdx:NaN;
+  const spxDaysAvg=st.avgSpx>0?st.spxRemain/st.avgSpx:NaN, ndxDaysAvg=st.avgNdx>0?st.ndxRemain/st.avgNdx:NaN;
+  const maxToday=Math.max(Number.isFinite(spxDaysToday)?spxDaysToday:0, Number.isFinite(ndxDaysToday)?ndxDaysToday:0);
+  const maxAvg=Math.max(Number.isFinite(spxDaysAvg)?spxDaysAvg:0, Number.isFinite(ndxDaysAvg)?ndxDaysAvg:0);
+  $('daysRemainText').textContent=Number.isFinite(maxToday)&&maxToday>0?Math.ceil(maxToday)+'天':'--';
+  $('daysRemainSub').textContent=`按今日建议：标普${Number.isFinite(spxDaysToday)?Math.ceil(spxDaysToday):'--'}天、纳指${Number.isFinite(ndxDaysToday)?Math.ceil(ndxDaysToday):'--'}天，约${tradingDateAfter(maxToday)}完成；按近20条实际均值：${Number.isFinite(maxAvg)&&maxAvg>0?Math.ceil(maxAvg)+'天，约'+tradingDateAfter(maxAvg):'暂无足够记录'}`;
+  const tb=$('historyTable').querySelector('tbody'); tb.innerHTML='';
+  rows.forEach(r=>{
+    const a=r.actual||{}, s=r.suggested||{};
+    const spxActual=(+a.spxFund||0)+(+a.spxEtf||0), ndxActual=(+a.ndxFund||0)+(+a.ndxEtf||0);
+    const spxSug=(+s.spxFund||0)+(+s.spxEtf||0), ndxSug=(+s.ndxFund||0)+(+s.ndxEtf||0);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${r.date||'--'}</td><td class="mono">${r.time||'--'}</td><td class="${pctClass(r.spxPct)}">${fmtPct(+r.spxPct)}</td><td class="${pctClass(r.ndxPct)}">${fmtPct(+r.ndxPct)}</td><td>${fmtNum(+r.spxPrem)}% / <span class="${pctClass(-r.spxCheap)}">${fmtNum(+r.spxCheap)}%</span><br><span class="sourceTag">${r.spxBest||''}</span></td><td>${fmtNum(+r.ndxPrem)}% / <span class="${pctClass(-r.ndxCheap)}">${fmtNum(+r.ndxCheap)}%</span><br><span class="sourceTag">${r.ndxBest||''}</span></td><td>建议${fmtMoney(spxSug)}<br><strong>${fmtMoney(spxActual)}</strong></td><td>建议${fmtMoney(ndxSug)}<br><strong>${fmtMoney(ndxActual)}</strong></td><td><strong>${fmtMoney(+r.totalActual||0)}</strong>${r.applyToCost?'':'<br><span class="sourceTag">未入当前成本</span>'}</td><td>标普${fmtMoney(r.remainingAfter?.spx)}<br>纳指${fmtMoney(r.remainingAfter?.ndx)}</td><td>${(r.note||'').replace(/[<>&]/g,m=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[m]))}</td><td><span class="dangerLink" onclick="deleteHistoryRecord('${r.id}')">删除</span></td>`;
+    tb.appendChild(tr);
+  });
+}
+function deleteHistoryRecord(id){
+  const rows=loadHistory(); const idx=rows.findIndex(r=>r.id===id); if(idx<0) return;
+  const rec=rows[idx];
+  let rollback=false;
+  if(rec.applyToCost) rollback=confirm('这条记录保存时已累加到当前成本。删除时是否同步回滚当前成本？点“确定”回滚；点“取消”只删除记录。');
+  if(rollback) subtractFromCurrentCost(rec.actual||{});
+  rows.splice(idx,1); saveHistory(rows); renderHistory(); log('已删除一条历史记录'+(rollback?'，并回滚当前成本。':'。'));
+}
+function exportCsv(){
+  const rows=loadHistory();
+  const header=['日期','时间','标普涨跌%','纳指涨跌%','标普溢价%','纳指溢价%','标普便宜度%','纳指便宜度%','标普建议','纳指建议','标普实际','纳指实际','总实际','标普剩余','纳指剩余','标普最低ETF','纳指最低ETF','备注'];
+  const csv=[header.join(',')].concat(rows.map(r=>{
+    const a=r.actual||{}, s=r.suggested||{}; const spxA=(+a.spxFund||0)+(+a.spxEtf||0), ndxA=(+a.ndxFund||0)+(+a.ndxEtf||0), spxS=(+s.spxFund||0)+(+s.spxEtf||0), ndxS=(+s.ndxFund||0)+(+s.ndxEtf||0);
+    const vals=[r.date,r.time,r.spxPct,r.ndxPct,r.spxPrem,r.ndxPrem,r.spxCheap,r.ndxCheap,spxS,ndxS,spxA,ndxA,r.totalActual,r.remainingAfter?.spx,r.remainingAfter?.ndx,r.spxBest,r.ndxBest,r.note||''];
+    return vals.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',');
+  })).join('\n');
+  downloadText('smart_dca_history.csv','\ufeff'+csv,'text/csv;charset=utf-8');
+}
+function exportJson(){ downloadText('smart_dca_history.json', JSON.stringify(loadHistory(),null,2), 'application/json;charset=utf-8'); }
+function downloadText(filename, text, type){ const blob=new Blob([text],{type}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
+function importJsonFile(file){
+  const reader=new FileReader();
+  reader.onload=()=>{ try{ const arr=JSON.parse(reader.result); if(!Array.isArray(arr)) throw new Error('JSON不是数组'); if(!confirm(`将导入${arr.length}条记录并覆盖当前历史记录，是否继续？`)) return; saveHistory(arr); renderHistory(); log('历史记录JSON导入完成。'); }catch(e){ alert('导入失败：'+e.message); } };
+  reader.readAsText(file,'utf-8');
+}
+function clearHistory(){ if(!confirm('确定清空全部历史记录？这不会自动回滚当前成本。')) return; localStorage.removeItem(HISTORY_KEY); renderHistory(); log('已清空历史记录。'); }
+
+async function fetchJsonDirect(url, timeout=12000){
+  const ctl=new AbortController();
+  const t=setTimeout(()=>ctl.abort(), timeout);
+  try{
+    const r=await fetch(url,{cache:'no-store',signal:ctl.signal});
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    return await r.json();
+  } finally { clearTimeout(t); }
+}
+async function fetchJsonProxy(url, timeout=15000){
+  const proxy=`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+  return await fetchJsonDirect(proxy, timeout);
+}
+function loadJsonp(url, cbParam='cb', timeout=12000){
+  return new Promise((resolve,reject)=>{
+    const cb='__jsonp_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const sep=url.includes('?')?'&':'?';
+    const s=document.createElement('script'); let done=false;
+    const timer=setTimeout(()=>finish(new Error('JSONP timeout')),timeout);
+    function finish(err,data){
+      if(done) return; done=true; clearTimeout(timer); delete window[cb]; s.remove();
+      err ? reject(err) : resolve(data);
+    }
+    window[cb]=(data)=>finish(null,data);
+    s.async=true; s.charset='utf-8';
+    s.src=`${url}${sep}${cbParam}=${cb}&_=${Date.now()}`;
+    s.onerror=()=>finish(new Error('JSONP script error'));
+    document.head.appendChild(s);
+  });
+}
+let _emGlobalCache=null;
+async function fetchEastmoneyGlobalSpot(){
+  if(_emGlobalCache && Date.now()-_emGlobalCache.ts < 30000) return _emGlobalCache.rows;
+  const fs=[
+    'i:1.000001','i:0.399001','i:0.399006','i:100.DJIA','i:100.SPX','i:100.NDX','i:100.HSI','i:100.N225','i:100.UDI'
+  ].join(',');
+  const params=new URLSearchParams({
+    np:'2', fltt:'1', invt:'2', fs,
+    fields:'f12,f13,f14,f292,f1,f2,f4,f3,f152,f17,f18,f15,f16,f7,f124',
+    fid:'f3', pn:'1', pz:'200', po:'1', dect:'1', wbp2u:'|0|0|0|web'
+  });
+  const url=`https://push2.eastmoney.com/api/qt/clist/get?${params.toString()}`;
+  let j;
+  try{ j=await loadJsonp(url,'cb',12000); }
+  catch(e1){
+    log(`东财全球指数JSONP失败：${e1.message}，尝试直接fetch。`);
+    try{ j=await fetchJsonDirect(url,12000); }
+    catch(e2){
+      log(`东财全球指数直接fetch失败：${e2.message}，尝试AllOrigins代理。`);
+      j=await fetchJsonProxy(url,15000);
+    }
+  }
+  const raw=j?.data?.diff;
+  if(!raw) throw new Error('东财全球指数返回为空');
+  const rows=Array.isArray(raw)?raw:Object.values(raw);
+  _emGlobalCache={ts:Date.now(),rows};
+  return rows;
+}
+async function fetchEastmoneyGlobalPct(which){
+  const code=which==='spx'?'SPX':'NDX';
+  const rows=await fetchEastmoneyGlobalSpot();
+  const r=rows.find(x=>String(x.f12).toUpperCase()===code);
+  if(!r) throw new Error(`东财全球指数未找到${code}`);
+  const pct=parseFloat(r.f3)/100;
+  const price=parseFloat(r.f2)/100;
+  const time=r.f124?new Date(parseInt(r.f124,10)*1000).toLocaleString('zh-CN',{hour12:false}):'';
+  if(!Number.isFinite(pct)) throw new Error(`东财${code}涨跌幅无效`);
+  log(`${which.toUpperCase()} 东财全球指数成功：${r.f14||code} ${fmtPct(pct)}，最新价${Number.isFinite(price)?fmtNum(price):'--'}，时间${time||'--'}`);
+  return pct;
+}
+function twelveCandidateSymbols(which){
+  const user=(which==='spx'?$('spxSymbol').value:$('ndxSymbol').value).trim();
+  const arr=which==='spx'?[user,'SPX','SPY']:[user,'NDX','QQQ'];
+  return [...new Set(arr.filter(Boolean))];
+}
+async function fetchTwelveJson(url){
+  try{ return await fetchJsonDirect(url,12000); }
+  catch(e1){
+    log(`Twelve直接fetch失败：${e1.message}，尝试AllOrigins代理。`);
+    return await fetchJsonProxy(url,15000);
+  }
+}
+async function fetchTwelveQuotePct(symbol,key){
+  if(!key) throw new Error('未填写Twelve Data API Key');
+  const url=`https://api.twelvedata.com/quote?symbol=${encodeURIComponent(symbol)}&apikey=${encodeURIComponent(key)}`;
+  const j=await fetchTwelveJson(url); if(j.status==='error'||j.code) throw new Error(j.message || 'Twelve quote error');
+  const pc=parseFloat(j.percent_change); if(Number.isFinite(pc)) return {pct:pc,symbol};
+  const close=parseFloat(j.close), prev=parseFloat(j.previous_close); if(Number.isFinite(close)&&Number.isFinite(prev)&&prev!==0) return {pct:(close/prev-1)*100,symbol};
+  throw new Error('Twelve quote无有效涨跌');
+}
+async function fetchTwelveSeriesPct(symbol,key){
+  if(!key) throw new Error('未填写Twelve Data API Key');
+  const url=`https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=1day&outputsize=5&apikey=${encodeURIComponent(key)}`;
+  const j=await fetchTwelveJson(url); if(j.status==='error'||j.code) throw new Error(j.message || 'Twelve time_series error');
+  const vals=(j.values||[]).map(v=>parseFloat(v.close)).filter(Number.isFinite); if(vals.length<2) throw new Error('Twelve有效数据不足');
+  return {pct:(vals[0]/vals[1]-1)*100,symbol};
+}
+async function fetchTwelveAnyPct(which){
+  const key=$('twelveKey').value.trim(); let last=null;
+  for(const sym of twelveCandidateSymbols(which)){
+    try{ const q=await fetchTwelveQuotePct(sym,key); log(`${which.toUpperCase()} Twelve quote成功：${q.symbol} ${fmtPct(q.pct)}`); return q.pct; }
+    catch(e1){ last=e1; log(`${which.toUpperCase()} Twelve quote失败 ${sym}：${e1.message}`); }
+    try{ const s=await fetchTwelveSeriesPct(sym,key); log(`${which.toUpperCase()} Twelve time_series成功：${s.symbol} ${fmtPct(s.pct)}`); return s.pct; }
+    catch(e2){ last=e2; log(`${which.toUpperCase()} Twelve time_series失败 ${sym}：${e2.message}`); }
+  }
+  throw last || new Error('Twelve全部候选失败');
+}
+async function fetchYahooPct(symbol){
+  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=7d&interval=1d`;
+  let j;
+  try{ j=await fetchJsonDirect(url,12000); }
+  catch(e1){ log(`Yahoo直接fetch失败：${e1.message}，尝试AllOrigins代理。`); j=await fetchJsonProxy(url,15000); }
+  const closes=j.chart?.result?.[0]?.indicators?.quote?.[0]?.close || []; const valid=closes.filter(Number.isFinite);
+  if(valid.length<2) throw new Error('Yahoo有效收盘价不足'); return (valid.at(-1)/valid.at(-2)-1)*100;
+}
+async function fetchIndexPct(which){
+  const provider=$('dataProvider').value;
+  if(provider==='manual') throw new Error('手动模式');
+  const yahooSym = which==='spx' ? '^GSPC' : '^NDX';
+  if(provider==='em_global') return await fetchEastmoneyGlobalPct(which);
+  if(provider==='twelve_proxy') return await fetchTwelveAnyPct(which);
+  try { return await fetchEastmoneyGlobalPct(which); } catch(e0){ log(`${which.toUpperCase()} 东财全球指数失败：${e0.message}`); }
+  try { return await fetchTwelveAnyPct(which); } catch(e1){ log(`${which.toUpperCase()} Twelve备用失败：${e1.message}`); }
+  try { const y=await fetchYahooPct(yahooSym); log(`${which.toUpperCase()} Yahoo代理成功：${fmtPct(y)}`); return y; } catch(e2){ log(`${which.toUpperCase()} Yahoo备用失败：${e2.message}`); throw e2; }
+}
+
+function loadScript(url,timeout=10000){
+  return new Promise((resolve,reject)=>{ const s=document.createElement('script'); let done=false; const timer=setTimeout(()=>finish(new Error('script timeout')),timeout); function finish(err){ if(done)return; done=true; clearTimeout(timer); s.remove(); err?reject(err):resolve(); } s.async=true; s.charset='utf-8'; s.src=url; s.onload=()=>finish(); s.onerror=()=>finish(new Error('script error')); document.head.appendChild(s); });
+}
+function fetchQt(funds){
+  return new Promise(resolve=>{ const syms=funds.map(f=>exchangePrefix(f[0])+f[0]).join(','); const s=document.createElement('script'); let ok=false; const tid=setTimeout(done,8000); function done(){ if(ok)return; ok=true; clearTimeout(tid); s.remove(); const out={}; funds.forEach(f=>{ const key='v_'+exchangePrefix(f[0])+f[0]; const raw=window[key]; delete window[key]; if(!raw) return; const p=raw.split('~'); if(p.length<38) return; const price=parseFloat(p[3]), prev=parseFloat(p[4]), amt=parseFloat(p[37])||0; if(price&&prev) out[f[0]]={price,pct:(price/prev-1)*100,amount:amt}; }); resolve(out); } s.onload=done; s.onerror=done; s.src=`https://qt.gtimg.cn/q=${syms}&r=${Date.now()}`; document.head.appendChild(s); });
+}
+async function fetchTextAny(urls,timeout=12000){
+  let last=null; for(const url of urls){ try{ const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),timeout); const r=await fetch(url,{cache:'no-store',signal:ctl.signal}); clearTimeout(t); if(!r.ok) throw new Error(`HTTP ${r.status}`); const text=await r.text(); if(text && text.length>20) return text; throw new Error('empty text'); }catch(e){ last=e; } } throw last || new Error('all text fetch failed');
+}
+function _num(s){ if(s==null) return null; const x=String(s).replace(/[,％%]/g,'').trim(); if(x==='-'||x===''||x==='--') return null; const n=parseFloat(x); return Number.isFinite(n)?n:null; }
+function pctToNum(s){ if(s==null) return null; const x=String(s).replace(/％/g,'%').replace('%','').replace('+','').trim(); if(x===''||x==='-'||x==='--') return null; const n=parseFloat(x); return Number.isFinite(n)?n:null; }
+function parseHaoHomeText(text){
+  const map={}, wanted=new Set(ALL_ETFS.map(f=>f[0]));
+  let clean=String(text).replace(/【\d+†([^】]+)】/g,(m,a)=>String(a).split('†')[0]).replace(/\[([^\]]+)\]\([^)]*\)/g,'$1').replace(/\^\{[^}]+\}/g,'').replace(/&nbsp;/g,' ').replace(/\u00a0/g,' ');
+  clean.split(/\n+/).forEach(line=>{ const raw=line.replace(/\|/g,' ').replace(/\s+/g,' ').trim(); const m=raw.match(/^(\d{6})\s+(\S+)\s+(.+)$/); if(!m) return; const code=m[1]; if(!wanted.has(code)) return; const a=m[3].split(' '); if(a.length<14) return; map[code]={haoName:m[2], realEst:_num(a[0]), realPrem:_num(a[1]), latestEst:_num(a[2]), latPrem:_num(a[3]), estDate:a[4]||'--', price:_num(a[5]), pct:_num(a[6]), amount:_num(a[7]), nav:_num(a[10]), navPct:_num(a[11]), navDate:a[12]||'--', indexPct:_num(a[13])}; });
+  return map;
+}
+async function fetchHaoCurrent(){
+  const urls=['https://r.jina.ai/https://www.haoetf.com/', `https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.haoetf.com/')}`, 'https://www.haoetf.com/'];
+  try{ const text=await fetchTextAny(urls,12000); return parseHaoHomeText(text); }catch(e){ log(`HaoETF快照失败：${e.message}`); return {}; }
+}
+function parsePalmmicroText(text){
+  const out={}, wanted=new Set(ALL_ETFS.map(f=>f[0]));
+  let clean=String(text).replace(/【\d+†([^】]+)】/g,(m,a)=>String(a).split('†').pop()).replace(/\[([^\]]+)\]\([^)]*\)/g,'$1').replace(/&nbsp;/g,' ').replace(/ /g,' ');
+  clean.split(/\n+/).forEach(line=>{ let raw=line.replace(/\|/g,' ').replace(/\s+/g,' ').trim(); if(!raw) return; const m=raw.match(/^(SH|SZ)?\s*(\d{6})\s*([0-9]+(?:\.[0-9]+)?)\s+(\d{4}-\d{2}-\d{2})\s*([+\-]?\d+(?:\.\d+)?%|0)(?:\s*([0-9]+(?:\.[0-9]+)?)\s*([+\-]?\d+(?:\.\d+)?%|0))?(?:\s*([0-9]+(?:\.[0-9]+)?)\s*([+\-]?\d+(?:\.\d+)?%|0))?/); if(!m) return; const code=m[2]; if(!wanted.has(code)) return; out[code]={pmOfficialEst:_num(m[3]), pmEstDate:m[4]||'--', pmOfficialPrem:pctToNum(m[5]), pmRefEst:_num(m[6]), pmRefPrem:pctToNum(m[7]), pmLiveEst:_num(m[8]), pmLivePrem:pctToNum(m[9])}; });
+  return out;
+}
+async function fetchPalmmicroCurrent(){
+  const PM_HOME='https://palmmicro.com/woody/res/qdiicn.php';
+  const urls=[`https://r.jina.ai/${PM_HOME}`, `https://api.allorigins.win/raw?url=${encodeURIComponent(PM_HOME)}`, PM_HOME];
+  try{ const text=await fetchTextAny(urls,12000); return parsePalmmicroText(text); }catch(e){ log(`Palmmicro快照失败：${e.message}`); return {}; }
+}
+function recomputePmPrem(row){
+  const price=row.price; if(!Number.isFinite(price)||price<=0) return;
+  if(Number.isFinite(row.pmOfficialEst)&&row.pmOfficialEst>0) row.pmOfficialPrem=(price/row.pmOfficialEst-1)*100;
+  if(Number.isFinite(row.pmRefEst)&&row.pmRefEst>0) row.pmRefPrem=(price/row.pmRefEst-1)*100;
+  if(Number.isFinite(row.pmLiveEst)&&row.pmLiveEst>0) row.pmLivePrem=(price/row.pmLiveEst-1)*100;
+}
+function choosePremium(row){
+  const choices=[['Palmmicro实时EST',row.pmLivePrem],['Palmmicro参考EST',row.pmRefPrem],['HaoETF实时估值',row.realPrem],['HaoETF最新估值',row.latPrem],['Palmmicro官方EST',row.pmOfficialPrem]];
+  for(const [src,val] of choices){ if(Number.isFinite(val)) return {premium:val, source:src}; }
+  return {premium:NaN, source:'无有效估值'};
+}
+function buildEtfRows(kind, qt, hao, pm){
+  return ETF_DB[kind].map(([code,name])=>{
+    const q=qt[code]||{}, h=hao[code]||{}, p=pm[code]||{};
+    const row={code,name, price:Number.isFinite(q.price)?q.price:h.price, pct:Number.isFinite(q.pct)?q.pct:h.pct, amount:Number.isFinite(q.amount)?q.amount:h.amount,
+      pmOfficialPrem:p.pmOfficialPrem, pmRefPrem:p.pmRefPrem, pmLivePrem:p.pmLivePrem, pmOfficialEst:p.pmOfficialEst, pmRefEst:p.pmRefEst, pmLiveEst:p.pmLiveEst,
+      realPrem:h.realPrem, latPrem:h.latPrem, latestEst:h.latestEst, realEst:h.realEst, source:''};
+    recomputePmPrem(row); const c=choosePremium(row); row.premium=c.premium; row.source=c.source; return row;
+  });
+}
+function renderEtfTable(kind,rows){
+  const tbody=$(`${kind}EtfTable`).querySelector('tbody'); tbody.innerHTML='';
+  rows.forEach(r=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${r.code}</td><td>${r.name}</td><td>${fmtNum(r.price,4)}</td><td class="${pctClass(r.pct)}">${fmtPct(r.pct)}</td><td>${fmtNum(r.pmLivePrem)}</td><td>${fmtNum(r.pmRefPrem)}</td><td>${fmtNum(r.realPrem)}</td><td><span class="${premiumClass(r.premium)}">${fmtNum(r.premium)}%</span></td><td><span class="sourceTag">${r.source}</span></td>`; tbody.appendChild(tr); });
+}
+function applyBestPremium(kind,rows){
+  const valid=rows.filter(r=>Number.isFinite(r.premium));
+  if(!valid.length){ log(`${kind.toUpperCase()} 没有取得有效ETF溢价，请手动填写。`); return; }
+  valid.sort((a,b)=>a.premium-b.premium);
+  const best=valid[0]; setVal(kind==='spx'?'spxPrem':'ndxPrem', fmtNum(best.premium)); setVal(kind==='spx'?'spxBest':'ndxBest', `${best.code} ${best.name} · ${best.source}`); log(`${kind.toUpperCase()} 最低采用溢价：${best.code} ${fmtNum(best.premium)}%（${best.source}）`);
+}
+async function refreshEtfPremiums(){
+  log('开始刷新ETF价格、Palmmicro与HaoETF估值。');
+  const [qt,hao,pm]=await Promise.all([fetchQt(ALL_ETFS), fetchHaoCurrent(), fetchPalmmicroCurrent()]);
+  const spxRows=buildEtfRows('spx',qt,hao,pm), ndxRows=buildEtfRows('ndx',qt,hao,pm);
+  renderEtfTable('spx',spxRows); renderEtfTable('ndx',ndxRows); applyBestPremium('spx',spxRows); applyBestPremium('ndx',ndxRows);
+  log(`ETF数据完成：腾讯价格${Object.keys(qt).length}/${ALL_ETFS.length}，HaoETF ${Object.keys(hao).length}/${ALL_ETFS.length}，Palmmicro ${Object.keys(pm).length}/${ALL_ETFS.length}。`);
+}
+async function refreshAll(){
+  $('refreshBtn').disabled=true; $('dataStatus').textContent='数据状态：正在刷新指数与ETF估值……'; $('dataStatus').className='callout warn'; log('开始刷新指数与ETF数据。');
+  try{
+    try{ const spx=await fetchIndexPct('spx'); setVal('spxPct',fmtNum(spx)); log(`标普500涨跌获取成功：${fmtPct(spx)}`); }catch(e){ log(`标普指数获取失败：${e.message}`); }
+    try{ const ndx=await fetchIndexPct('ndx'); setVal('ndxPct',fmtNum(ndx)); log(`纳指100涨跌获取成功：${fmtPct(ndx)}`); }catch(e){ log(`纳指指数获取失败：${e.message}`); }
+    await refreshEtfPremiums(); calculate(); $('dataStatus').textContent='数据状态：刷新完成。若某项为空，请手动填写后点“只按手动输入计算”。'; $('dataStatus').className='callout good';
+  }catch(e){ log(`刷新异常：${e.message}`); $('dataStatus').textContent='数据状态：部分接口失败，请使用手动输入兜底。'; $('dataStatus').className='callout bad'; }
+  finally{ $('refreshBtn').disabled=false; }
+}
+function bind(){
+  $('refreshBtn').addEventListener('click',refreshAll); $('calcBtn').addEventListener('click',()=>{calculate();log('已按当前输入重新计算。')}); $('saveBtn').addEventListener('click',saveSettings); $('resetBtn').addEventListener('click',resetSettings);
+  $('fillRecordBtn').addEventListener('click',()=>{calculate(); fillActualFromDecision(true); log('已用今日建议金额填入实际金额。');});
+  $('recordBtn').addEventListener('click',saveExecutionRecord);
+  $('exportCsvBtn').addEventListener('click',exportCsv); $('exportJsonBtn').addEventListener('click',exportJson);
+  $('importJsonBtn').addEventListener('click',()=>$('importJsonFile').click()); $('importJsonFile').addEventListener('change',e=>{ if(e.target.files?.[0]) importJsonFile(e.target.files[0]); e.target.value=''; });
+  $('clearHistoryBtn').addEventListener('click',clearHistory);
+  document.querySelectorAll('input,select').forEach(el=>el.addEventListener('change',()=>{ if(el.id!=='twelveKey' && !el.id.startsWith('record') && el.id!=='applyToCost') calculate(); }));
+}
+loadSettings(); if($('recordDate')) setVal('recordDate', ymd()); bind(); updateGaps(); calculate(); renderHistory();
+</script>
+</body>
+</html>
