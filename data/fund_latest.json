@@ -1,6 +1,6 @@
 {
   "script_version": "v10_history_guard_20260513",
-  "updated_at": "2026-05-25T15:00:38+00:00",
+  "updated_at": "2026-05-25T15:55:10+00:00",
   "expected_trade_date": "2026-05-25",
   "stale_codes": [],
   "items": {
@@ -34,7 +34,7 @@
       "date_ok": true,
       "expected_trade_date": "2026-05-25",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-05-25:2.536 | AKShare fund_open_fund_info_em:2026-05-25:2.536 | 天天基金fundgz确认净值:2026-05-22:2.514; reference_only=天天基金fundgz估算参考:2026-05-25:2.5235(参考) | 新浪财经fu_估算参考:2026-05-25:2.5522(参考); history_guard=merged_old_history old_len=1354 fetched_len=20 merged_len=1354"
+      "diagnosis": "script=v10_history_guard_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-05-25:2.536 | 东方财富F10最新净值:2026-05-25:2.536 | AKShare fund_open_fund_info_em:2026-05-25:2.536 | 天天基金fundgz确认净值:2026-05-22:2.514; reference_only=新浪财经fu_估算参考:2026-05-25:2.5522(参考)"
     },
     "007120": {
       "code": "007120",
@@ -50,7 +50,7 @@
       "date_ok": true,
       "expected_trade_date": "2026-05-25",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-05-25:2.6122 | AKShare fund_open_fund_info_em:2026-05-25:2.6122 | 天天基金fundgz确认净值:2026-05-22:2.537; reference_only=新浪财经fu_估算参考:2026-05-25:2.6039(参考); history_guard=merged_old_history old_len=1354 fetched_len=20 merged_len=1354"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-05-25:2.6122 | 东方财富F10最新净值:2026-05-25:2.6122 | AKShare fund_open_fund_info_em:2026-05-25:2.6122; reference_only=天天基金fundgz估算参考:2026-05-25:2.6062(参考) | 新浪财经fu_估算参考:2026-05-25:2.6039(参考); history_guard=merged_old_history old_len=1354 fetched_len=20 merged_len=1354"
     },
     "169101": {
       "code": "169101",
@@ -146,7 +146,7 @@
       "date_ok": true,
       "expected_trade_date": "2026-05-25",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-05-25:0.9736 | 东方财富F10最新净值:2026-05-25:0.9736 | AKShare fund_open_fund_info_em:2026-05-22:0.9722 | 天天基金fundgz确认净值:2026-05-22:0.9722; reference_only=天天基金fundgz估算参考:2026-05-25:0.9742(参考) | 新浪财经fu_估算参考:2026-05-25:0.9724(参考); history_guard=merged_old_history old_len=28 fetched_len=20 merged_len=28; WARNING: history seems short len=28 first=2026-04-13"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-05-25:0.9736 | 东方财富F10最新净值:2026-05-25:0.9736 | AKShare fund_open_fund_info_em:2026-05-25:0.9736 | 天天基金fundgz确认净值:2026-05-22:0.9722; reference_only=天天基金fundgz估算参考:2026-05-25:0.9742(参考) | 新浪财经fu_估算参考:2026-05-25:0.9724(参考); history_guard=merged_old_history old_len=28 fetched_len=20 merged_len=28; WARNING: history seems short len=28 first=2026-04-13"
     },
     "010186": {
       "code": "010186",
@@ -162,7 +162,7 @@
       "date_ok": true,
       "expected_trade_date": "2026-05-25",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-05-25:0.8933 | 东方财富F10最新净值:2026-05-25:0.8933 | AKShare fund_open_fund_info_em:2026-05-22:0.8783 | 天天基金fundgz确认净值:2026-05-22:0.8783; reference_only=天天基金fundgz估算参考:2026-05-25:0.8872(参考) | 新浪财经fu_估算参考:2026-05-25:0.899(参考); history_guard=merged_old_history old_len=1304 fetched_len=20 merged_len=1304"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-05-25:0.8933 | 东方财富F10最新净值:2026-05-25:0.8933 | AKShare fund_open_fund_info_em:2026-05-25:0.8933 | 天天基金fundgz确认净值:2026-05-22:0.8783; reference_only=天天基金fundgz估算参考:2026-05-25:0.8872(参考) | 新浪财经fu_估算参考:2026-05-25:0.899(参考); history_guard=merged_old_history old_len=1304 fetched_len=20 merged_len=1304"
     },
     "010027": {
       "code": "010027",
@@ -178,7 +178,7 @@
       "date_ok": true,
       "expected_trade_date": "2026-05-25",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-05-25:0.9218 | 东方财富F10最新净值:2026-05-25:0.9218 | AKShare fund_open_fund_info_em:2026-05-22:0.901 | 天天基金fundgz确认净值:2026-05-22:0.901; reference_only=天天基金fundgz估算参考:2026-05-25:0.9117(参考) | 新浪财经fu_估算参考:2026-05-25:0.9163(参考); history_guard=merged_old_history old_len=1293 fetched_len=20 merged_len=1293"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-05-25:0.9218 | 东方财富F10最新净值:2026-05-25:0.9218 | AKShare fund_open_fund_info_em:2026-05-25:0.9218 | 天天基金fundgz确认净值:2026-05-22:0.901; reference_only=天天基金fundgz估算参考:2026-05-25:0.9117(参考) | 新浪财经fu_估算参考:2026-05-25:0.9163(参考); history_guard=merged_old_history old_len=1293 fetched_len=20 merged_len=1293"
     },
     "501054": {
       "code": "501054",
@@ -194,7 +194,7 @@
       "date_ok": true,
       "expected_trade_date": "2026-05-25",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-05-25:1.7462 | AKShare fund_open_fund_info_em:2026-05-25:1.7462 | 天天基金fundgz确认净值:2026-05-22:1.7055; reference_only=天天基金fundgz估算参考:2026-05-25:1.7548(参考) | 新浪财经fu_估算参考:2026-05-25:1.758(参考); history_guard=merged_old_history old_len=28 fetched_len=20 merged_len=28; WARNING: history seems short len=28 first=2026-04-13"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-05-25:1.7462 | 东方财富F10最新净值:2026-05-25:1.7462 | AKShare fund_open_fund_info_em:2026-05-25:1.7462 | 天天基金fundgz确认净值:2026-05-22:1.7055; reference_only=天天基金fundgz估算参考:2026-05-25:1.7548(参考) | 新浪财经fu_估算参考:2026-05-25:1.758(参考); history_guard=merged_old_history old_len=28 fetched_len=20 merged_len=28; WARNING: history seems short len=28 first=2026-04-13"
     },
     "011006": {
       "code": "011006",
