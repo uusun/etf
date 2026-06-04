@@ -1,8 +1,23 @@
 {
   "script_version": "v10_history_guard_20260513",
-  "updated_at": "2026-06-04T15:21:27+00:00",
-  "expected_trade_date": "2026-06-04",
-  "stale_codes": [],
+  "updated_at": "2026-06-04T16:23:17+00:00",
+  "expected_trade_date": "2026-06-05",
+  "stale_codes": [
+    "014362",
+    "001511",
+    "007120",
+    "169101",
+    "007119",
+    "006608",
+    "163417",
+    "010340",
+    "010273",
+    "010186",
+    "010027",
+    "501054",
+    "011006",
+    "501049"
+  ],
   "items": {
     "014362": {
       "code": "014362",
@@ -15,10 +30,10 @@
       "estimated": false,
       "official": true,
       "ok": true,
-      "date_ok": true,
-      "expected_trade_date": "2026-06-04",
+      "date_ok": false,
+      "expected_trade_date": "2026-06-05",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:1.1932 | 东方财富F10最新净值:2026-06-04:1.1932 | AKShare fund_open_fund_info_em:2026-06-04:1.1932 | 天天基金fundgz确认净值:2026-06-03:1.1991; reference_only=天天基金fundgz估算参考:2026-06-04:1.1915(参考) | 新浪财经fu_估算参考:2026-06-04:1.1901(参考); history_guard=merged_old_history old_len=1069 fetched_len=20 merged_len=1069"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:1.1932 | 东方财富F10最新净值:2026-06-04:1.1932 | AKShare fund_open_fund_info_em:2026-06-04:1.1932 | 天天基金fundgz确认净值:2026-06-03:1.1991; reference_only=天天基金fundgz估算参考:2026-06-04:1.1915(参考) | 新浪财经fu_估算参考:2026-06-04:1.1901(参考); history_guard=merged_old_history old_len=1069 fetched_len=20 merged_len=1069; WARNING: latest date 2026-06-04 < expected 2026-06-05"
     },
     "001511": {
       "code": "001511",
@@ -31,10 +46,10 @@
       "estimated": false,
       "official": true,
       "ok": true,
-      "date_ok": true,
-      "expected_trade_date": "2026-06-04",
+      "date_ok": false,
+      "expected_trade_date": "2026-06-05",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:2.436 | 东方财富F10最新净值:2026-06-04:2.436 | AKShare fund_open_fund_info_em:2026-06-04:2.436 | 天天基金fundgz确认净值:2026-06-03:2.45; reference_only=天天基金fundgz估算参考:2026-06-04:2.4423(参考) | 新浪财经fu_估算参考:2026-06-04:2.4512(参考); history_guard=merged_old_history old_len=1362 fetched_len=20 merged_len=1362"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:2.436 | 东方财富F10最新净值:2026-06-04:2.436 | AKShare fund_open_fund_info_em:2026-06-04:2.436 | 天天基金fundgz确认净值:2026-06-03:2.45; reference_only=天天基金fundgz估算参考:2026-06-04:2.4423(参考) | 新浪财经fu_估算参考:2026-06-04:2.4512(参考); history_guard=merged_old_history old_len=1362 fetched_len=20 merged_len=1362; WARNING: latest date 2026-06-04 < expected 2026-06-05"
     },
     "007120": {
       "code": "007120",
@@ -47,10 +62,10 @@
       "estimated": false,
       "official": true,
       "ok": true,
-      "date_ok": true,
-      "expected_trade_date": "2026-06-04",
+      "date_ok": false,
+      "expected_trade_date": "2026-06-05",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:2.6085 | 东方财富F10最新净值:2026-06-04:2.6085 | AKShare fund_open_fund_info_em:2026-06-04:2.6085 | 天天基金fundgz确认净值:2026-06-03:2.596; reference_only=天天基金fundgz估算参考:2026-06-04:2.625(参考) | 新浪财经fu_估算参考:2026-06-04:2.6165(参考); history_guard=merged_old_history old_len=1362 fetched_len=20 merged_len=1362"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:2.6085 | 东方财富F10最新净值:2026-06-04:2.6085 | AKShare fund_open_fund_info_em:2026-06-04:2.6085 | 天天基金fundgz确认净值:2026-06-03:2.596; reference_only=天天基金fundgz估算参考:2026-06-04:2.625(参考) | 新浪财经fu_估算参考:2026-06-04:2.6165(参考); history_guard=merged_old_history old_len=1362 fetched_len=20 merged_len=1362; WARNING: latest date 2026-06-04 < expected 2026-06-05"
     },
     "169101": {
       "code": "169101",
@@ -63,10 +78,10 @@
       "estimated": false,
       "official": true,
       "ok": true,
-      "date_ok": true,
-      "expected_trade_date": "2026-06-04",
+      "date_ok": false,
+      "expected_trade_date": "2026-06-05",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:2.681 | 东方财富F10最新净值:2026-06-04:2.681 | AKShare fund_open_fund_info_em:2026-06-04:2.681 | 天天基金fundgz确认净值:2026-06-03:2.642; reference_only=天天基金fundgz估算参考:2026-06-04:2.6502(参考) | 新浪财经fu_估算参考:2026-06-04:2.6565(参考); history_guard=merged_old_history old_len=36 fetched_len=20 merged_len=36; WARNING: history seems short len=36 first=2026-04-13"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:2.681 | 东方财富F10最新净值:2026-06-04:2.681 | AKShare fund_open_fund_info_em:2026-06-04:2.681 | 天天基金fundgz确认净值:2026-06-03:2.642; reference_only=天天基金fundgz估算参考:2026-06-04:2.6502(参考) | 新浪财经fu_估算参考:2026-06-04:2.6565(参考); history_guard=merged_old_history old_len=36 fetched_len=20 merged_len=36; WARNING: history seems short len=36 first=2026-04-13; WARNING: latest date 2026-06-04 < expected 2026-06-05"
     },
     "007119": {
       "code": "007119",
@@ -79,10 +94,10 @@
       "estimated": false,
       "official": true,
       "ok": true,
-      "date_ok": true,
-      "expected_trade_date": "2026-06-04",
+      "date_ok": false,
+      "expected_trade_date": "2026-06-05",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:2.6847 | 东方财富F10最新净值:2026-06-04:2.6847 | AKShare fund_open_fund_info_em:2026-06-04:2.6847 | 天天基金fundgz确认净值:2026-06-03:2.6718; reference_only=天天基金fundgz估算参考:2026-06-04:2.7016(参考) | 新浪财经fu_估算参考:2026-06-04:2.693(参考); history_guard=merged_old_history old_len=36 fetched_len=20 merged_len=36; WARNING: history seems short len=36 first=2026-04-13"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:2.6847 | 东方财富F10最新净值:2026-06-04:2.6847 | AKShare fund_open_fund_info_em:2026-06-04:2.6847 | 天天基金fundgz确认净值:2026-06-03:2.6718; reference_only=天天基金fundgz估算参考:2026-06-04:2.7016(参考) | 新浪财经fu_估算参考:2026-06-04:2.693(参考); history_guard=merged_old_history old_len=36 fetched_len=20 merged_len=36; WARNING: history seems short len=36 first=2026-04-13; WARNING: latest date 2026-06-04 < expected 2026-06-05"
     },
     "006608": {
       "code": "006608",
@@ -95,10 +110,10 @@
       "estimated": false,
       "official": true,
       "ok": true,
-      "date_ok": true,
-      "expected_trade_date": "2026-06-04",
+      "date_ok": false,
+      "expected_trade_date": "2026-06-05",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:1.5398 | 东方财富F10最新净值:2026-06-04:1.5398 | AKShare fund_open_fund_info_em:2026-06-04:1.5398 | 天天基金fundgz确认净值:2026-06-03:1.5412; reference_only=天天基金fundgz估算参考:2026-06-04:1.5372(参考) | 新浪财经fu_估算参考:2026-06-04:1.5401(参考); history_guard=merged_old_history old_len=36 fetched_len=20 merged_len=36; WARNING: history seems short len=36 first=2026-04-13"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:1.5398 | 东方财富F10最新净值:2026-06-04:1.5398 | AKShare fund_open_fund_info_em:2026-06-04:1.5398 | 天天基金fundgz确认净值:2026-06-03:1.5412; reference_only=天天基金fundgz估算参考:2026-06-04:1.5372(参考) | 新浪财经fu_估算参考:2026-06-04:1.5401(参考); history_guard=merged_old_history old_len=36 fetched_len=20 merged_len=36; WARNING: history seems short len=36 first=2026-04-13; WARNING: latest date 2026-06-04 < expected 2026-06-05"
     },
     "163417": {
       "code": "163417",
@@ -111,10 +126,10 @@
       "estimated": false,
       "official": true,
       "ok": true,
-      "date_ok": true,
-      "expected_trade_date": "2026-06-04",
+      "date_ok": false,
+      "expected_trade_date": "2026-06-05",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:2.1907 | 东方财富F10最新净值:2026-06-04:2.1907 | AKShare fund_open_fund_info_em:2026-06-04:2.1907 | 天天基金fundgz确认净值:2026-06-03:2.2093; reference_only=天天基金fundgz估算参考:2026-06-04:2.1928(参考) | 新浪财经fu_估算参考:2026-06-04:2.2045(参考); history_guard=merged_old_history old_len=1362 fetched_len=20 merged_len=1362"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:2.1907 | 东方财富F10最新净值:2026-06-04:2.1907 | AKShare fund_open_fund_info_em:2026-06-04:2.1907 | 天天基金fundgz确认净值:2026-06-03:2.2093; reference_only=天天基金fundgz估算参考:2026-06-04:2.1928(参考) | 新浪财经fu_估算参考:2026-06-04:2.2045(参考); history_guard=merged_old_history old_len=1362 fetched_len=20 merged_len=1362; WARNING: latest date 2026-06-04 < expected 2026-06-05"
     },
     "010340": {
       "code": "010340",
@@ -127,10 +142,10 @@
       "estimated": false,
       "official": true,
       "ok": true,
-      "date_ok": true,
-      "expected_trade_date": "2026-06-04",
+      "date_ok": false,
+      "expected_trade_date": "2026-06-05",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:1.0996 | 东方财富F10最新净值:2026-06-04:1.0996 | AKShare fund_open_fund_info_em:2026-06-04:1.0996 | 天天基金fundgz确认净值:2026-06-03:1.092; reference_only=天天基金fundgz估算参考:2026-06-04:1.0946(参考) | 新浪财经fu_估算参考:2026-06-04:1.0958(参考); history_guard=merged_old_history old_len=36 fetched_len=20 merged_len=36; WARNING: history seems short len=36 first=2026-04-13"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:1.0996 | 东方财富F10最新净值:2026-06-04:1.0996 | AKShare fund_open_fund_info_em:2026-06-04:1.0996 | 天天基金fundgz确认净值:2026-06-03:1.092; reference_only=天天基金fundgz估算参考:2026-06-04:1.0946(参考) | 新浪财经fu_估算参考:2026-06-04:1.0958(参考); history_guard=merged_old_history old_len=36 fetched_len=20 merged_len=36; WARNING: history seems short len=36 first=2026-04-13; WARNING: latest date 2026-06-04 < expected 2026-06-05"
     },
     "010273": {
       "code": "010273",
@@ -143,10 +158,10 @@
       "estimated": false,
       "official": true,
       "ok": true,
-      "date_ok": true,
-      "expected_trade_date": "2026-06-04",
+      "date_ok": false,
+      "expected_trade_date": "2026-06-05",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:0.9738 | 东方财富F10最新净值:2026-06-04:0.9738 | AKShare fund_open_fund_info_em:2026-06-04:0.9738 | 天天基金fundgz确认净值:2026-06-03:0.9831; reference_only=天天基金fundgz估算参考:2026-06-04:0.9762(参考) | 新浪财经fu_估算参考:2026-06-04:0.9757(参考); history_guard=merged_old_history old_len=1278 fetched_len=20 merged_len=1278"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:0.9738 | 东方财富F10最新净值:2026-06-04:0.9738 | AKShare fund_open_fund_info_em:2026-06-04:0.9738 | 天天基金fundgz确认净值:2026-06-03:0.9831; reference_only=天天基金fundgz估算参考:2026-06-04:0.9762(参考) | 新浪财经fu_估算参考:2026-06-04:0.9757(参考); history_guard=merged_old_history old_len=1278 fetched_len=20 merged_len=1278; WARNING: latest date 2026-06-04 < expected 2026-06-05"
     },
     "010186": {
       "code": "010186",
@@ -159,10 +174,10 @@
       "estimated": false,
       "official": true,
       "ok": true,
-      "date_ok": true,
-      "expected_trade_date": "2026-06-04",
+      "date_ok": false,
+      "expected_trade_date": "2026-06-05",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:0.8726 | 东方财富F10最新净值:2026-06-04:0.8726 | AKShare fund_open_fund_info_em:2026-06-04:0.8726 | 天天基金fundgz确认净值:2026-06-03:0.8621; reference_only=天天基金fundgz估算参考:2026-06-04:0.8678(参考) | 新浪财经fu_估算参考:2026-06-04:0.8605(参考); history_guard=merged_old_history old_len=1312 fetched_len=20 merged_len=1312"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:0.8726 | 东方财富F10最新净值:2026-06-04:0.8726 | AKShare fund_open_fund_info_em:2026-06-04:0.8726 | 天天基金fundgz确认净值:2026-06-03:0.8621; reference_only=天天基金fundgz估算参考:2026-06-04:0.8678(参考) | 新浪财经fu_估算参考:2026-06-04:0.8605(参考); history_guard=merged_old_history old_len=1312 fetched_len=20 merged_len=1312; WARNING: latest date 2026-06-04 < expected 2026-06-05"
     },
     "010027": {
       "code": "010027",
@@ -175,10 +190,10 @@
       "estimated": false,
       "official": true,
       "ok": true,
-      "date_ok": true,
-      "expected_trade_date": "2026-06-04",
+      "date_ok": false,
+      "expected_trade_date": "2026-06-05",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:0.9068 | 东方财富F10最新净值:2026-06-04:0.9068 | AKShare fund_open_fund_info_em:2026-06-04:0.9068 | 天天基金fundgz确认净值:2026-06-03:0.8987; reference_only=天天基金fundgz估算参考:2026-06-04:0.8977(参考) | 新浪财经fu_估算参考:2026-06-04:0.9008(参考); history_guard=merged_old_history old_len=1301 fetched_len=20 merged_len=1301"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:0.9068 | 东方财富F10最新净值:2026-06-04:0.9068 | AKShare fund_open_fund_info_em:2026-06-04:0.9068 | 天天基金fundgz确认净值:2026-06-03:0.8987; reference_only=天天基金fundgz估算参考:2026-06-04:0.8977(参考) | 新浪财经fu_估算参考:2026-06-04:0.9008(参考); history_guard=merged_old_history old_len=1301 fetched_len=20 merged_len=1301; WARNING: latest date 2026-06-04 < expected 2026-06-05"
     },
     "501054": {
       "code": "501054",
@@ -191,10 +206,10 @@
       "estimated": false,
       "official": true,
       "ok": true,
-      "date_ok": true,
-      "expected_trade_date": "2026-06-04",
+      "date_ok": false,
+      "expected_trade_date": "2026-06-05",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:1.8091 | 东方财富F10最新净值:2026-06-04:1.8091 | AKShare fund_open_fund_info_em:2026-06-04:1.8091 | 天天基金fundgz确认净值:2026-06-03:1.804; reference_only=天天基金fundgz估算参考:2026-06-04:1.8115(参考) | 新浪财经fu_估算参考:2026-06-04:1.8209(参考); history_guard=merged_old_history old_len=36 fetched_len=20 merged_len=36; WARNING: history seems short len=36 first=2026-04-13"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:1.8091 | 东方财富F10最新净值:2026-06-04:1.8091 | AKShare fund_open_fund_info_em:2026-06-04:1.8091 | 天天基金fundgz确认净值:2026-06-03:1.804; reference_only=天天基金fundgz估算参考:2026-06-04:1.8115(参考) | 新浪财经fu_估算参考:2026-06-04:1.8209(参考); history_guard=merged_old_history old_len=36 fetched_len=20 merged_len=36; WARNING: history seems short len=36 first=2026-04-13; WARNING: latest date 2026-06-04 < expected 2026-06-05"
     },
     "011006": {
       "code": "011006",
@@ -207,10 +222,10 @@
       "estimated": false,
       "official": true,
       "ok": true,
-      "date_ok": true,
-      "expected_trade_date": "2026-06-04",
+      "date_ok": false,
+      "expected_trade_date": "2026-06-05",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:0.7695 | 东方财富F10最新净值:2026-06-04:0.7695 | AKShare fund_open_fund_info_em:2026-06-04:0.7695 | 天天基金fundgz确认净值:2026-06-03:0.781; reference_only=天天基金fundgz估算参考:2026-06-04:0.7707(参考) | 新浪财经fu_估算参考:2026-06-04:0.7737(参考); history_guard=merged_old_history old_len=1264 fetched_len=20 merged_len=1264"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:0.7695 | 东方财富F10最新净值:2026-06-04:0.7695 | AKShare fund_open_fund_info_em:2026-06-04:0.7695 | 天天基金fundgz确认净值:2026-06-03:0.781; reference_only=天天基金fundgz估算参考:2026-06-04:0.7707(参考) | 新浪财经fu_估算参考:2026-06-04:0.7737(参考); history_guard=merged_old_history old_len=1264 fetched_len=20 merged_len=1264; WARNING: latest date 2026-06-04 < expected 2026-06-05"
     },
     "501049": {
       "code": "501049",
@@ -223,10 +238,10 @@
       "estimated": false,
       "official": true,
       "ok": true,
-      "date_ok": true,
-      "expected_trade_date": "2026-06-04",
+      "date_ok": false,
+      "expected_trade_date": "2026-06-05",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:0.9016 | 东方财富F10最新净值:2026-06-04:0.9016 | AKShare fund_open_fund_info_em:2026-06-04:0.9016 | 天天基金fundgz确认净值:2026-06-03:0.9132; reference_only=天天基金fundgz估算参考:2026-06-04:0.904(参考) | 新浪财经fu_估算参考:2026-06-04:0.8995(参考); history_guard=merged_old_history old_len=1362 fetched_len=20 merged_len=1362"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-04:0.9016 | 东方财富F10最新净值:2026-06-04:0.9016 | AKShare fund_open_fund_info_em:2026-06-04:0.9016 | 天天基金fundgz确认净值:2026-06-03:0.9132; reference_only=天天基金fundgz估算参考:2026-06-04:0.904(参考) | 新浪财经fu_估算参考:2026-06-04:0.8995(参考); history_guard=merged_old_history old_len=1362 fetched_len=20 merged_len=1362; WARNING: latest date 2026-06-04 < expected 2026-06-05"
     }
   }
 }
