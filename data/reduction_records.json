@@ -1,6 +1,20 @@
 {
   "version": 1,
   "page_version": "v13_reduction_backend_manual_20260609",
-  "updated_at": "",
-  "records": []
+  "updated_at": "2026-06-09T15:54:28.474Z",
+  "records": [
+    {
+      "id": "1781020461369_9f04b1c3e30568",
+      "date": "2026-06-09",
+      "code": "014362",
+      "name": "睿远稳进配置两年持有混合A",
+      "shares": 1,
+      "nav": 1.1841,
+      "amount": 1.1841,
+      "note": "",
+      "source": "manual",
+      "created_at": "2026-06-09T15:54:21.369Z",
+      "updated_at": "2026-06-09T15:54:21.369Z"
+    }
+  ]
 }
