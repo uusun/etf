@@ -1,6 +1,6 @@
 {
   "script_version": "v10_history_guard_20260513",
-  "updated_at": "2026-06-23T14:53:50+00:00",
+  "updated_at": "2026-06-23T15:52:13+00:00",
   "expected_trade_date": "2026-06-23",
   "stale_codes": [],
   "items": {
@@ -210,7 +210,7 @@
       "date_ok": true,
       "expected_trade_date": "2026-06-23",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-23:0.7514 | 东方财富F10最新净值:2026-06-23:0.7514 | AKShare fund_open_fund_info_em:2026-06-23:0.7514 | 天天基金fundgz确认净值:2026-06-22:0.7656; reference_only=天天基金fundgz估算参考:2026-06-23:0.7481(参考) | 新浪财经fu_估算参考:2026-06-23:0.7539(参考); history_guard=merged_old_history old_len=1276 fetched_len=20 merged_len=1276"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-23:0.7514 | 东方财富F10最新净值:2026-06-23:0.7514 | AKShare fund_open_fund_info_em:2026-06-23:0.7514 | 天天基金fundgz确认净值:2026-06-22:0.7656; reference_only=新浪财经fu_估算参考:2026-06-23:0.7539(参考); history_guard=merged_old_history old_len=1276 fetched_len=20 merged_len=1276"
     },
     "501049": {
       "code": "501049",
@@ -226,7 +226,7 @@
       "date_ok": true,
       "expected_trade_date": "2026-06-23",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-23:0.8512 | 东方财富F10最新净值:2026-06-23:0.8512 | AKShare fund_open_fund_info_em:2026-06-23:0.8512 | 天天基金fundgz确认净值:2026-06-22:0.8631; reference_only=天天基金fundgz估算参考:2026-06-23:0.8522(参考) | 新浪财经fu_估算参考:2026-06-23:0.8512(参考); history_guard=merged_old_history old_len=1374 fetched_len=20 merged_len=1374"
+      "diagnosis": "script=v10_history_guard_20260513; history=东方财富F10历史净值; official_candidates=东方财富JSON最新净值:2026-06-23:0.8512 | AKShare fund_open_fund_info_em:2026-06-23:0.8512 | 天天基金fundgz确认净值:2026-06-22:0.8631; reference_only=天天基金fundgz估算参考:2026-06-23:0.8522(参考) | 新浪财经fu_估算参考:2026-06-23:0.8512(参考); history_guard=merged_old_history old_len=1374 fetched_len=20 merged_len=1374"
     }
   }
 }
