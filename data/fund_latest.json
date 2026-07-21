@@ -1,6 +1,6 @@
 {
   "script_version": "v10_history_guard_20260513",
-  "updated_at": "2026-07-21T13:56:23+00:00",
+  "updated_at": "2026-07-21T15:06:53+00:00",
   "expected_trade_date": "2026-07-21",
   "stale_codes": [],
   "items": {
@@ -98,7 +98,7 @@
       "date_ok": true,
       "expected_trade_date": "2026-07-21",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-07-21:1.4496 | AKShare fund_open_fund_info_em:2026-07-20:1.4269; reference_only=新浪财经fu_估算参考:2026-07-21:1.4444(参考)"
+      "diagnosis": "script=v10_history_guard_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-07-21:1.4496 | AKShare fund_open_fund_info_em:2026-07-21:1.4496; reference_only=新浪财经fu_估算参考:2026-07-21:1.4444(参考)"
     },
     "163417": {
       "code": "163417",
