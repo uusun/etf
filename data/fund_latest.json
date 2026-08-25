@@ -1,10 +1,8 @@
 {
   "script_version": "v10_history_guard_20260513",
-  "updated_at": "2026-08-25T12:50:37+00:00",
+  "updated_at": "2026-08-25T13:41:24+00:00",
   "expected_trade_date": "2026-08-25",
-  "stale_codes": [
-    "010273"
-  ],
+  "stale_codes": [],
   "items": {
     "014362": {
       "code": "014362",
@@ -36,7 +34,7 @@
       "date_ok": true,
       "expected_trade_date": "2026-08-25",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-08-25:2.404 | AKShare fund_open_fund_info_em:2026-08-24:2.399; reference_only=新浪财经fu_估算参考:2026-08-25:2.4038(参考)"
+      "diagnosis": "script=v10_history_guard_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-08-25:2.404 | AKShare fund_open_fund_info_em:2026-08-25:2.404; reference_only=新浪财经fu_估算参考:2026-08-25:2.4038(参考)"
     },
     "007120": {
       "code": "007120",
@@ -100,7 +98,7 @@
       "date_ok": true,
       "expected_trade_date": "2026-08-25",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-08-25:1.4916 | AKShare fund_open_fund_info_em:2026-08-24:1.4882; reference_only=新浪财经fu_估算参考:2026-08-25:1.4929(参考)"
+      "diagnosis": "script=v10_history_guard_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-08-25:1.4916 | AKShare fund_open_fund_info_em:2026-08-25:1.4916; reference_only=新浪财经fu_估算参考:2026-08-25:1.4929(参考)"
     },
     "163417": {
       "code": "163417",
@@ -137,18 +135,18 @@
     "010273": {
       "code": "010273",
       "name": "嘉实价值长青混合A",
-      "nav": 1.0266,
-      "date": "2026-08-24",
-      "date_time": "2026-08-24",
-      "daily_pct": -0.7,
+      "nav": 1.0202,
+      "date": "2026-08-25",
+      "date_time": "2026-08-25",
+      "daily_pct": -0.62,
       "source": "东方财富JSON最新净值",
       "estimated": false,
       "official": true,
       "ok": true,
-      "date_ok": false,
+      "date_ok": true,
       "expected_trade_date": "2026-08-25",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; 本次更新失败，沿用旧数据：history_from_eastmoney_json: Eastmoney JSON no LSJZList; history_from_eastmoney_f10: F10 content not found; history_from_akshare: Response ended prematurely"
+      "diagnosis": "script=v10_history_guard_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-08-25:1.0202 | AKShare fund_open_fund_info_em:2026-08-24:1.0266; reference_only=新浪财经fu_估算参考:2026-08-25:1.0166(参考)"
     },
     "010186": {
       "code": "010186",
