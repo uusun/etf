@@ -1,6 +1,6 @@
 {
   "script_version": "v10_history_guard_20260513",
-  "updated_at": "2026-08-26T13:52:40+00:00",
+  "updated_at": "2026-08-26T13:57:16+00:00",
   "expected_trade_date": "2026-08-26",
   "stale_codes": [],
   "items": {
@@ -146,7 +146,7 @@
       "date_ok": true,
       "expected_trade_date": "2026-08-26",
       "script_version": "v10_history_guard_20260513",
-      "diagnosis": "script=v10_history_guard_20260513; 本次更新失败，沿用旧数据：history_from_eastmoney_json: Eastmoney JSON no LSJZList; history_from_eastmoney_f10: F10 content not found; history_from_akshare: Response ended prematurely"
+      "diagnosis": "script=v10_history_guard_20260513; history=AKShare fund_open_fund_info_em; official_candidates=东方财富JSON最新净值:2026-08-26:1.0218 | AKShare fund_open_fund_info_em:2026-08-26:1.0218; reference_only=新浪财经fu_估算参考:2026-08-26:1.0249(参考)"
     },
     "010186": {
       "code": "010186",
